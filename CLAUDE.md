@@ -6,6 +6,10 @@
 
 **Webflow site:** https://aurea-residences-1abb56.webflow.io
 
+**GitHub:** https://github.com/deanhopes/aurea-residences
+
+**Webflow MCP:** Connected via `mcp__webflow__*` tools. Use for site data, pages, CMS, styles, elements, and components directly from Claude Code.
+
 **Dev workflow:** `npm run dev` starts localhost:5173. Webflow footer snippet detects localhost and loads from there. When not running, falls back to Netlify CDN.
 
 **Pattern:** All JS hooks into Webflow via `data-*` attributes. Never select by Webflow class names.
