@@ -8,6 +8,8 @@
 
 **Dev workflow:** `npm run dev` starts localhost:5173. Webflow footer snippet detects localhost and loads from there. When not running, falls back to Netlify CDN.
 
+**Webflow MCP:** Connected via MCP server. Use `mcp__webflow__*` tools for Designer operations (elements, styles, pages, CMS, components, scripts, assets). Build the site through Webflow MCP + custom code through this repo.
+
 **Pattern:** All JS hooks into Webflow via `data-*` attributes. Never select by Webflow class names.
 
 ---
