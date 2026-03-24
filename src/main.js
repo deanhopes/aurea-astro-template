@@ -1,7 +1,8 @@
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { Flip } from 'gsap/Flip';
 
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger, Flip);
 
 // Connection info
 console.log(
@@ -29,7 +30,11 @@ onReady(function init() {
   const mm = gsap.matchMedia();
 
   mm.add('(prefers-reduced-motion: no-preference)', () => {
-    initPreloader();
+    initPreloader(function onPreloaderDone() {
+      initHero();
+      initHorizontalScroll();
+      initAnimateEngine();
+    });
   });
 
   mm.add('(prefers-reduced-motion: reduce)', () => {
@@ -42,14 +47,13 @@ onReady(function init() {
   });
 });
 
-// ─── Phase 1: Preloader wipe + wordmark reveal ───
-function initPreloader() {
+// ─── Preloader ───
+// Standalone page reveal. Calls onDone callback when finished.
+function initPreloader(onDone) {
   const preloader = document.querySelector('[data-preloader]');
   if (!preloader) {
     console.log('%c[preloader] %cNo preloader found, skipping', 'color: #b8860b; font-weight: bold', 'color: #f59e0b');
-    initHero();
-    initHorizontalScroll();
-    initAnimateEngine();
+    if (onDone) onDone();
     return;
   }
   console.log('%c[preloader] %cInit', 'color: #b8860b; font-weight: bold', 'color: #22c55e');
@@ -72,7 +76,7 @@ function initPreloader() {
     gsap.set(heroImage, { scale: 1.1 });
   }
 
-  // Spin the placeholder icon — store ref to kill later
+  // Spin the placeholder icon
   let spinner;
   const icon = bar.querySelector('[data-preloader-icon]');
   if (icon) {
@@ -82,14 +86,11 @@ function initPreloader() {
   const tl = gsap.timeline({
     delay: 0.3,
     onComplete: function () {
-      console.log('%c[preloader] %cComplete — removing overlay, unlocking scroll', 'color: #b8860b; font-weight: bold', 'color: #22c55e');
+      console.log('%c[preloader] %cComplete', 'color: #b8860b; font-weight: bold', 'color: #22c55e');
       if (spinner) spinner.kill();
       document.body.style.overflow = '';
       preloader.remove();
-      // Now init hero + animate AFTER preloader is done
-      initHero();
-      initHorizontalScroll();
-      initAnimateEngine();
+      if (onDone) onDone();
     },
   });
 
@@ -128,8 +129,8 @@ function initPreloader() {
   }
 }
 
-// ─── Phase 2: Scroll-triggered hero animation ───
-// Letterbox + wordmark — scrub with snap, plays/reverses
+// ─── Hero scroll animation ───
+// Letterbox + wordmark Flip into nav. Plays forward on scroll, reverses on scroll back.
 function initHero() {
   const hero = document.querySelector('[data-hero]');
   if (!hero) {
@@ -139,107 +140,81 @@ function initHero() {
 
   const imageWrap = hero.querySelector('[data-hero-image]');
   const wordmark = hero.querySelector('[data-wordmark]');
-  console.log('%c[hero] %cFound elements — hero: ✓, imageWrap: ' + !!imageWrap + ', wordmark: ' + !!wordmark, 'color: #b8860b; font-weight: bold', 'color: #888');
+  const navLogo = document.querySelector('[data-nav-logo]');
 
   if (!imageWrap) {
     console.log('%c[hero] %cNo [data-hero-image] found, skipping', 'color: #b8860b; font-weight: bold', 'color: #f59e0b');
     return;
   }
-  console.log('%c[hero] %cInit ScrollTrigger — scrub + snap', 'color: #b8860b; font-weight: bold', 'color: #22c55e');
+  console.log('%c[hero] %cInit ScrollTrigger — play/reverse with Flip', 'color: #b8860b; font-weight: bold', 'color: #22c55e');
 
-  // Create a fixed wordmark clone for post-hero display (avoids DOM mutation during scroll)
-  let fixedWordmark;
-  if (wordmark) {
-    fixedWordmark = wordmark.cloneNode(true);
-    fixedWordmark.setAttribute('data-wordmark-fixed', '');
-    fixedWordmark.removeAttribute('data-wordmark');
-    gsap.set(fixedWordmark, {
-      position: 'fixed',
-      top: '1rem',
-      left: '0',
-      width: '100%',
-      zIndex: 100,
-      scale: 0.25,
-      transformOrigin: 'center top',
-      paddingLeft: '5vw',
-      paddingRight: '5vw',
-      autoAlpha: 0,
-    });
-    document.body.appendChild(fixedWordmark);
+  // Hide nav logo initially, wordmark will animate to its position
+  if (navLogo) {
+    gsap.set(navLogo, { autoAlpha: 0 });
   }
 
-  // Letterbox clips from bottom only — image stays anchored to top
-  const clipAmount = 38; // % clipped from bottom — enough to reveal intro text
+  const clipAmount = 25;
+
+  // Measure where the wordmark needs to go (nav logo position)
+  const getNavTarget = () => {
+    if (!navLogo) return null;
+    const navRect = navLogo.getBoundingClientRect();
+    const wordmarkRect = wordmark.getBoundingClientRect();
+    return {
+      x: navRect.left - wordmarkRect.left + (navRect.width - wordmarkRect.width) / 2,
+      y: navRect.top - wordmarkRect.top + (navRect.height - wordmarkRect.height) / 2,
+      scale: navRect.width / wordmarkRect.width,
+    };
+  };
 
   const tl = gsap.timeline({
-    scrollTrigger: {
-      trigger: hero,
-      start: 'top top',
-      end: '+=100%',
-      pin: true,
-      pinSpacing: true,
-      scrub: 1,
-      fastScrollEnd: true,
-      invalidateOnRefresh: true,
-      refreshPriority: -1,
-      snap: {
-        snapTo: 'labelsDirectional',
-        duration: { min: 0.3, max: 0.6 },
-        delay: 0.1,
-        ease: 'power2.inOut',
-      },
-      onEnter: function () {
-        console.log('%c[hero] %cScrollTrigger entered — playing', 'color: #b8860b; font-weight: bold', 'color: #22c55e');
-      },
-      onLeaveBack: function () {
-        console.log('%c[hero] %cScrollTrigger left back — reversing to fullbleed', 'color: #b8860b; font-weight: bold', 'color: #f59e0b');
-      },
-    },
+    paused: true,
+    defaults: { ease: 'power2.inOut' },
   });
 
-  tl.addLabel('start', 0);
+  // Letterbox: clip from bottom
+  tl.to(imageWrap, {
+    clipPath: 'inset(0 0 ' + clipAmount + '% 0)',
+    duration: 1.2,
+  }, 0);
 
-  // Fullbleed → letterbox, clipped from bottom (anchored to top of viewport)
-  tl.to(
-    imageWrap,
-    {
-      clipPath: 'inset(0 0 ' + clipAmount + '% 0)',
-      ease: 'none',
-      duration: 1,
-    },
-    0
-  );
-
-  // Wordmark scales down and moves up via y transform (no layout-triggering top/bottom)
+  // Wordmark animates to nav logo position
   if (wordmark) {
-    tl.to(
-      wordmark,
-      {
-        y: () => {
-          const heroRect = hero.getBoundingClientRect();
-          const wordmarkRect = wordmark.getBoundingClientRect();
-          // Move from current position to 1rem from top of hero
-          return -(wordmarkRect.top - heroRect.top) + 16;
-        },
-        scale: 0.25,
-        transformOrigin: 'center top',
-        ease: 'none',
-        duration: 1,
+    tl.to(wordmark, {
+      x: () => {
+        const target = getNavTarget();
+        return target ? target.x : 0;
       },
-      0
-    );
+      y: () => {
+        const target = getNavTarget();
+        return target ? target.y : -wordmark.getBoundingClientRect().top + 16;
+      },
+      scale: () => {
+        const target = getNavTarget();
+        return target ? target.scale : 0.12;
+      },
+      transformOrigin: 'center center',
+      duration: 1.2,
+    }, 0);
 
-    // Crossfade: hide hero wordmark, show fixed — at the very end of the scrub
-    // so it stays in sync with animation progress (not scroll position)
-    if (fixedWordmark) {
-      tl.to(wordmark, { autoAlpha: 0, duration: 0.05, ease: 'none' });
-      tl.to(fixedWordmark, { autoAlpha: 1, duration: 0.05, ease: 'none' }, '<');
+    // At the end: hide wordmark, show nav logo
+    tl.to(wordmark, { autoAlpha: 0, duration: 0.1 }, 1.0);
+    if (navLogo) {
+      tl.to(navLogo, { autoAlpha: 1, duration: 0.1 }, 1.0);
     }
   }
 
-  tl.addLabel('end');
-
-  ScrollTrigger.refresh();
+  // ScrollTrigger: play after first scroll, reverse when back to top
+  ScrollTrigger.create({
+    trigger: hero,
+    start: 'top -1px',
+    end: '+=40%',
+    pin: true,
+    pinSpacing: true,
+    invalidateOnRefresh: true,
+    onEnter: () => tl.play(),
+    onLeaveBack: () => tl.reverse(),
+  });
 }
 
 // ─── Horizontal scroll section ───
