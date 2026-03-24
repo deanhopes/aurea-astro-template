@@ -243,9 +243,8 @@ function initHero() {
 }
 
 // ─── Horizontal scroll section ───
-// Sticky + tall section pattern (no pin). Section height is dynamic based on track width.
-// Structure: section (tall) → stickyWrap (sticky, 100vh) → track (flex, animated x)
-// Sticky breaks if ANY ancestor has overflow: hidden — we fix that at init.
+// Simple pattern: tall section, wide sticky track, GSAP translates x on scroll.
+// Section height and scroll distance recalculate on resize via invalidateOnRefresh.
 function initHorizontalScroll() {
   const section = document.querySelector('[data-horizontal-scroll]');
   if (!section) {
@@ -259,51 +258,29 @@ function initHorizontalScroll() {
     return;
   }
 
-  // Move label out of track so it stays fixed while track content scrolls
-  const label = track.querySelector('[data-horizontal-label]');
-  if (label) {
-    section.appendChild(label);
-    console.log('%c[horizontal] %cLabel moved to section overlay', 'color: #b8860b; font-weight: bold', 'color: #888');
-  }
-
-  // Wrap track in a sticky container (avoids transforming the sticky element itself)
-  const stickyWrap = document.createElement('div');
-  stickyWrap.style.cssText = 'position: sticky; top: 0; height: 100vh; overflow: clip;';
-  track.parentNode.insertBefore(stickyWrap, track);
-  stickyWrap.appendChild(track);
-
-  // Remove sticky from track — it's now on the wrapper
-  track.style.position = 'static';
-  track.style.top = 'auto';
-  track.style.height = '100%';
-  track.style.overflowX = 'visible';
-  track.style.overflowY = 'visible';
-
-  // Fix sticky killers: walk up from section and swap overflow: hidden → clip
+  // Fix sticky killers: walk up from section and swap overflow: hidden to clip
   let el = section.parentElement;
   while (el && el !== document.body) {
     const ov = getComputedStyle(el).overflow;
     if (ov === 'hidden') {
       el.style.overflow = 'clip';
-      console.log('%c[horizontal] %cFixed overflow: hidden → clip on', 'color: #b8860b; font-weight: bold', 'color: #f59e0b', el);
+      console.log('%c[horizontal] %cFixed overflow: hidden on ancestor', 'color: #b8860b; font-weight: bold', 'color: #f59e0b');
     }
     el = el.parentElement;
   }
 
-  // Set section height dynamically: trackWidth = scroll distance + one viewport
-  const setHeight = () => {
-    const h = track.scrollWidth;
-    section.style.height = h + 'px';
-    console.log('%c[horizontal] %cSection height set to ' + h + 'px (track scrollWidth)', 'color: #b8860b; font-weight: bold', 'color: #888');
-  };
-  setHeight();
-
+  // Dynamic: track width minus one viewport = total scroll travel
   const scrollDistance = () => track.scrollWidth - window.innerWidth;
 
-  console.log('%c[horizontal] %cInit (sticky, no pin) — ' + track.children.length + ' panels, trackWidth: ' + track.scrollWidth + 'px, viewport: ' + window.innerWidth + 'px, scroll: ' + scrollDistance() + 'px', 'color: #b8860b; font-weight: bold', 'color: #22c55e');
+  // Dynamic: set section height to match track width so scroll ratio is 1:1
+  const setSectionHeight = () => {
+    section.style.height = track.scrollWidth + 'px';
+  };
+  setSectionHeight();
 
-  // Scrub track horizontally as the tall section scrolls through viewport
-  const scrollTween = gsap.to(track, {
+  console.log('%c[horizontal] %cInit — track: ' + track.scrollWidth + 'px, viewport: ' + window.innerWidth + 'px, travel: ' + scrollDistance() + 'px', 'color: #b8860b; font-weight: bold', 'color: #22c55e');
+
+  gsap.to(track, {
     x: () => -scrollDistance(),
     ease: 'none',
     scrollTrigger: {
@@ -312,43 +289,12 @@ function initHorizontalScroll() {
       end: 'bottom bottom',
       scrub: 1,
       invalidateOnRefresh: true,
-      onRefresh: () => setHeight(),
-      onEnter: () => console.log('%c[horizontal] %cScrollTrigger entered', 'color: #b8860b; font-weight: bold', 'color: #22c55e'),
-      onLeave: () => console.log('%c[horizontal] %cScrollTrigger left', 'color: #b8860b; font-weight: bold', 'color: #22c55e'),
-      onEnterBack: () => console.log('%c[horizontal] %cScrollTrigger entered back', 'color: #b8860b; font-weight: bold', 'color: #f59e0b'),
-      onLeaveBack: () => console.log('%c[horizontal] %cScrollTrigger left back', 'color: #b8860b; font-weight: bold', 'color: #f59e0b'),
+      onRefresh: () => {
+        setSectionHeight();
+        console.log('%c[horizontal] %cRefreshed — section: ' + section.style.height + ', travel: ' + scrollDistance() + 'px', 'color: #b8860b; font-weight: bold', 'color: #888');
+      },
     },
   });
-
-  // Animate children inside the horizontal scroll based on containerAnimation
-  const animEls = track.querySelectorAll('[data-animate]');
-  console.log('%c[horizontal] %cFound ' + animEls.length + ' animated elements inside track', 'color: #b8860b; font-weight: bold', 'color: #888');
-
-  animEls.forEach((el) => {
-    const type = el.getAttribute('data-animate');
-    const props = {
-      scrollTrigger: {
-        trigger: el,
-        containerAnimation: scrollTween,
-        start: 'left 80%',
-        toggleActions: 'play none none reset',
-      },
-      duration: 0.8,
-    };
-
-    switch (type) {
-      case 'fade-up':
-        Object.assign(props, { autoAlpha: 0, y: 30 });
-        break;
-      case 'fade-in':
-        Object.assign(props, { autoAlpha: 0 });
-        break;
-    }
-
-    gsap.from(el, props);
-  });
-
-  console.log('%c[horizontal] %cSetup complete', 'color: #b8860b; font-weight: bold', 'color: #22c55e');
 }
 
 // ─── Attribute-driven animation engine ───
