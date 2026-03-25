@@ -63,8 +63,15 @@ function initPreloader(onDone) {
   // Show preloader (hidden in Designer via display:none)
   preloader.style.display = 'block';
 
-  // Lock scroll during preloader
-  document.body.style.overflow = 'hidden';
+  // Lock scroll during preloader — prevent scroll WITHOUT removing scrollbar (no layout shift)
+  // Capture wheel/touch/keyboard events instead of overflow:hidden
+  const preventScroll = (e) => e.preventDefault();
+  const preventKeys = (e) => {
+    if ([32, 33, 34, 35, 36, 38, 40].includes(e.keyCode)) e.preventDefault();
+  };
+  window.addEventListener('wheel', preventScroll, { passive: false });
+  window.addEventListener('touchmove', preventScroll, { passive: false });
+  window.addEventListener('keydown', preventKeys);
   if (heroImage) {
     gsap.set(heroImage, { scale: 1.1 });
   }
@@ -81,7 +88,9 @@ function initPreloader(onDone) {
     onComplete: function () {
       console.log('%c[preloader] %cComplete', 'color: #b8860b; font-weight: bold', 'color: #22c55e');
       if (spinner) spinner.kill();
-      document.body.style.overflow = '';
+      window.removeEventListener('wheel', preventScroll);
+      window.removeEventListener('touchmove', preventScroll);
+      window.removeEventListener('keydown', preventKeys);
       preloader.remove();
       if (onDone) onDone();
     },
