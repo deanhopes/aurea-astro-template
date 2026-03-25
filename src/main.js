@@ -1,6 +1,7 @@
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-gsap.registerPlugin(ScrollTrigger);
+import { SplitText } from 'gsap/SplitText';
+gsap.registerPlugin(ScrollTrigger, SplitText);
 
 // Connection info
 console.log(
@@ -58,19 +59,12 @@ function initPreloader(onDone) {
 
   const bar = preloader.querySelector('[data-preloader-bar]');
   const heroImage = document.querySelector('[data-hero-image]');
-  const logo = document.querySelector('[data-nav-logo]');
 
   // Show preloader (hidden in Designer via display:none)
   preloader.style.display = 'block';
 
   // Lock scroll during preloader
   document.body.style.overflow = 'hidden';
-
-  // Set initial states — hide logo during preloader, reveal it after
-  // Use opacity (not autoAlpha) so visibility stays inherit and getBoundingClientRect works
-  if (logo) {
-    gsap.set(logo, { opacity: 0 });
-  }
   if (heroImage) {
     gsap.set(heroImage, { scale: 1.1 });
   }
@@ -115,114 +109,10 @@ function initPreloader(onDone) {
   }
 }
 
-// ─── Hero scroll animation ───
-// Single logo lives in the nav DOM. On load, we check scroll position:
-// - At top: set logo large + centered over hero (hero state), then reveal
-// - Past trigger: logo stays in natural nav position, then reveal
-// On scroll, transforms animate between the two states.
+// ─── Hero ───
+// Placeholder — hero animations stripped for now.
 function initHero() {
-  const hero = document.querySelector('[data-hero]');
-  if (!hero) {
-    console.log('%c[hero] %cNo [data-hero] found, skipping', 'color: #b8860b; font-weight: bold', 'color: #f59e0b');
-    return;
-  }
-
-  const imageWrap = hero.querySelector('[data-hero-image]');
-  const logo = document.querySelector('[data-nav-logo]');
-
-  if (!imageWrap) {
-    console.log('%c[hero] %cNo [data-hero-image] found, skipping', 'color: #b8860b; font-weight: bold', 'color: #f59e0b');
-    return;
-  }
-  if (!logo) {
-    console.log('%c[hero] %cNo [data-nav-logo] found, skipping', 'color: #b8860b; font-weight: bold', 'color: #f59e0b');
-    return;
-  }
-  console.log('%c[hero] %cInit ScrollTrigger — single logo animation', 'color: #b8860b; font-weight: bold', 'color: #22c55e');
-
-  const clipAmount = 25;
-
-  // Measure the logo's natural position in the nav (before any transforms)
-  const logoRect = logo.getBoundingClientRect();
-  const heroRect = hero.getBoundingClientRect();
-
-  // Target: logo fills ~60% of hero width, centered in the hero
-  const targetWidth = heroRect.width * 0.6;
-  const scaleUp = targetWidth / logoRect.width;
-
-  // Offset from logo's natural nav position to hero center
-  const heroX = (heroRect.left + heroRect.width / 2) - (logoRect.left + logoRect.width / 2);
-  const heroY = (heroRect.top + heroRect.height / 2) - (logoRect.top + logoRect.height / 2);
-
-  // Check if we're at the top of the page (hero visible)
-  const atTop = window.scrollY < 2;
-
-  if (atTop) {
-    // Position logo in hero state before revealing
-    gsap.set(logo, {
-      x: heroX,
-      y: heroY,
-      scale: scaleUp,
-      filter: 'brightness(0) invert(1)',
-      zIndex: 100,
-    });
-    gsap.set(imageWrap, { clipPath: 'inset(0 0 0 0)' });
-  } else {
-    // Already scrolled past hero — logo stays in nav, hero already letterboxed
-    gsap.set(logo, {
-      x: 0,
-      y: 0,
-      scale: 1,
-      filter: 'none',
-      zIndex: 100,
-    });
-    gsap.set(imageWrap, { clipPath: 'inset(0 0 ' + clipAmount + '% 0)' });
-  }
-
-  // Now reveal the logo (positioned correctly before it becomes visible)
-  gsap.to(logo, {
-    opacity: 1,
-    duration: 0.8,
-    ease: 'power2.out',
-  });
-
-  // Build the scroll timeline
-  const tl = gsap.timeline({
-    paused: true,
-    defaults: { ease: 'expo.out', duration: 1.0 },
-  });
-
-  // Letterbox: clip hero image from bottom
-  tl.to(imageWrap, {
-    clipPath: 'inset(0 0 ' + clipAmount + '% 0)',
-    duration: 1.2,
-    ease: 'power2.inOut',
-  }, 0);
-
-  // Logo: animate transforms back to 0 (natural nav position)
-  tl.to(logo, {
-    x: 0,
-    y: 0,
-    scale: 1,
-    filter: 'brightness(1) invert(0)',
-  }, 0);
-
-  // If already scrolled, jump timeline to end so reverse works correctly
-  if (!atTop) {
-    tl.progress(1, false);
-  }
-
-  // ScrollTrigger: play on scroll, reverse when back to top
-  ScrollTrigger.create({
-    trigger: hero,
-    start: 'top -1px',
-    end: '+=40%',
-    pin: true,
-    pinSpacing: true,
-    invalidateOnRefresh: true,
-    onEnter: function () { tl.play(); },
-    onLeaveBack: function () { tl.reverse(); },
-  });
+  // No-op
 }
 
 // ─── Horizontal scroll section ───
@@ -281,42 +171,222 @@ function initHorizontalScroll() {
 }
 
 // ─── Attribute-driven animation engine ───
+// All animations use IntersectionObserver (not ScrollTrigger).
+// Works in any context: normal flow, horizontal scroll, sticky containers.
+// ScrollTrigger is reserved for scrub-linked animations (horizontal scroll, parallax).
+//
+// Text splits:
+//   data-animate="split-lines|split-words|split-chars"
+//   data-delay="0"        (seconds)
+//   data-duration="1.9"   (seconds)
+//   data-stagger="0.05"   (seconds between items)
+//   data-ease="expo.out"
+//
+// Element animations:
+//   data-animate="fade-up|fade-down|fade-in|scale-up"
+//   data-delay="0"        (seconds)
+//   data-duration="0.6"   (seconds)
+//   data-ease="power2.out"
+//
+// Shared options:
+//   data-once="true"      (default true — set false to re-trigger on re-enter)
+//   data-threshold="0.2"  (0-1, how much of element must be visible)
+//   data-margin="10px"    (observer rootMargin)
+//
 function initAnimateEngine() {
-  // Exclude elements inside horizontal scroll — those use containerAnimation
-  const animEls = document.querySelectorAll('[data-animate]:not([data-horizontal-scroll] [data-animate])');
+  const animEls = document.querySelectorAll('[data-animate]');
+
+  let count = 0;
+  animEls.forEach((el) => {
+    const type = el.getAttribute('data-animate');
+    if (!type) return; // skip empty Mast component props
+
+    count++;
+    if (type.startsWith('split-')) {
+      initSplitAnimation(el, type);
+    } else {
+      initElementAnimation(el, type);
+    }
+  });
+
   console.log(
-    '%c[aurea-residences] %cFound ' + animEls.length + ' animated elements',
+    '%c[aurea-residences] %cAnimated ' + count + ' elements (' + animEls.length + ' total [data-animate], ' + (animEls.length - count) + ' skipped empty)',
     'color: #b8860b; font-weight: bold',
     'color: #888'
   );
+}
 
-  animEls.forEach(function (el) {
-    const type = el.getAttribute('data-animate');
-    const delay = parseFloat(el.getAttribute('data-delay') || 0);
-    const duration = parseFloat(el.getAttribute('data-duration') || 0.6);
+// ─── Split text animations (Observer pattern) ───
+// Uses IntersectionObserver for trigger — lighter than ScrollTrigger,
+// supports animateOut for re-triggering, and kill() for clean transitions.
+function initSplitAnimation(el, type) {
+  const delay = parseFloat(el.dataset.delay || 0);
+  const duration = parseFloat(el.dataset.duration || 1.9);
+  const stagger = parseFloat(el.dataset.stagger || 0.05);
+  const ease = el.dataset.ease || 'expo.out';
+  const once = el.dataset.once !== 'false';
+  const threshold = parseFloat(el.dataset.threshold ?? 0.2);
+  const margin = el.dataset.margin || '10px';
 
-    const props = {
-      delay: delay,
-      duration: duration,
-      immediateRender: false,
-      scrollTrigger: { trigger: el, start: 'top 85%' },
-    };
+  // SplitText needs the actual text node, not a Webflow wrapper div
+  const splitTarget =
+    el.querySelector('h1, h2, h3, h4, h5, h6, p, [class*="heading-text"], [class*="plain-text"]') || el;
 
-    switch (type) {
-      case 'fade-up':
-        Object.assign(props, { autoAlpha: 0, y: 30 });
-        break;
-      case 'fade-down':
-        Object.assign(props, { autoAlpha: 0, y: -30 });
-        break;
-      case 'fade-in':
-        Object.assign(props, { autoAlpha: 0 });
-        break;
-      case 'scale-up':
-        Object.assign(props, { autoAlpha: 0, scale: 0.9 });
-        break;
+  // Determine split type and mask config
+  let splitType, maskType, targets;
+  switch (type) {
+    case 'split-lines':
+      splitType = 'lines';
+      maskType = 'lines';
+      break;
+    case 'split-words':
+      splitType = 'words';
+      maskType = 'words';
+      break;
+    case 'split-chars':
+      splitType = 'words, chars';
+      maskType = null; // chars use opacity, not mask
+      break;
+  }
+
+  // Create split — GSAP's mask option handles the overflow:hidden wrapper
+  const splitConfig = { type: splitType, autoSplit: true };
+  if (maskType) splitConfig.mask = maskType;
+  const split = SplitText.create(splitTarget, splitConfig);
+
+  // Fix descender clipping (g, y, p, q, j) — mask wrappers use overflow:clip
+  // with a height that doesn't account for descenders. Add padding to the outer mask divs.
+  if (maskType) {
+    const maskDivs = splitTarget.querySelectorAll(':scope > div[style*="overflow"]');
+    maskDivs.forEach((div) => { div.style.paddingBottom = '0.15em'; });
+  }
+
+  // Get the targets to animate
+  targets = type === 'split-chars' ? split.chars : type === 'split-lines' ? split.lines : split.words;
+
+  // Set initial hidden state on split targets (GSAP controls visibility from here)
+  if (type === 'split-chars') {
+    gsap.set(targets, { y: 30, autoAlpha: 0 });
+  } else {
+    gsap.set(targets, { yPercent: 120 });
+  }
+
+  // Clear CSS FOUC hiding — SplitText has split and GSAP owns the hidden state now
+  gsap.set(splitTarget, { visibility: 'visible', opacity: 1 });
+
+  // Track current animation for kill/restart
+  let animation = null;
+
+  function animateIn() {
+    if (animation) animation.kill();
+    if (type === 'split-chars') {
+      animation = gsap.to(targets, {
+        y: 0,
+        autoAlpha: 1,
+        delay,
+        duration,
+        ease,
+        stagger: { each: stagger || 0.02, from: 'start' },
+      });
+    } else {
+      animation = gsap.to(targets, {
+        yPercent: 0,
+        delay,
+        duration,
+        ease,
+        stagger: { each: stagger, from: 'start' },
+      });
     }
+  }
 
-    gsap.from(el, props);
-  });
+  function animateOut() {
+    if (animation) animation.kill();
+    if (type === 'split-chars') {
+      gsap.set(targets, { y: 30, autoAlpha: 0 });
+    } else {
+      gsap.set(targets, { yPercent: 120 });
+    }
+  }
+
+  // IntersectionObserver — fires animateIn/Out on visibility
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          animateIn();
+          if (once) observer.unobserve(el);
+        } else if (!once) {
+          animateOut();
+        }
+      });
+    },
+    { rootMargin: margin, threshold }
+  );
+  observer.observe(el);
+}
+
+// ─── Element animations (Observer) ───
+function initElementAnimation(el, type) {
+  const delay = parseFloat(el.dataset.delay || 0);
+  const duration = parseFloat(el.dataset.duration || 0.6);
+  const ease = el.dataset.ease || 'power2.out';
+  const once = el.dataset.once !== 'false';
+  const threshold = parseFloat(el.dataset.threshold || 0.2);
+  const margin = el.dataset.margin || '10px';
+
+  // Determine initial hidden state
+  let fromProps;
+  switch (type) {
+    case 'fade-up':
+      fromProps = { autoAlpha: 0, y: 30 };
+      break;
+    case 'fade-down':
+      fromProps = { autoAlpha: 0, y: -30 };
+      break;
+    case 'fade-in':
+      fromProps = { autoAlpha: 0 };
+      break;
+    case 'scale-up':
+      fromProps = { autoAlpha: 0, scale: 0.9 };
+      break;
+    default:
+      return; // unknown type, skip
+  }
+
+  // Set initial hidden state
+  gsap.set(el, fromProps);
+
+  let animation = null;
+
+  function animateIn() {
+    if (animation) animation.kill();
+    animation = gsap.to(el, {
+      autoAlpha: 1,
+      y: 0,
+      scale: 1,
+      delay,
+      duration,
+      ease,
+    });
+  }
+
+  function animateOut() {
+    if (animation) animation.kill();
+    gsap.set(el, fromProps);
+  }
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          animateIn();
+          if (once) observer.unobserve(el);
+        } else if (!once) {
+          animateOut();
+        }
+      });
+    },
+    { rootMargin: margin, threshold }
+  );
+  observer.observe(el);
 }

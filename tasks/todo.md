@@ -14,24 +14,27 @@
 - [x] Nav overlay element added (display:none, ready for JS)
 - [x] Styles created: nav, nav__container, nav__spacer, nav__logo, nav__hamburger, nav__hamburger-line, nav-overlay, nav-overlay__content
 
-### Next: Nav fixes (Dean's notes)
+### Next: Nav — Colour Logic (hero vs rest of page)
 
-- [ ] **Nav logo must be hidden in Designer** — Currently the AUREA.svg loads and is visible before JS hides it (flash). Set `display: none` or `opacity: 0` on the nav logo image in Webflow Designer. JS will reveal it when the hero scroll animation completes. This prevents the FOUC (flash of unstyled content).
+- [ ] **White nav over hero** — Logo and hamburger icon must be white when over the hero section (dark background)
+- [ ] **Blue nav elsewhere** — Logo and hamburger switch to blue when scrolled past hero onto any other section (light backgrounds, visibility)
+- [ ] **ScrollTrigger colour swap** — Use ScrollTrigger on the hero section to toggle a class or swap SVG fills at the right scroll position
+- [ ] **Upload both SVG variants** — White AUREA logo for hero, blue/dark AUREA logo for rest of page. Swap `src` or use CSS filter
+- [ ] **Nav logo hidden until ready** — Prevent FOUC: hide nav logo in Designer, JS reveals after hero animation completes
 
-- [ ] **Hamburger lines must be white over hero** — Currently `#1a1a2e` (dark). Since the nav overlays the dark hero image, hamburger lines need to be white initially. Options:
-  1. Set `nav__hamburger-line` to white in Webflow, then JS changes to dark after hero scroll animation
-  2. Or use a combo class `cc-light` that sets lines to white, JS removes it after scroll
+### Next: Nav — Hamburger Animation
 
-- [ ] **Upload AUREA-dark.svg** — Open the AUREA SVG, change fill from white to dark blue/navy. Upload as new asset. Swap the nav logo image source to this dark version. The white SVG is invisible on the light nav background.
+- [ ] **Hover animation** — Design a nice hover effect on the hamburger icon (e.g. line spread, subtle scale, colour shift). Should feel premium/smooth
+- [ ] **Click → X animation** — On click: top line rotates 45°, middle fades out, bottom rotates -45° (forms X). Reverse on close. GSAP timeline
+- [ ] **Click handler** — Toggle open/close state, coordinate with overlay
 
-### Next: Hamburger + overlay animation (JS)
+### Next: Nav — Mega Menu Overlay
 
-- [ ] **Hamburger click handler** — Toggle open/close state
-- [ ] **Hamburger line animation** — On open: top line rotates 45deg, middle fades out, bottom rotates -45deg (forms X). On close: reverse.
-- [ ] **Overlay animation** — On open: set display:block, animate in (clip-path reveal or fade). On close: animate out, set display:none.
-- [ ] **Overlay content** — Build mega menu layout inside `nav-overlay__content`. TBD what links/content go here.
-- [ ] **Lock scroll when overlay open** — `document.body.style.overflow = 'hidden'`
-- [ ] **Hamburger colour swap** — Lines white over hero, dark after scroll, white when overlay is open (on dark bg)
+- [ ] **Design the overlay** — Full-screen overlay from top, mega menu style. Needs to look premium and well-designed (not just a list of links)
+- [ ] **Overlay animation** — Animate in from top (clip-path or translateY reveal). Staggered content entrance. Smooth close animation
+- [ ] **Overlay content/layout** — Build mega menu layout inside `nav-overlay__content`. Decide what links/sections go here
+- [ ] **Lock scroll when open** — `document.body.style.overflow = 'hidden'`
+- [ ] **Hamburger white when overlay open** — Overlay bg is dark, so X icon must be white regardless of scroll position
 
 ### Next: Hero animation polish
 
