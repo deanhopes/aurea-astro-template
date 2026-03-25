@@ -1,8 +1,6 @@
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Flip } from 'gsap/Flip';
-
-gsap.registerPlugin(ScrollTrigger, Flip);
+gsap.registerPlugin(ScrollTrigger);
 
 // Connection info
 console.log(
@@ -42,7 +40,7 @@ onReady(function init() {
     const preloader = document.querySelector('[data-preloader]');
     if (preloader) preloader.remove();
     document.body.style.overflow = '';
-    initHero();
+    // Logo stays in nav naturally, no hero animation
     initHorizontalScroll();
   });
 });
@@ -59,8 +57,8 @@ function initPreloader(onDone) {
   console.log('%c[preloader] %cInit', 'color: #b8860b; font-weight: bold', 'color: #22c55e');
 
   const bar = preloader.querySelector('[data-preloader-bar]');
-  const wordmark = document.querySelector('[data-wordmark]');
   const heroImage = document.querySelector('[data-hero-image]');
+  const logo = document.querySelector('[data-nav-logo]');
 
   // Show preloader (hidden in Designer via display:none)
   preloader.style.display = 'block';
@@ -68,9 +66,10 @@ function initPreloader(onDone) {
   // Lock scroll during preloader
   document.body.style.overflow = 'hidden';
 
-  // Set initial states
-  if (wordmark) {
-    gsap.set(wordmark, { clipPath: 'inset(100% 0 0 0)', autoAlpha: 1 });
+  // Set initial states — hide logo during preloader, reveal it after
+  // Use opacity (not autoAlpha) so visibility stays inherit and getBoundingClientRect works
+  if (logo) {
+    gsap.set(logo, { opacity: 0 });
   }
   if (heroImage) {
     gsap.set(heroImage, { scale: 1.1 });
@@ -102,19 +101,6 @@ function initPreloader(onDone) {
     ease: 'power3.inOut',
   });
 
-  // Wordmark clip-path reveal (bottom to top)
-  if (wordmark) {
-    tl.to(
-      wordmark,
-      {
-        clipPath: 'inset(0% 0 0 0)',
-        duration: 0.8,
-        ease: 'power2.out',
-      },
-      '-=0.6'
-    );
-  }
-
   // Hero image subtle scale settle
   if (heroImage) {
     tl.to(
@@ -124,13 +110,16 @@ function initPreloader(onDone) {
         duration: 1.4,
         ease: 'power2.out',
       },
-      '-=1.0'
+      '-=0.6'
     );
   }
 }
 
 // ─── Hero scroll animation ───
-// Letterbox + wordmark Flip into nav. Plays forward on scroll, reverses on scroll back.
+// Single logo lives in the nav DOM. On load, we check scroll position:
+// - At top: set logo large + centered over hero (hero state), then reveal
+// - Past trigger: logo stays in natural nav position, then reveal
+// On scroll, transforms animate between the two states.
 function initHero() {
   const hero = document.querySelector('[data-hero]');
   if (!hero) {
@@ -139,72 +128,91 @@ function initHero() {
   }
 
   const imageWrap = hero.querySelector('[data-hero-image]');
-  const wordmark = hero.querySelector('[data-wordmark]');
-  const navLogo = document.querySelector('[data-nav-logo]');
+  const logo = document.querySelector('[data-nav-logo]');
 
   if (!imageWrap) {
     console.log('%c[hero] %cNo [data-hero-image] found, skipping', 'color: #b8860b; font-weight: bold', 'color: #f59e0b');
     return;
   }
-  console.log('%c[hero] %cInit ScrollTrigger — play/reverse with Flip', 'color: #b8860b; font-weight: bold', 'color: #22c55e');
-
-  // Hide nav logo initially, wordmark will animate to its position
-  if (navLogo) {
-    gsap.set(navLogo, { autoAlpha: 0 });
+  if (!logo) {
+    console.log('%c[hero] %cNo [data-nav-logo] found, skipping', 'color: #b8860b; font-weight: bold', 'color: #f59e0b');
+    return;
   }
+  console.log('%c[hero] %cInit ScrollTrigger — single logo animation', 'color: #b8860b; font-weight: bold', 'color: #22c55e');
 
   const clipAmount = 25;
 
-  // Measure where the wordmark needs to go (nav logo position)
-  const getNavTarget = () => {
-    if (!navLogo) return null;
-    const navRect = navLogo.getBoundingClientRect();
-    const wordmarkRect = wordmark.getBoundingClientRect();
-    return {
-      x: navRect.left - wordmarkRect.left + (navRect.width - wordmarkRect.width) / 2,
-      y: navRect.top - wordmarkRect.top + (navRect.height - wordmarkRect.height) / 2,
-      scale: navRect.width / wordmarkRect.width,
-    };
-  };
+  // Measure the logo's natural position in the nav (before any transforms)
+  const logoRect = logo.getBoundingClientRect();
+  const heroRect = hero.getBoundingClientRect();
 
-  const tl = gsap.timeline({
-    paused: true,
-    defaults: { ease: 'power2.inOut' },
+  // Target: logo fills ~60% of hero width, centered in the hero
+  const targetWidth = heroRect.width * 0.6;
+  const scaleUp = targetWidth / logoRect.width;
+
+  // Offset from logo's natural nav position to hero center
+  const heroX = (heroRect.left + heroRect.width / 2) - (logoRect.left + logoRect.width / 2);
+  const heroY = (heroRect.top + heroRect.height / 2) - (logoRect.top + logoRect.height / 2);
+
+  // Check if we're at the top of the page (hero visible)
+  const atTop = window.scrollY < 2;
+
+  if (atTop) {
+    // Position logo in hero state before revealing
+    gsap.set(logo, {
+      x: heroX,
+      y: heroY,
+      scale: scaleUp,
+      filter: 'brightness(0) invert(1)',
+      zIndex: 100,
+    });
+    gsap.set(imageWrap, { clipPath: 'inset(0 0 0 0)' });
+  } else {
+    // Already scrolled past hero — logo stays in nav, hero already letterboxed
+    gsap.set(logo, {
+      x: 0,
+      y: 0,
+      scale: 1,
+      filter: 'none',
+      zIndex: 100,
+    });
+    gsap.set(imageWrap, { clipPath: 'inset(0 0 ' + clipAmount + '% 0)' });
+  }
+
+  // Now reveal the logo (positioned correctly before it becomes visible)
+  gsap.to(logo, {
+    opacity: 1,
+    duration: 0.8,
+    ease: 'power2.out',
   });
 
-  // Letterbox: clip from bottom
+  // Build the scroll timeline
+  const tl = gsap.timeline({
+    paused: true,
+    defaults: { ease: 'expo.out', duration: 1.0 },
+  });
+
+  // Letterbox: clip hero image from bottom
   tl.to(imageWrap, {
     clipPath: 'inset(0 0 ' + clipAmount + '% 0)',
     duration: 1.2,
+    ease: 'power2.inOut',
   }, 0);
 
-  // Wordmark animates to nav logo position
-  if (wordmark) {
-    tl.to(wordmark, {
-      x: () => {
-        const target = getNavTarget();
-        return target ? target.x : 0;
-      },
-      y: () => {
-        const target = getNavTarget();
-        return target ? target.y : -wordmark.getBoundingClientRect().top + 16;
-      },
-      scale: () => {
-        const target = getNavTarget();
-        return target ? target.scale : 0.12;
-      },
-      transformOrigin: 'center center',
-      duration: 1.2,
-    }, 0);
+  // Logo: animate transforms back to 0 (natural nav position)
+  tl.to(logo, {
+    x: 0,
+    y: 0,
+    scale: 1,
+    filter: 'brightness(1) invert(0)',
+  }, 0);
 
-    // At the end: hide wordmark, show nav logo
-    tl.to(wordmark, { autoAlpha: 0, duration: 0.1 }, 1.0);
-    if (navLogo) {
-      tl.to(navLogo, { autoAlpha: 1, duration: 0.1 }, 1.0);
-    }
+  // If already scrolled, jump timeline to end so reverse works correctly
+  if (!atTop) {
+    tl.progress(1, false);
   }
 
-  // ScrollTrigger: play after first scroll, reverse when back to top
+  // ScrollTrigger: play on scroll, reverse when back to top
   ScrollTrigger.create({
     trigger: hero,
     start: 'top -1px',
@@ -212,8 +220,8 @@ function initHero() {
     pin: true,
     pinSpacing: true,
     invalidateOnRefresh: true,
-    onEnter: () => tl.play(),
-    onLeaveBack: () => tl.reverse(),
+    onEnter: function () { tl.play(); },
+    onLeaveBack: function () { tl.reverse(); },
   });
 }
 
