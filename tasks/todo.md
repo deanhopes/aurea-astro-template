@@ -32,7 +32,7 @@
 
 - [ ] **Design the overlay** — Full-screen overlay from top, mega menu style. Needs to look premium and well-designed (not just a list of links)
 - [ ] **Overlay animation** — Animate in from top (clip-path or translateY reveal). Staggered content entrance. Smooth close animation
-- [ ] **Overlay content/layout** — Build mega menu layout inside `nav-overlay__content`. Decide what links/sections go here
+- [ ] **Overlay content/layout** — Build mega menu layout inside `nav-overlay__content`. Pages: Vision, Residences, Lifestyle, Location, Neighbourhood, Team + Enquire CTA. Consider adding a hero image or bay visual in the overlay for premium feel
 - [ ] **Lock scroll when open** — `document.body.style.overflow = 'hidden'`
 - [ ] **Hamburger white when overlay open** — Overlay bg is dark, so X icon must be white regardless of scroll position
 

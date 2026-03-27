@@ -1,6 +1,7 @@
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
+import { initNav } from './nav.js';
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
 // Connection info
@@ -26,6 +27,9 @@ function onReady(fn) {
 }
 
 onReady(function init() {
+  // Nav is always interactive, regardless of motion preference
+  initNav();
+
   const mm = gsap.matchMedia();
 
   mm.add('(prefers-reduced-motion: no-preference)', () => {
