@@ -299,21 +299,31 @@ export function initNav() {
 }
 
 // ─── Card hover: sunrise reveal ───
-// Bar slides up from below. Sunrise (blurred half-circle) sweeps through
-// the bar's visible area bottom-to-top, border-radius flips mid-travel.
-// Luxury pacing — unhurried, considered. A sunrise, not a notification.
+// Sunrise sweeps through, bar follows, text blurs in. Inner shadow on card.
+// Luxury pacing — unhurried, considered. Three properties max per element.
 function initCardHovers(cards) {
   cards.forEach(function (card) {
     var hoverEl = card.querySelector(".nav-card__hover");
     if (!hoverEl) return;
 
     var sunrise = hoverEl.querySelector(".nav-card__sunrise");
+    var videoWrap = card.querySelector(".inline-video-component");
+    var label = hoverEl.querySelector(".btn-text");
 
     // Bar: hidden below card
     gsap.set(hoverEl, { y: "100%" });
 
-    // Sunrise: hidden below the bar
-    if (sunrise) sunrise.style.opacity = "0";
+    // Video: slightly scaled up at rest
+    if (videoWrap) gsap.set(videoWrap, { scale: 1.05 });
+
+    // Label: hidden for blur-in reveal
+    if (label) gsap.set(label, { autoAlpha: 0, filter: "blur(8px)" });
+
+    // Sunrise: hidden below
+    if (sunrise) gsap.set(sunrise, { y: "300%", opacity: 0 });
+
+    // Card inner shadow (off at rest)
+    card.style.boxShadow = "inset 0 0 0 0 rgba(0,0,0,0)";
 
     var tl = null;
 
@@ -321,13 +331,30 @@ function initCardHovers(cards) {
       if (tl) tl.kill();
       tl = gsap.timeline();
 
-      // Sunrise sweeps through first — slow rise, sine.inOut for the arc
-      // 300% below → -800% above (24px element, so big % = real travel)
+      // Video recedes — subtle dim, scale settles
+      if (videoWrap) {
+        tl.to(videoWrap, {
+          scale: 1,
+          filter: "brightness(0.92)",
+          duration: 0.9,
+          ease: EASE.expo,
+        }, 0);
+      }
+
+      // Card inner shadow fades in
+      tl.to(card, {
+        boxShadow: "inset 0 -40px 60px -20px rgba(0,0,0,0.35)",
+        duration: 0.9,
+        ease: EASE.expo,
+      }, 0);
+
+      // Sunrise: travel + fade + radius flip. Nothing else.
       if (sunrise) {
-        gsap.set(sunrise, { y: "300%", opacity: 1, borderRadius: "50% 50% 0% 0%" });
+        gsap.set(sunrise, { y: "300%", opacity: 0, borderRadius: "50% 50% 0% 0%" });
+        tl.to(sunrise, { opacity: 1, duration: 0.15, ease: EASE.quart }, 0);
         tl.to(sunrise, {
           y: "-800%",
-          duration: 1.1,
+          duration: 0.7,
           ease: "sine.inOut",
           onUpdate: function () {
             var p = this.progress();
@@ -336,30 +363,55 @@ function initCardHovers(cards) {
               : "0% 0% 50% 50%";
           },
         }, 0);
-
-        // Fade out gently in the last third
         tl.to(sunrise, {
           opacity: 0,
-          duration: 0.3,
+          duration: 0.2,
           ease: EASE.quartIn,
-        }, 0.75);
+        }, 0.5);
       }
 
-      // Bar follows — arrives after sunrise has swept through
+      // Bar arrives after sunrise is gone
       tl.to(hoverEl, {
         y: "0%",
         borderTopLeftRadius: 8,
         borderTopRightRadius: 8,
-        duration: 0.7,
+        duration: 0.9,
         ease: EASE.expo,
-      }, 0.15);
+      }, 0.2);
+
+      // Label blurs in — the payoff after motion settles
+      if (label) {
+        tl.to(label, {
+          autoAlpha: 1,
+          filter: "blur(0px)",
+          duration: 0.5,
+          ease: EASE.expo,
+        }, 0.6);
+      }
     });
 
     card.addEventListener("mouseleave", function () {
       if (tl) tl.kill();
       tl = gsap.timeline();
 
-      // Bar drops — snappy exit
+      // Video returns
+      if (videoWrap) {
+        tl.to(videoWrap, {
+          scale: 1.05,
+          filter: "brightness(1)",
+          duration: 0.3,
+          ease: EASE.quartIn,
+        }, 0);
+      }
+
+      // Inner shadow fades
+      tl.to(card, {
+        boxShadow: "inset 0 0 0 0 rgba(0,0,0,0)",
+        duration: 0.3,
+        ease: EASE.quartIn,
+      }, 0);
+
+      // Bar drops
       tl.to(hoverEl, {
         y: "100%",
         borderTopLeftRadius: 0,
@@ -368,11 +420,11 @@ function initCardHovers(cards) {
         ease: EASE.quartIn,
       }, 0);
 
-      // Sunrise resets instantly — one-way flourish
-      if (sunrise) {
-        sunrise.style.opacity = "0";
-        gsap.set(sunrise, { y: "300%" });
-      }
+      // Label hides instantly
+      if (label) gsap.set(label, { autoAlpha: 0, filter: "blur(8px)" });
+
+      // Sunrise resets
+      if (sunrise) gsap.set(sunrise, { y: "300%", opacity: 0 });
     });
   });
 
