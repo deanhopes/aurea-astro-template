@@ -331,10 +331,11 @@ function initCardHovers(cards) {
       if (tl) tl.kill();
       tl = gsap.timeline();
 
-      // Video recedes — subtle dim, scale settles
+      // Video recedes — subtle dim, scale settles (1.01 not 1.0 to prevent
+      // sub-pixel gap at card border-radius edges)
       if (videoWrap) {
         tl.to(videoWrap, {
-          scale: 1,
+          scale: 1.01,
           filter: "brightness(0.92)",
           duration: 0.9,
           ease: EASE.expo,
