@@ -114,9 +114,8 @@ export function initNav() {
     },
   });
 
-  // Initial hidden state — visibility + clipPath only, never touch display
+  // Initial hidden state
   gsap.set(overlay, {
-    clipPath: "inset(0 0 100% 0)",
     visibility: "hidden",
     pointerEvents: "none",
   });
@@ -130,13 +129,6 @@ export function initNav() {
   if (navCta) {
     gsap.set(navCta, { y: 15, autoAlpha: 0 });
   }
-
-  // Panel clips open — expo.out for the main reveal (~400ms dropdown)
-  dropdownTl.to(overlay, {
-    clipPath: "inset(0 0 0 0)",
-    duration: 0.4,
-    ease: EASE.expo,
-  });
 
   // Nav links stagger in with fantasy easing (nav items)
   if (navLinks.length) {
@@ -185,22 +177,10 @@ export function initNav() {
   // ─── Nav card hover (reveal overlay from bottom) ───
   initCardHovers(navCards);
 
-  // ─── MENU/CLOSE label crossfade ───
+  // ─── MENU/CLOSE label swap ───
   function crossfadeLabel(newText) {
     if (!menuLabel) return;
-    gsap.to(menuLabel, {
-      autoAlpha: 0,
-      duration: 0.15,
-      ease: EASE.quartIn,
-      onComplete: function () {
-        menuLabel.textContent = newText;
-        gsap.to(menuLabel, {
-          autoAlpha: 1,
-          duration: 0.15,
-          ease: EASE.quart,
-        });
-      },
-    });
+    menuLabel.textContent = newText;
   }
 
   // ─── Open / Close ───
@@ -223,7 +203,6 @@ export function initNav() {
     dropdownTl.pause();
     overlay.style.visibility = "hidden";
     overlay.style.pointerEvents = "none";
-    gsap.set(overlay, { clipPath: "inset(0 0 100% 0)" });
     if (navLinks.length) gsap.set(navLinks, { y: 20, autoAlpha: 0 });
     if (navCards.length) gsap.set(navCards, { y: 20, autoAlpha: 0 });
     if (navCta) gsap.set(navCta, { y: 15, autoAlpha: 0 });
