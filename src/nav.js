@@ -25,18 +25,21 @@ export function initNav() {
     mid: document.querySelector('[data-nav-line="2"]'),
     bot: document.querySelector('[data-nav-line="3"]'),
   };
-  const navCta = document.querySelector("[data-nav-cta]");
-
-  // Links: query buttons inside the links container (no data-nav-link attr on them)
+  // Links: nav-link elements inside the links container
   const linksContainer = overlay
-    ? overlay.querySelector(".nav-overlay__links")
+    ? overlay.querySelector(".nav-menu__links")
     : null;
   const navLinks = linksContainer
-    ? linksContainer.querySelectorAll(".button")
+    ? linksContainer.querySelectorAll(".nav-link")
     : [];
 
-  // Cards: query by class (nav-card elements inside overlay)
-  const navCards = overlay ? overlay.querySelectorAll(".nav-card") : [];
+  // Cards: nav-menu__cards link blocks inside overlay
+  const navCards = overlay ? overlay.querySelectorAll(".nav-menu__cards") : [];
+
+  // Enquire button inside the menu
+  const navCta = linksContainer
+    ? linksContainer.querySelector(".button")
+    : null;
 
   if (!nav || !toggle || !overlay) {
     console.log(
@@ -106,15 +109,15 @@ export function initNav() {
   const dropdownTl = gsap.timeline({
     paused: true,
     onReverseComplete: function () {
-      overlay.style.display = "none";
+      overlay.style.visibility = "hidden";
       overlay.style.pointerEvents = "none";
     },
   });
 
-  // Initial hidden state
+  // Initial hidden state — visibility + clipPath only, never touch display
   gsap.set(overlay, {
     clipPath: "inset(0 0 100% 0)",
-    display: "none",
+    visibility: "hidden",
     pointerEvents: "none",
   });
 
@@ -203,7 +206,7 @@ export function initNav() {
   // ─── Open / Close ───
   function openDropdown() {
     isOpen = true;
-    overlay.style.display = "block";
+    overlay.style.visibility = "visible";
     overlay.style.pointerEvents = "auto";
     nav.classList.add("is-overlay-open");
     crossfadeLabel("CLOSE");
@@ -308,6 +311,7 @@ function initCardHovers(cards) {
 
     var sunrise = hoverEl.querySelector(".nav-card__sunrise");
     var videoWrap = card.querySelector(".inline-video-component");
+    var dimOverlay = card.querySelector(".nav-card__overlay");
     var label = hoverEl.querySelector(".btn-text");
 
     // Bar: hidden below card
@@ -331,12 +335,19 @@ function initCardHovers(cards) {
       if (tl) tl.kill();
       tl = gsap.timeline();
 
-      // Video recedes — subtle dim, scale settles (1.01 not 1.0 to prevent
-      // sub-pixel gap at card border-radius edges)
+      // Video scale settles (1.01 not 1.0 to prevent sub-pixel gap)
       if (videoWrap) {
         tl.to(videoWrap, {
           scale: 1.01,
-          filter: "brightness(0.92)",
+          duration: 0.9,
+          ease: EASE.expo,
+        }, 0);
+      }
+
+      // Dim overlay fades in — pure opacity, no paint
+      if (dimOverlay) {
+        tl.to(dimOverlay, {
+          opacity: 0.25,
           duration: 0.9,
           ease: EASE.expo,
         }, 0);
@@ -399,7 +410,15 @@ function initCardHovers(cards) {
       if (videoWrap) {
         tl.to(videoWrap, {
           scale: 1.05,
-          filter: "brightness(1)",
+          duration: 0.3,
+          ease: EASE.quartIn,
+        }, 0);
+      }
+
+      // Dim overlay fades out
+      if (dimOverlay) {
+        tl.to(dimOverlay, {
+          opacity: 0,
           duration: 0.3,
           ease: EASE.quartIn,
         }, 0);
