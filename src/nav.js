@@ -219,7 +219,15 @@ export function initNav() {
     nav.classList.remove("is-overlay-open");
     crossfadeLabel("MENU");
     hamburgerTl.reverse();
-    dropdownTl.reverse();
+    // Snap overlay hidden instantly instead of reversing the stagger
+    dropdownTl.pause();
+    overlay.style.visibility = "hidden";
+    overlay.style.pointerEvents = "none";
+    gsap.set(overlay, { clipPath: "inset(0 0 100% 0)" });
+    if (navLinks.length) gsap.set(navLinks, { y: 20, autoAlpha: 0 });
+    if (navCards.length) gsap.set(navCards, { y: 20, autoAlpha: 0 });
+    if (navCta) gsap.set(navCta, { y: 15, autoAlpha: 0 });
+    dropdownTl.progress(0).pause();
   }
 
   function toggleDropdown() {
@@ -309,7 +317,6 @@ function initCardHovers(cards) {
     var hoverEl = card.querySelector(".nav-card__hover");
     if (!hoverEl) return;
 
-    var sunrise = hoverEl.querySelector(".nav-card__sunrise");
     var videoWrap = card.querySelector(".inline-video-component");
     var dimOverlay = card.querySelector(".nav-card__overlay");
     var label = hoverEl.querySelector(".btn-text");
@@ -322,9 +329,6 @@ function initCardHovers(cards) {
 
     // Label: hidden for blur-in reveal
     if (label) gsap.set(label, { autoAlpha: 0, filter: "blur(8px)" });
-
-    // Sunrise: hidden below
-    if (sunrise) gsap.set(sunrise, { y: "300%", opacity: 0 });
 
     // Card inner shadow (off at rest)
     card.style.boxShadow = "inset 0 0 0 0 rgba(0,0,0,0)";
@@ -360,45 +364,21 @@ function initCardHovers(cards) {
         ease: EASE.expo,
       }, 0);
 
-      // Sunrise: travel + fade + radius flip. Nothing else.
-      if (sunrise) {
-        gsap.set(sunrise, { y: "300%", opacity: 0, borderRadius: "50% 50% 0% 0%" });
-        tl.to(sunrise, { opacity: 1, duration: 0.15, ease: EASE.quart }, 0);
-        tl.to(sunrise, {
-          y: "-800%",
-          duration: 0.7,
-          ease: "sine.inOut",
-          onUpdate: function () {
-            var p = this.progress();
-            sunrise.style.borderRadius = p < 0.5
-              ? "50% 50% 0% 0%"
-              : "0% 0% 50% 50%";
-          },
-        }, 0);
-        tl.to(sunrise, {
-          opacity: 0,
-          duration: 0.2,
-          ease: EASE.quartIn,
-        }, 0.5);
-      }
-
-      // Bar arrives after sunrise is gone
+      // Bar slides up
       tl.to(hoverEl, {
         y: "0%",
-        borderTopLeftRadius: 8,
-        borderTopRightRadius: 8,
         duration: 0.9,
         ease: EASE.expo,
       }, 0.2);
 
-      // Label blurs in — the payoff after motion settles
+      // Label blurs in
       if (label) {
         tl.to(label, {
           autoAlpha: 1,
           filter: "blur(0px)",
-          duration: 0.5,
+          duration: 0.3,
           ease: EASE.expo,
-        }, 0.6);
+        }, 0.25);
       }
     });
 
@@ -434,17 +414,12 @@ function initCardHovers(cards) {
       // Bar drops
       tl.to(hoverEl, {
         y: "100%",
-        borderTopLeftRadius: 0,
-        borderTopRightRadius: 0,
         duration: 0.3,
         ease: EASE.quartIn,
       }, 0);
 
       // Label hides instantly
       if (label) gsap.set(label, { autoAlpha: 0, filter: "blur(8px)" });
-
-      // Sunrise resets
-      if (sunrise) gsap.set(sunrise, { y: "300%", opacity: 0 });
     });
   });
 
