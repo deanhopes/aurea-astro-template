@@ -1,0 +1,286 @@
+/*
+ * Aurea Residences — Design System
+ *
+ * Typography: GT Walsheim (display) + Aktiv Grotesk (body)
+ * Palette: Silver canvas, charcoal text, atmospheric gradient accents
+ * Motion: Single easing curve, Lenis smooth scroll
+ *
+ * Vanilla CSS + Lightning CSS (bundled with Astro).
+ * No framework dependencies.
+ */
+
+/* ─── Custom Properties ─── */
+
+:root {
+  /* Core palette */
+  --color-silver: #EDEDED;
+  --color-charcoal: #323032;
+
+  /* Accent palette (gradient/atmospheric use only) */
+  --color-deep-blue: #0E367C;
+  --color-sky-blue: #8ED4FD;
+  --color-coral: #EF5D2A;
+  --color-hot-pink: #FF5684;
+
+  /* Extended Miami palette */
+  --color-bay-turquoise: #2A9D8F;
+  --color-royal-palm: #2D5F3B;
+  --color-golden-peach: #F0C4A8;
+  --color-horizon-haze: #89C4DC;
+  --color-aurea-bronze: #C4A882;
+  --color-miami-night: #1A1E2E;
+  --color-sunlit-concrete: #F5F0EA;
+  --color-warm-dark: #3D3630;
+
+  /* Font families */
+  --font-display: 'GT Walsheim', system-ui, sans-serif;
+  --font-body: 'Aktiv Grotesk', system-ui, sans-serif;
+
+  /* Type scale */
+  --text-hero: clamp(4rem, 8vw + 1rem, 9rem);
+  --leading-hero: 0.95;
+  --tracking-hero: 0.04em;
+
+  --text-section: clamp(2rem, 4vw + 0.5rem, 4rem);
+  --leading-section: 1.1;
+
+  --text-body: 1.125rem;
+  --leading-body: 1.6;
+
+  --text-ui: 0.875rem;
+  --leading-ui: 1.5;
+  --tracking-ui: 0.08em;
+
+  /* Spacing scale */
+  --space-section: clamp(6rem, 10vw, 10rem);
+  --space-block: clamp(3rem, 6vw, 6rem);
+  --space-element: clamp(1.5rem, 3vw, 3rem);
+
+  /* The easing */
+  --ease-premium: cubic-bezier(0.19, 1, 0.22, 1);
+
+  /* Transitions */
+  --transition-reveal: opacity 0.8s var(--ease-premium), transform 0.8s var(--ease-premium);
+  --transition-color: color 0.3s ease, border-color 0.3s ease;
+}
+
+/* ─── Base ─── */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  background-color: var(--color-silver);
+  color: var(--color-charcoal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-aurea-bronze) var(--color-silver);
+}
+
+body {
+  min-height: 100dvh;
+}
+
+/* ─── Display type defaults ─── */
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 300;
+}
+
+/* ─── Selection ─── */
+
+::selection {
+  background-color: var(--color-charcoal);
+  color: var(--color-silver);
+}
+
+/* ─── Links ─── */
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ─── Scroll reveal ─── */
+
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(1.5rem);
+  transition: var(--transition-reveal);
+}
+
+[data-reveal].revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ─── Component styles ─── */
+
+/* Nav */
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .nav {
+    padding: 1.5rem 3rem;
+  }
+}
+
+.nav-wordmark {
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  font-weight: 300;
+  letter-spacing: 0.04em;
+  color: var(--color-charcoal);
+}
+
+.nav-links {
+  display: none;
+  align-items: center;
+  gap: 2rem;
+  list-style: none;
+}
+
+@media (min-width: 768px) {
+  .nav-links {
+    display: flex;
+  }
+}
+
+.nav-link {
+  font-size: var(--text-ui);
+  line-height: var(--leading-ui);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-ui);
+  color: color-mix(in srgb, var(--color-charcoal) 60%, transparent);
+  transition: var(--transition-color);
+}
+
+.nav-link:hover,
+.nav-link[aria-current="page"] {
+  color: var(--color-charcoal);
+}
+
+/* Footer */
+.footer {
+  padding: 3rem 1.5rem;
+  text-align: center;
+  font-size: var(--text-ui);
+  line-height: var(--leading-ui);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-ui);
+  color: color-mix(in srgb, var(--color-charcoal) 40%, transparent);
+}
+
+/* ─── Page layout ─── */
+
+.section {
+  padding: 1.5rem;
+  padding-top: var(--space-section);
+  padding-bottom: var(--space-section);
+}
+
+@media (min-width: 768px) {
+  .section {
+    padding-left: 3rem;
+    padding-right: 3rem;
+  }
+}
+
+.section--hero {
+  position: relative;
+  height: 100dvh;
+  display: flex;
+  align-items: flex-end;
+  padding-bottom: 6rem;
+}
+
+.section--inner {
+  padding-top: 12rem;
+}
+
+.section--center {
+  height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* ─── Typography ─── */
+
+.text-hero {
+  font-family: var(--font-display);
+  font-size: var(--text-hero);
+  font-weight: 100;
+  line-height: var(--leading-hero);
+  letter-spacing: var(--tracking-hero);
+  color: var(--color-charcoal);
+}
+
+.text-section {
+  font-family: var(--font-display);
+  font-size: var(--text-section);
+  font-weight: 300;
+  line-height: var(--leading-section);
+}
+
+.text-body-muted {
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  color: color-mix(in srgb, var(--color-charcoal) 60%, transparent);
+}
+
+/* ─── Content containers ─── */
+
+.content-narrow {
+  max-width: 48rem;
+}
+
+.content-text {
+  max-width: 36rem;
+}
+
+/* ─── Spacing ─── */
+
+.mt-sm { margin-top: 1rem; }
+.mt-md { margin-top: 2rem; }
+
+/* ─── Links ─── */
+
+.link-underline {
+  display: inline-block;
+  font-size: var(--text-ui);
+  line-height: var(--leading-ui);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-ui);
+  color: color-mix(in srgb, var(--color-charcoal) 60%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-charcoal) 20%, transparent);
+  padding-bottom: 0.25rem;
+  transition: var(--transition-color);
+}
+
+.link-underline:hover {
+  color: var(--color-charcoal);
+  border-color: var(--color-charcoal);
+}

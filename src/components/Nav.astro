@@ -1,0 +1,29 @@
+---
+import { nav } from '@data/site';
+
+const currentPath = Astro.url.pathname;
+---
+
+<nav class="nav" data-nav>
+  <a href="/" class="nav-wordmark">
+    AUREA
+  </a>
+
+  <ul class="nav-links">
+    {nav.items.map(({ label, href }) => (
+      <li>
+        <a
+          href={href}
+          class="nav-link"
+          aria-current={currentPath === href ? 'page' : undefined}
+        >
+          {label}
+        </a>
+      </li>
+    ))}
+  </ul>
+
+  <a href={nav.cta.href} class="nav-link">
+    {nav.cta.label}
+  </a>
+</nav>

@@ -1,51 +1,42 @@
 # Aurea Residences — Next Steps
 
-## Session: 2026-03-24
+## Session: 2026-04-07
 
-### What's done
-- [x] Horizontal scroll: 5 panels with Grid Row components, dynamic section height, resize-safe GSAP
-- [x] Panel combo classes: `cc-wide` (120vw), `cc-narrow` (80vw), `cc-half` (50vw)
-- [x] Panel 1: 4-column layout with image (flex:1), text anchored bottom (u-mt-auto)
-- [x] Typography: all letter spacing tightened (-2% to -1%)
-- [x] Hero: preloader separated from hero (callback pattern)
-- [x] Hero: scroll animation plays/reverses (not scrub), `toggleActions` via `onEnter`/`onLeaveBack`
-- [x] Hero: letterbox clip at 25%, wordmark animates to nav logo position
-- [x] Custom nav built from scratch (not MAST component): centered logo, spacer, hamburger
-- [x] Nav overlay element added (display:none, ready for JS)
-- [x] Styles created: nav, nav__container, nav__spacer, nav__logo, nav__hamburger, nav__hamburger-line, nav-overlay, nav-overlay__content
+### Stack switch
+- [x] Migrate from Webflow + Vite to Astro 5 + Tailwind 4 + GSAP + Lenis
+- [x] Scaffold all 8 pages (Home, Vision, Residences, Lifestyle, Location, Neighbourhood, Team, 404)
+- [x] Design system tokens in global.css (palette, type scale, spacing, easing)
+- [x] BaseLayout with Lenis smooth scroll + scroll reveal + View Transitions
+- [x] Nav component (3 primary links + Enquire CTA)
+- [x] SEO component
+- [x] ESLint flat config
+- [x] Prettier config
+- [x] .editorconfig
+- [x] Project docs (CLAUDE.md, docs/codebase.md)
 
-### Next: Nav — Colour Logic (hero vs rest of page)
+### Assets needed
+- [ ] **Favicon** — design and add `public/favicon.svg`
+- [ ] **OG image** — create `public/og.jpg` (1200x630, hero render or wordmark on silver)
+- [ ] **Font files** — license GT Walsheim + Aktiv Grotesk, add .woff2 to `src/assets/fonts/`, fill in `fonts.css`
 
-- [ ] **White nav over hero** — Logo and hamburger icon must be white when over the hero section (dark background)
-- [ ] **Blue nav elsewhere** — Logo and hamburger switch to blue when scrolled past hero onto any other section (light backgrounds, visibility)
-- [ ] **ScrollTrigger colour swap** — Use ScrollTrigger on the hero section to toggle a class or swap SVG fills at the right scroll position
-- [ ] **Upload both SVG variants** — White AUREA logo for hero, blue/dark AUREA logo for rest of page. Swap `src` or use CSS filter
-- [ ] **Nav logo hidden until ready** — Prevent FOUC: hide nav logo in Designer, JS reveals after hero animation completes
+### Build: pages
+- [ ] Home — hero (full viewport, render + typographic headline), vision teaser, residences teaser, location teaser
+- [ ] Vision — architectural philosophy, design concept, facade, tower form
+- [ ] Residences — unit types, terrace living, interiors
+- [ ] Lifestyle — amenities as experiences (biohacking, cold plunge, private chef)
+- [ ] Location — Edgewater on the map, connectivity, the bay
+- [ ] Neighbourhood — dining, culture, Margaret Pace Park, Design District, Wynwood
+- [ ] Team — architect, developer, interior design credibility
+- [ ] 404 — on-brand (already scaffolded, needs polish)
 
-### Next: Nav — Hamburger Animation
+### Build: components
+- [ ] Enquire modal (global, persistent CTA in nav)
+- [ ] Mobile nav (hamburger + overlay)
+- [ ] GSAP scroll sequences (pinned sections, staggered reveals)
+- [ ] Page transitions (dark wash fade, 0.8-1.2s)
 
-- [ ] **Hover animation** — Design a nice hover effect on the hamburger icon (e.g. line spread, subtle scale, colour shift). Should feel premium/smooth
-- [ ] **Click → X animation** — On click: top line rotates 45°, middle fades out, bottom rotates -45° (forms X). Reverse on close. GSAP timeline
-- [ ] **Click handler** — Toggle open/close state, coordinate with overlay
-
-### Next: Nav — Mega Menu Overlay
-
-- [ ] **Design the overlay** — Full-screen overlay from top, mega menu style. Needs to look premium and well-designed (not just a list of links)
-- [ ] **Overlay animation** — Animate in from top (clip-path or translateY reveal). Staggered content entrance. Smooth close animation
-- [ ] **Overlay content/layout** — Build mega menu layout inside `nav-overlay__content`. Pages: Vision, Residences, Lifestyle, Location, Neighbourhood, Team + Enquire CTA. Consider adding a hero image or bay visual in the overlay for premium feel
-- [ ] **Lock scroll when open** — `document.body.style.overflow = 'hidden'`
-- [ ] **Hamburger white when overlay open** — Overlay bg is dark, so X icon must be white regardless of scroll position
-
-### Next: Hero animation polish
-
-- [ ] **Test wordmark-to-nav animation** — Verify the hero wordmark animates to the correct nav logo position. May need position tweaking.
-- [ ] **Nav background on scroll** — Nav starts transparent over hero. After hero animation completes, add a subtle background (white/cream with slight opacity) so nav is visible over page content.
-- [ ] **Letterbox value tuning** — 25% clip may need adjusting depending on intro section position. Check gap between image bottom and intro text.
-
-### Later: Content + polish
-
-- [ ] Populate horizontal scroll panels 2-5 with content
-- [ ] Responsive breakpoints for horizontal scroll (tablet/mobile behaviour)
-- [ ] Responsive nav (probably same hamburger pattern, just adjust sizes)
-- [ ] Real images (replace placeholders)
-- [ ] Publish and test on staging
+### Polish
+- [ ] Responsive breakpoints (all pages)
+- [ ] Real renders/photography (replace placeholder copy)
+- [ ] Performance audit (Lighthouse, CWV)
+- [ ] Case study write-up (after ship)

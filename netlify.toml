@@ -1,9 +1,3 @@
 [build]
   command = "npm run build"
   publish = "dist"
-
-[[headers]]
-  for = "/main.js"
-  [headers.values]
-    Access-Control-Allow-Origin = "*"
-    Cache-Control = "public, max-age=300"

@@ -1,20 +1,11 @@
-# Aurea Residences — Webflow Custom Code
+## Session Start
 
-**What this is:** Vite + vanilla JS custom code for the Aurea Residences Webflow site.
+DO NOT ADJUST CLAUDE.md - it must always remain as is, if any additional context etc is required add it to /docs
 
-**Stack:** Vite 6, vanilla JS, GSAP + ScrollTrigger, attribute-driven architecture.
-
-**Webflow site:** https://aurea-residences-1abb56.webflow.io
-
-**GitHub:** https://github.com/deanhopes/aurea-residences
-
-**Webflow MCP:** Connected via `mcp__webflow__*` tools. Use for site data, pages, CMS, styles, elements, and components directly from Claude Code.
-
-**Dev workflow:** `npm run dev` starts localhost:5173. Webflow footer snippet detects localhost and loads from there. When not running, falls back to Netlify CDN.
-
-**Webflow MCP:** Connected via MCP server. Use `mcp__webflow__*` tools for Designer operations (elements, styles, pages, CMS, components, scripts, assets). Build the site through Webflow MCP + custom code through this repo.
-
-**Pattern:** All JS hooks into Webflow via `data-*` attributes. Never select by Webflow class names.
+Read these before any work:
+- `docs/soul.md` — design posture, quality standard, voice
+- `docs/codebase.md` — project structure, code conventions, commands
+- `tasks/lessons.md` — mistakes to not repeat
 
 ---
 
