@@ -172,6 +172,7 @@ a {
 }
 
 .nav-pill--menu {
+  min-width: 120px;
   background: var(--color-silver);
   color: var(--color-charcoal);
 }
@@ -188,6 +189,7 @@ a {
 }
 
 .nav-pill--cta {
+  min-width: 120px;
   background: var(--color-charcoal);
   color: var(--color-silver);
 }
