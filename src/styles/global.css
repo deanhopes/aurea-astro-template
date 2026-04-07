@@ -1,7 +1,7 @@
 /*
  * Aurea Residences — Design System
  *
- * Typography: GT Walsheim (display) + Aktiv Grotesk (body)
+ * Typography: Test Söhne (display) + Aktiv Grotesk (body)
  * Palette: Silver canvas, charcoal text, atmospheric gradient accents
  * Motion: Single easing curve, Lenis smooth scroll
  *
@@ -33,7 +33,7 @@
   --color-warm-dark: #3D3630;
 
   /* Font families */
-  --font-display: 'GT Walsheim', system-ui, sans-serif;
+  --font-display: 'Test Sohne', system-ui, sans-serif;
   --font-body: 'Aktiv Grotesk', system-ui, sans-serif;
 
   /* Type scale */
@@ -127,58 +127,254 @@ a {
 
 /* ─── Component styles ─── */
 
-/* Nav */
-.nav {
+/* Header */
+.header {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 50;
+  padding: 4px;
+  pointer-events: none;
+}
+
+.header > * {
+  pointer-events: auto;
+}
+
+/* Nav bar */
+.nav-bar {
+  display: flex;
+  gap: 4px;
+  align-items: stretch;
+}
+
+.nav-pill {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 1.5rem;
-}
-
-@media (min-width: 768px) {
-  .nav {
-    padding: 1.5rem 3rem;
-  }
-}
-
-.nav-wordmark {
-  font-family: var(--font-display);
+  justify-content: center;
+  gap: 8px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-family: var(--font-body);
+  font-weight: 500;
   font-size: 1.125rem;
-  font-weight: 300;
-  letter-spacing: 0.04em;
+  line-height: 1.5;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.3s var(--ease-premium);
+}
+
+.nav-pill:hover {
+  opacity: 0.8;
+}
+
+.nav-pill--menu {
+  background: var(--color-silver);
   color: var(--color-charcoal);
 }
 
-.nav-links {
-  display: none;
-  align-items: center;
-  gap: 2rem;
-  list-style: none;
+.nav-pill--wordmark {
+  flex: 1;
+  height: 40px;
+  background: var(--color-silver);
+  color: var(--color-charcoal);
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: 1.125rem;
+  letter-spacing: 0.04em;
 }
 
-@media (min-width: 768px) {
-  .nav-links {
-    display: flex;
+.nav-pill--cta {
+  background: var(--color-charcoal);
+  color: var(--color-silver);
+}
+
+/* Menu panel */
+.menu-panel {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+  padding: 4px;
+  background: color-mix(in srgb, var(--color-silver) 90%, transparent);
+  backdrop-filter: blur(12px);
+  border-radius: 4px;
+  height: 600px;
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition:
+    opacity 0.5s var(--ease-premium),
+    transform 0.5s var(--ease-premium),
+    visibility 0s 0.5s;
+}
+
+.menu-panel[aria-hidden="false"] {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  transition:
+    opacity 0.5s var(--ease-premium),
+    transform 0.5s var(--ease-premium),
+    visibility 0s 0s;
+}
+
+/* Menu cards */
+.menu-cards {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.menu-card {
+  flex: 1;
+  position: relative;
+  min-width: 0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.menu-card__image {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-charcoal) 15%, var(--color-silver)),
+    color-mix(in srgb, var(--color-charcoal) 30%, var(--color-silver))
+  );
+  background-size: cover;
+  background-position: center;
+}
+
+.menu-card__label {
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+  right: 4px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-silver);
+  border: 1px solid #A3A3A3;
+  border-radius: 1px;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 1.125rem;
+  line-height: 1.5;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  color: var(--color-charcoal);
+}
+
+/* Menu sidebar */
+.menu-sidebar {
+  display: flex;
+  flex-direction: column;
+  width: 280px;
+  flex-shrink: 0;
+}
+
+.menu-sidebar__inner {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  gap: 24px;
+}
+
+.menu-sidebar__links {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  gap: 1rem;
+}
+
+.menu-sidebar__link {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 1.125rem;
+  line-height: 1.5;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  color: var(--color-charcoal);
+  transition: opacity 0.3s var(--ease-premium);
+}
+
+.menu-sidebar__link:hover {
+  opacity: 0.6;
+}
+
+.menu-sidebar__divider {
+  width: 100%;
+  border: none;
+  border-top: 1px solid #737373;
+}
+
+.menu-sidebar__cta {
+  height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-charcoal);
+  color: var(--color-silver);
+  border-radius: 2px;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 1.125rem;
+  line-height: 1.5;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  transition: opacity 0.3s var(--ease-premium);
+}
+
+.menu-sidebar__cta:hover {
+  opacity: 0.85;
+}
+
+/* Mobile menu */
+@media (max-width: 767px) {
+  .menu-panel {
+    flex-direction: column;
+    height: calc(100dvh - 52px);
+  }
+
+  .menu-cards {
+    flex: 1;
+    min-height: 0;
+  }
+
+  .menu-sidebar {
+    width: 100%;
+    flex-shrink: 0;
+  }
+
+  .menu-sidebar__inner {
+    padding: 24px;
+    gap: 16px;
   }
 }
 
-.nav-link {
-  font-size: var(--text-ui);
-  line-height: var(--leading-ui);
-  text-transform: uppercase;
-  letter-spacing: var(--tracking-ui);
-  color: color-mix(in srgb, var(--color-charcoal) 60%, transparent);
-  transition: var(--transition-color);
-}
+@media (max-width: 480px) {
+  .menu-cards {
+    flex-direction: column;
+  }
 
-.nav-link:hover,
-.nav-link[aria-current="page"] {
-  color: var(--color-charcoal);
+  .menu-card {
+    min-height: 120px;
+  }
+
+  .nav-pill span {
+    display: none;
+  }
 }
 
 /* Footer */

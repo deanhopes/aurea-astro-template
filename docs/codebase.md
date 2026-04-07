@@ -14,7 +14,7 @@
 
 ```
 src/
-├── assets/fonts/     # .woff2 font files (GT Walsheim + Aktiv Grotesk)
+├── assets/fonts/     # .woff2 font files (Test Söhne + Aktiv Grotesk)
 ├── components/       # Astro components (Nav, SEO, section components)
 ├── layouts/          # BaseLayout (Lenis, scroll reveal, View Transitions)
 ├── lib/              # Utilities, constants

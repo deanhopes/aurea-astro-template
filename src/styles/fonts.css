@@ -1,26 +1,55 @@
 /*
- * Font declarations for GT Walsheim + Aktiv Grotesk
- *
- * TODO: Add @font-face rules once fonts are licensed and .woff2 files
- * are placed in src/assets/fonts/
- *
- * Until then, the system font fallback stack in global.css handles it.
- *
- * Expected files:
- *   src/assets/fonts/GTWalsheim-Thin.woff2
- *   src/assets/fonts/GTWalsheim-Light.woff2
- *   src/assets/fonts/GTWalsheim-Regular.woff2
- *   src/assets/fonts/AktivGrotesk-Light.woff2
- *   src/assets/fonts/AktivGrotesk-Regular.woff2
- *   src/assets/fonts/AktivGrotesk-Medium.woff2
- *
- * Implementation pattern:
- *
- * @font-face {
- *   font-family: 'GT Walsheim';
- *   src: url('../assets/fonts/GTWalsheim-Thin.woff2') format('woff2');
- *   font-weight: 100;
- *   font-style: normal;
- *   font-display: swap;
- * }
+ * Font declarations for Test Söhne (headings) + Aktiv Grotesk (body)
  */
+
+/* ─── Test Söhne ─── */
+
+@font-face {
+  font-family: 'Test Sohne';
+  src: url('../assets/fonts/TestSohne-Extraleicht.woff2') format('woff2');
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Test Sohne';
+  src: url('../assets/fonts/TestSohne-Leicht.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Test Sohne';
+  src: url('../assets/fonts/TestSohne-Buch.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ─── Aktiv Grotesk ─── */
+
+@font-face {
+  font-family: 'Aktiv Grotesk';
+  src: url('../assets/fonts/AktivGrotesk-Light.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Aktiv Grotesk';
+  src: url('../assets/fonts/AktivGrotesk-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Aktiv Grotesk';
+  src: url('../assets/fonts/AktivGrotesk-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}

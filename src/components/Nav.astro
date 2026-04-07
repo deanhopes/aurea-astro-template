@@ -1,29 +1,64 @@
 ---
 import { nav } from '@data/site';
-
-const currentPath = Astro.url.pathname;
 ---
 
-<nav class="nav" data-nav>
-  <a href="/" class="nav-wordmark">
-    AUREA
-  </a>
+<header class="header" data-nav>
+  <nav class="nav-bar">
+    <button
+      class="nav-pill nav-pill--menu"
+      data-menu-toggle
+      aria-expanded="false"
+      aria-controls="menu-panel"
+    >
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <rect x="3" y="5" width="18" height="2" rx="0.5" />
+        <rect x="3" y="11" width="18" height="2" rx="0.5" />
+        <rect x="3" y="17" width="18" height="2" rx="0.5" />
+      </svg>
+      <span>Menu</span>
+    </button>
 
-  <ul class="nav-links">
-    {nav.items.map(({ label, href }) => (
-      <li>
-        <a
-          href={href}
-          class="nav-link"
-          aria-current={currentPath === href ? 'page' : undefined}
-        >
-          {label}
+    <a href="/" class="nav-pill nav-pill--wordmark">
+      AUREA
+    </a>
+
+    <a href={nav.cta.href} class="nav-pill nav-pill--cta">
+      {nav.cta.label}
+    </a>
+  </nav>
+
+  <div class="menu-panel" id="menu-panel" data-menu-panel aria-hidden="true">
+    <div class="menu-cards">
+      {nav.menu.cards.map(({ label, href }) => (
+        <a href={href} class="menu-card">
+          <div class="menu-card__image" />
+          <div class="menu-card__label">
+            <span>{label}</span>
+          </div>
         </a>
-      </li>
-    ))}
-  </ul>
+      ))}
+    </div>
 
-  <a href={nav.cta.href} class="nav-link">
-    {nav.cta.label}
-  </a>
-</nav>
+    <div class="menu-sidebar">
+      <div class="menu-sidebar__inner">
+        <div class="menu-sidebar__links">
+          {nav.menu.links.map(({ label, href }) => (
+            <a href={href} class="menu-sidebar__link">{label}</a>
+          ))}
+        </div>
+
+        <hr class="menu-sidebar__divider" />
+
+        <div class="menu-sidebar__links">
+          {nav.menu.secondaryLinks.map(({ label, href }) => (
+            <a href={href} class="menu-sidebar__link">{label}</a>
+          ))}
+        </div>
+      </div>
+
+      <a href={nav.cta.href} class="menu-sidebar__cta">
+        {nav.cta.label}
+      </a>
+    </div>
+  </div>
+</header>

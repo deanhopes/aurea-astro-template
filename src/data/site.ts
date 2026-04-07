@@ -7,10 +7,22 @@ export const site = {
 } as const;
 
 export const nav = {
-  items: [
-    { label: 'Residences', href: '/residences' },
-    { label: 'Lifestyle', href: '/lifestyle' },
-    { label: 'Location', href: '/location' },
-  ],
   cta: { label: 'Enquire', href: '#enquire' },
+  menu: {
+    cards: [
+      { label: 'Vision', href: '/vision' },
+      { label: 'Residences', href: '/residences' },
+      { label: 'Lifestyle', href: '/lifestyle' },
+    ],
+    links: [
+      { label: 'Neighbourhood', href: '/neighbourhood' },
+      { label: 'Location', href: '/location' },
+      { label: 'The Team', href: '/team' },
+    ],
+    secondaryLinks: [
+      { label: 'Blog', href: '/blog' },
+      { label: 'Terms & Conditions', href: '/terms' },
+      { label: 'Privacy Policy', href: '/privacy' },
+    ],
+  },
 } as const;

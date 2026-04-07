@@ -47,6 +47,14 @@ const {
       document.addEventListener('astro:before-swap', destroyLenis);
     </script>
 
+    <!-- Nav menu toggle -->
+    <script>
+      import { initNav, destroyNav } from '@lib/nav';
+
+      document.addEventListener('astro:page-load', initNav);
+      document.addEventListener('astro:before-swap', destroyNav);
+    </script>
+
     <!-- GSAP context lifecycle -->
     <script>
       import { initAnimations, cleanupAnimations } from '@lib/animations';
