@@ -28,27 +28,6 @@ export function initVisionScroll() {
         },
       });
 
-      /* ── Panel 1: intro text reveals ── */
-      const introLabel = section.querySelector('.vision__panel--intro > .vision__label');
-      const towerLabel = section.querySelector('.vision__tower .vision__label');
-      const towerBody = section.querySelector('.vision__tower-body');
-
-      [introLabel, towerLabel, towerBody].forEach((el) => {
-        if (!el) return;
-        gsap.from(el, {
-          y: 30,
-          opacity: 0,
-          duration: 0.9,
-          ease: 'expo.out',
-          scrollTrigger: {
-            trigger: el,
-            containerAnimation: horizontalScroll,
-            start: 'left 85%',
-            toggleActions: 'play none none none',
-          },
-        });
-      });
-
       /* ── Panel 2: card columns stagger ── */
       const cardColumns = section.querySelectorAll(
         '.vision__card-left, .vision__card-centre, .vision__card-right',

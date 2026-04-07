@@ -8,7 +8,22 @@ let ctx: gsap.Context | null = null;
 export function initAnimations() {
   ctx?.revert();
   ctx = gsap.context(() => {
-    // Page-level animations registered here or via per-page scripts
+    gsap.matchMedia().add('(prefers-reduced-motion: no-preference)', () => {
+      /* Hero parallax */
+      const heroImg = document.querySelector<HTMLElement>('[data-hero] .hero__image img');
+      if (heroImg) {
+        gsap.to(heroImg, {
+          yPercent: 15,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: '[data-hero]',
+            start: 'top top',
+            end: 'bottom top',
+            scrub: 1,
+          },
+        });
+      }
+    });
   });
 }
 
