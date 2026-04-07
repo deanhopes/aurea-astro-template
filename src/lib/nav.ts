@@ -8,11 +8,30 @@ function createIconTimeline(toggle: HTMLElement): gsap.core.Timeline {
   const mid = toggle.querySelector('[data-bar="mid"]');
   const bot = toggle.querySelector('[data-bar="bot"]');
 
-  const tl = gsap.timeline({ paused: true, defaults: { duration: 0.4, ease: 'power2.inOut' } });
+  const tl = gsap.timeline({ paused: true, defaults: { duration: 0.3, ease: 'power2.inOut' } });
 
   tl.to(top, { y: 6, rotation: 45, transformOrigin: 'center center' }, 0)
     .to(bot, { y: -6, rotation: -45, transformOrigin: 'center center' }, 0)
-    .to(mid, { autoAlpha: 0, duration: 0.2 }, 0);
+    .to(mid, { autoAlpha: 0, duration: 0.15 }, 0);
+
+  return tl;
+}
+
+function createPanelTimeline(panel: HTMLElement): gsap.core.Timeline {
+  const cards = panel.querySelectorAll('.menu-card');
+  const links = panel.querySelectorAll('.menu-sidebar__link');
+  const cta = panel.querySelector('.menu-sidebar__cta');
+
+  const tl = gsap.timeline({ paused: true });
+
+  // Panel enters with ease-out — starts fast, feels responsive
+  tl.to(panel, { autoAlpha: 1, y: 0, duration: 0.25, ease: 'power2.out' })
+    .fromTo(cards, { autoAlpha: 0, y: 8 }, { autoAlpha: 1, y: 0, duration: 0.25, ease: 'power2.out', stagger: 0.05 }, 0.1)
+    .fromTo(links, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.2, ease: 'power2.out', stagger: 0.04 }, 0.15);
+
+  if (cta) {
+    tl.fromTo(cta, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.2, ease: 'power2.out' }, 0.25);
+  }
 
   return tl;
 }
@@ -24,12 +43,17 @@ export function initNav() {
   const panel = document.querySelector<HTMLElement>('[data-menu-panel]');
   if (!toggle || !panel) return;
 
+  // Pre-promote to GPU layer so backdrop-filter doesn't cause jank on first open
+  gsap.set(panel, { autoAlpha: 0, y: -4, force3D: true });
+
   const iconTl = createIconTimeline(toggle);
+  const panelTl = createPanelTimeline(panel);
 
   function open() {
     toggle!.setAttribute('aria-expanded', 'true');
     panel!.setAttribute('aria-hidden', 'false');
     iconTl.play();
+    panelTl.play();
     getLenis()?.stop();
   }
 
@@ -37,6 +61,7 @@ export function initNav() {
     toggle!.setAttribute('aria-expanded', 'false');
     panel!.setAttribute('aria-hidden', 'true');
     iconTl.reverse();
+    panelTl.reverse();
     getLenis()?.start();
   }
 
@@ -63,6 +88,7 @@ export function initNav() {
   cleanup = () => {
     close();
     iconTl.kill();
+    panelTl.kill();
     toggle.removeEventListener('click', handleToggle);
     document.removeEventListener('keydown', handleKeydown);
     panel.removeEventListener('click', handlePanelClick);

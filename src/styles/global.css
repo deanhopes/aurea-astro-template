@@ -44,10 +44,10 @@
   --text-section: clamp(2rem, 4vw + 0.5rem, 4rem);
   --leading-section: 1.1;
 
-  --text-body: 1.125rem;
+  --text-body: clamp(1rem, 0.5vw + 0.875rem, 1.125rem);
   --leading-body: 1.6;
 
-  --text-ui: 0.875rem;
+  --text-ui: clamp(0.75rem, 0.25vw + 0.6875rem, 0.875rem);
   --leading-ui: 1.5;
   --tracking-ui: 0.08em;
 
@@ -203,23 +203,8 @@ a {
   border-radius: 4px;
   height: 600px;
   overflow: hidden;
-  opacity: 0;
   visibility: hidden;
-  transform: translateY(-8px);
-  transition:
-    opacity 0.5s var(--ease-premium),
-    transform 0.5s var(--ease-premium),
-    visibility 0s 0.5s;
-}
-
-.menu-panel[aria-hidden="false"] {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
-  transition:
-    opacity 0.5s var(--ease-premium),
-    transform 0.5s var(--ease-premium),
-    visibility 0s 0s;
+  will-change: transform, opacity;
 }
 
 /* Menu cards */
@@ -342,17 +327,30 @@ a {
 
 /* Mobile menu */
 @media (max-width: 767px) {
+  .nav-pill {
+    font-size: 1rem;
+  }
+
   .nav-bar {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     gap: 4px;
-    align-items: stretch;
+    align-items: center;
+  }
+
+  .nav-pill--wordmark {
+    grid-row: 1;
+    grid-column: 2;
+    justify-self: center;
   }
 
   .nav-pill--menu {
+    grid-row: 1;
     grid-column: 3;
     justify-self: end;
-    min-width: auto;
+    min-width: 40px;
+    min-height: 40px;
+    border: 2px solid color-mix(in srgb, var(--color-charcoal) 15%, transparent);
   }
 
   .nav-pill--menu span {
@@ -366,6 +364,7 @@ a {
   .menu-panel {
     flex-direction: column;
     height: calc(100dvh - 52px);
+    overflow-y: auto;
   }
 
   .menu-cards {
