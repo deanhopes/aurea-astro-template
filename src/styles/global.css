@@ -172,7 +172,6 @@ a {
 }
 
 .nav-pill--menu {
-  min-width: 120px;
   background: var(--color-silver);
   color: var(--color-charcoal);
 }
@@ -189,7 +188,6 @@ a {
 }
 
 .nav-pill--cta {
-  min-width: 120px;
   background: var(--color-charcoal);
   color: var(--color-silver);
 }
@@ -344,6 +342,27 @@ a {
 
 /* Mobile menu */
 @media (max-width: 767px) {
+  .nav-bar {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 4px;
+    align-items: stretch;
+  }
+
+  .nav-pill--menu {
+    grid-column: 3;
+    justify-self: end;
+    min-width: auto;
+  }
+
+  .nav-pill--menu span {
+    display: none;
+  }
+
+  .nav-pill--cta {
+    display: none;
+  }
+
   .menu-panel {
     flex-direction: column;
     height: calc(100dvh - 52px);
