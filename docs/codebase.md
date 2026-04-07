@@ -30,6 +30,8 @@ src/
 
 **CSS:** Design tokens defined in `global.css` via CSS custom properties. Use semantic class names (`.text-hero`, `.section`, `.nav-link`, `.link-underline`) not inline styles. Accent colours are gradient/atmospheric only, never solid fills. No utility framework. Lightning CSS (bundled with Astro) handles nesting, `color-mix()`, and minification.
 
+**Border radius:** 4px standard (`border-radius: 4px`). Nested elements must use concentric radii — inner radius = outer radius minus the gap between them. If padding ≥ outer radius, inner element gets `0`.
+
 **Motion:** One easing curve: `var(--ease-premium)`. Lenis handles smooth scroll. `data-reveal` attribute for scroll-triggered fade-up. GSAP only for choreographed sequences (pinned sections, staggered reveals).
 
 **Typography:** `font-display` for headings (weight 100-300 only). `font-body` for everything else. No bold headlines.
