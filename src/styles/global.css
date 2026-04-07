@@ -13,7 +13,7 @@
 
 :root {
   /* Core palette */
-  --color-silver: #EDEDED;
+  --color-silver: #F9EFE6;
   --color-charcoal: #323032;
 
   /* Accent palette (gradient/atmospheric use only) */
@@ -96,6 +96,11 @@ body {
 h1, h2, h3 {
   font-family: var(--font-display);
   font-weight: 300;
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
 }
 
 /* ─── Selection ─── */
@@ -178,13 +183,13 @@ a {
 
 .nav-pill--wordmark {
   flex: 1;
-  height: 40px;
+  height: 60px;
   background: var(--color-silver);
   color: var(--color-charcoal);
   font-family: var(--font-display);
   font-weight: 300;
-  font-size: 1.125rem;
-  letter-spacing: 0.04em;
+  font-size: 2.125rem;
+  letter-spacing: 0.2em;
 }
 
 .nav-pill--cta {
@@ -226,14 +231,13 @@ a {
 .menu-card__image {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--color-charcoal) 15%, var(--color-silver)),
-    color-mix(in srgb, var(--color-charcoal) 30%, var(--color-silver))
-  );
   background-size: cover;
   background-position: center;
 }
+
+.menu-card:nth-child(1) .menu-card__image { background-image: url('/images/menu-vision.jpg'); }
+.menu-card:nth-child(2) .menu-card__image { background-image: url('/images/menu-residences.jpg'); }
+.menu-card:nth-child(3) .menu-card__image { background-image: url('/images/menu-lifestyle.jpg'); }
 
 .menu-card__label {
   position: absolute;
@@ -248,7 +252,7 @@ a {
   border: 1px solid #A3A3A3;
   border-radius: 1px;
   font-family: var(--font-body);
-  font-weight: 500;
+  font-weight: 300;
   font-size: 1.125rem;
   line-height: 1.5;
   text-transform: uppercase;
@@ -499,14 +503,7 @@ a {
 .hero__image {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    160deg,
-    color-mix(in srgb, var(--color-horizon-haze) 60%, var(--color-silver)) 0%,
-    color-mix(in srgb, var(--color-bay-turquoise) 30%, var(--color-silver)) 50%,
-    color-mix(in srgb, var(--color-golden-peach) 40%, var(--color-silver)) 100%
-  );
-  background-size: cover;
-  background-position: center;
+  background: url('/images/hero.jpg') center / cover no-repeat;
 }
 
 .hero__content {
@@ -525,7 +522,7 @@ a {
 
 .hero__label {
   font-family: var(--font-body);
-  font-weight: 600;
+  font-weight: 300;
   font-size: 0.875rem;
   line-height: 1.11;
   letter-spacing: 0.16em;
@@ -618,4 +615,312 @@ a {
 .link-underline:hover {
   color: var(--color-charcoal);
   border-color: var(--color-charcoal);
+}
+
+/* ─── Vision (horizontal scroll) ─── */
+
+.vision {
+  position: relative;
+  min-height: 100dvh;
+}
+
+.vision__sticky {
+  position: sticky;
+  top: 0;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.vision__track {
+  display: flex;
+  gap: 3vw;
+  height: 100%;
+  width: max-content;
+}
+
+/* Panels */
+.vision__panel {
+  height: 100%;
+  flex-shrink: 0;
+}
+
+.vision__panel--intro {
+  width: 40vw;
+  min-width: 520px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 2rem 1.5rem 2rem 1.5rem;
+}
+
+.vision__panel--card {
+  padding: 4px;
+}
+
+.vision__panel--images {
+  padding: 4px 4px 4px 0;
+}
+
+/* Labels (shared) */
+.vision__label {
+  font-family: var(--font-body);
+  font-weight: 300;
+  font-size: 0.875rem;
+  line-height: 1.11;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--color-charcoal) 50%, transparent);
+}
+
+/* Tower text block */
+.vision__tower {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 461px;
+}
+
+.vision__tower-body {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: clamp(1.5rem, 1vw + 1.25rem, 2rem);
+  line-height: 1.5;
+  letter-spacing: -0.03em;
+  color: var(--color-charcoal);
+}
+
+/* Editorial card */
+.vision__card {
+  display: flex;
+  gap: 4px;
+  height: 100%;
+  background: var(--color-sunlit-concrete);
+  border-radius: 4px;
+  overflow: hidden;
+  padding: 4px;
+}
+
+/* Card columns */
+.vision__card-left {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 609px;
+  flex-shrink: 0;
+}
+
+.vision__card-left .vision__card-image {
+  flex: 1;
+  min-height: 0;
+}
+
+.vision__card-centre {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 500px;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.vision__card-right {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 303px;
+  flex-shrink: 0;
+  justify-content: flex-end;
+}
+
+/* Card copy */
+.vision__card-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding-top: 15px;
+  padding-left: 50px;
+}
+
+.vision__card-copy p {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 1.125rem;
+  line-height: 1.5;
+  letter-spacing: -0.03em;
+  color: var(--color-charcoal);
+  opacity: 0.6;
+}
+
+/* CTA */
+.vision__cta {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.875rem;
+  line-height: 1.11;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-charcoal);
+  text-decoration: none;
+  position: relative;
+  display: inline-block;
+}
+
+.vision__cta::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 500ms var(--ease-premium);
+}
+
+.vision__cta:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* Card images */
+.vision__card-image {
+  border-radius: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.vision__card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Captions */
+.vision__caption {
+  font-family: var(--font-body);
+  font-weight: 300;
+  font-size: 0.875rem;
+  line-height: 1.11;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-charcoal);
+}
+
+.vision__caption--muted {
+  color: color-mix(in srgb, var(--color-charcoal) 50%, transparent);
+}
+
+.vision__caption--number {
+  flex-shrink: 0;
+}
+
+.vision__caption-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Full-bleed image pair */
+.vision__image-pair {
+  display: flex;
+  gap: 4px;
+  height: 100%;
+}
+
+.vision__image-pair .vision__card-image {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+}
+
+.vision__card-image--sunset {
+  max-width: 611px;
+}
+
+.vision__card-image--terrace {
+  max-width: 1176px;
+}
+
+/* Image hover */
+.vision__card-image img {
+  transition: transform 600ms var(--ease-premium);
+}
+
+.vision__card-image:hover img {
+  transform: scale(1.05);
+}
+
+/* ── Vision: responsive ── */
+@media (max-width: 1024px) {
+  .vision__sticky {
+    height: auto;
+    overflow: visible;
+  }
+
+  .vision__track {
+    flex-direction: column;
+    gap: 0;
+    width: 100%;
+    height: auto;
+  }
+
+  .vision__panel {
+    height: auto;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .vision__panel--intro {
+    padding: var(--space-section) 1.5rem var(--space-block);
+    min-height: 60dvh;
+  }
+
+  .vision__panel--card {
+    padding: 0 1.5rem;
+  }
+
+  .vision__card {
+    flex-direction: column;
+    height: auto;
+    gap: 1.5rem;
+    padding: 1.5rem;
+  }
+
+  .vision__card-left,
+  .vision__card-centre,
+  .vision__card-right {
+    width: 100%;
+  }
+
+  .vision__card-left .vision__card-image {
+    height: 50vw;
+    flex: none;
+  }
+
+  .vision__panel--images {
+    padding: 1.5rem;
+  }
+
+  .vision__image-pair {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .vision__image-pair .vision__card-image {
+    height: 50vw;
+  }
+
+  .vision__card-image--sunset,
+  .vision__card-image--terrace {
+    max-width: none;
+  }
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .vision__card-image img {
+    transition: none;
+  }
 }

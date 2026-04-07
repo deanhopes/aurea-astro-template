@@ -1,23 +1,12 @@
 ---
 import BaseLayout from '@layouts/BaseLayout.astro';
 import Hero from '@components/Hero.astro';
+import Vision from '@components/Vision.astro';
 ---
 
 <BaseLayout title="Aurea Residences">
   <Hero />
-
-  <!-- Vision teaser -->
-  <section class="section">
-    <div class="content-narrow">
-      <h2 class="text-section" data-reveal>
-        Where light meets water
-      </h2>
-      <p class="text-body-muted content-text mt-md" data-reveal>
-        A 62-storey residential tower designed around the bay. Morning light floods
-        every residence. The architecture is quiet, the views are not.
-      </p>
-    </div>
-  </section>
+  <Vision />
 
   <!-- Residences teaser -->
   <section class="section">
@@ -51,4 +40,11 @@ import Hero from '@components/Hero.astro';
       </a>
     </div>
   </section>
+
+  <script>
+    import { initVisionScroll, destroyVisionScroll } from '@lib/vision-scroll';
+
+    document.addEventListener('astro:page-load', initVisionScroll);
+    document.addEventListener('astro:before-swap', destroyVisionScroll);
+  </script>
 </BaseLayout>
