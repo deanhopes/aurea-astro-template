@@ -1,6 +1,7 @@
 ---
 import { ClientRouter } from 'astro:transitions';
 import Nav from '@components/Nav.astro';
+import Footer from '@components/Footer.astro';
 import SEO from '@components/seo/Head.astro';
 import '@styles/fonts.css';
 import '@styles/global.css';
@@ -35,9 +36,7 @@ const {
     <main id="main-content">
       <slot />
     </main>
-    <footer class="footer">
-      <p>&copy; {new Date().getFullYear()} Aurea Residences. All rights reserved.</p>
-    </footer>
+    <Footer />
 
     <!-- Lenis smooth scroll -->
     <script>

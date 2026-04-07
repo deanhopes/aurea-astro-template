@@ -3,45 +3,14 @@ import BaseLayout from '@layouts/BaseLayout.astro';
 import Hero from '@components/Hero.astro';
 import Vision from '@components/Vision.astro';
 import Lifestyle from '@components/Lifestyle.astro';
+import Neighbourhood from '@components/Neighbourhood.astro';
 ---
 
 <BaseLayout title="Aurea Residences">
   <Hero />
   <Vision />
   <Lifestyle />
-
-  <!-- Residences teaser -->
-  <section class="section">
-    <div class="content-narrow">
-      <h2 class="text-section" data-reveal>
-        Residences
-      </h2>
-      <p class="text-body-muted content-text mt-md" data-reveal>
-        One to four bedrooms, each with a private terrace facing the bay.
-        Floor-to-ceiling glass. Interiors by appointment.
-      </p>
-      <a href="/residences" class="link-underline mt-md" data-reveal>
-        View Residences
-      </a>
-    </div>
-  </section>
-
-  <!-- Location teaser -->
-  <section class="section">
-    <div class="content-narrow">
-      <h2 class="text-section" data-reveal>
-        Edgewater
-      </h2>
-      <p class="text-body-muted content-text mt-md" data-reveal>
-        Between the bay and the Design District. Margaret Pace Park at your door.
-        Wynwood around the corner. The neighbourhood that feels like Miami without
-        performing it.
-      </p>
-      <a href="/location" class="link-underline mt-md" data-reveal>
-        Explore Location
-      </a>
-    </div>
-  </section>
+  <Neighbourhood />
 
   <script>
     import { initVisionScroll, destroyVisionScroll } from '@lib/vision-scroll';

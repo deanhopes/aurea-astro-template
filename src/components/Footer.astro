@@ -1,0 +1,67 @@
+---
+/**
+ * Footer — fixed behind content, revealed as page scrolls past.
+ * Large AUREA wordmark, decorative wave stroke, icon, tagline, nav links.
+ */
+
+const linkGroups = [
+  [
+    { label: 'Vision', href: '/vision' },
+    { label: 'Residences', href: '/residences' },
+    { label: 'Lifestyle', href: '/lifestyle' },
+    { label: 'Neighbourhood', href: '/neighbourhood' },
+  ],
+  [
+    { label: 'Location', href: '/location' },
+    { label: 'The Team', href: '/team' },
+    { label: 'Blog', href: '/blog' },
+  ],
+  [
+    { label: 'Terms & Conditions', href: '/terms' },
+    { label: 'Privacy Policy', href: '/privacy' },
+    { label: 'Enquire', href: '#enquire' },
+  ],
+];
+---
+
+<footer class="site-footer" data-footer>
+  <div class="site-footer__inner">
+    <!-- Decorative wave stroke -->
+    <img
+      src="/images/aurea-wordmark.svg"
+      alt=""
+      aria-hidden="true"
+      class="site-footer__wave"
+    />
+
+    <!-- Icon -->
+    <img
+      src="/images/aurea-icon.svg"
+      alt="Aurea Residences"
+      class="site-footer__icon"
+    />
+
+    <!-- Tagline -->
+    <p class="site-footer__tagline">
+      Edgewater is a bayfront residential neighbourhood stretching
+      from NE 17th Street to NE 37th Street
+    </p>
+
+    <!-- Navigation -->
+    <div class="site-footer__nav">
+      <p class="site-footer__year">{new Date().getFullYear()}</p>
+      {linkGroups.map((group) => (
+        <ul class="site-footer__links">
+          {group.map(({ label, href }) => (
+            <li>
+              <a href={href} class="site-footer__link">{label}</a>
+            </li>
+          ))}
+        </ul>
+      ))}
+    </div>
+
+    <!-- Giant wordmark -->
+    <p class="site-footer__wordmark" aria-hidden="true">AUREA</p>
+  </div>
+</footer>

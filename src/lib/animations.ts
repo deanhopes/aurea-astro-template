@@ -88,6 +88,53 @@ export function initAnimations() {
           },
         });
       }
+
+      /* Neighbourhood reveals */
+      const nhoodText = document.querySelector('.neighbourhood__text');
+      if (nhoodText) {
+        gsap.from(nhoodText.children, {
+          y: 25,
+          opacity: 0,
+          duration: 0.9,
+          ease: 'expo.out',
+          stagger: 0.06,
+          scrollTrigger: {
+            trigger: '.neighbourhood',
+            start: 'top 80%',
+            toggleActions: 'play none none none',
+          },
+        });
+      }
+
+      const nhoodImages = document.querySelectorAll('.neighbourhood__image img');
+      nhoodImages.forEach((img, i) => {
+        gsap.from(img, {
+          scale: 1.05,
+          opacity: 0,
+          duration: 1.25,
+          ease: 'expo.out',
+          scrollTrigger: {
+            trigger: img.parentElement,
+            start: 'top 85%',
+            toggleActions: 'play none none none',
+          },
+        });
+      });
+
+      const nhoodInfo = document.querySelector('.neighbourhood__info');
+      if (nhoodInfo) {
+        gsap.from(nhoodInfo, {
+          y: 30,
+          opacity: 0,
+          duration: 0.9,
+          ease: 'expo.out',
+          scrollTrigger: {
+            trigger: nhoodInfo,
+            start: 'top 90%',
+            toggleActions: 'play none none none',
+          },
+        });
+      }
     });
   });
 }
