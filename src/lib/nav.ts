@@ -1,6 +1,21 @@
+import gsap from 'gsap';
 import { getLenis } from './lenis';
 
 let cleanup: (() => void) | null = null;
+
+function createIconTimeline(toggle: HTMLElement): gsap.core.Timeline {
+  const top = toggle.querySelector('[data-bar="top"]');
+  const mid = toggle.querySelector('[data-bar="mid"]');
+  const bot = toggle.querySelector('[data-bar="bot"]');
+
+  const tl = gsap.timeline({ paused: true, defaults: { duration: 0.4, ease: 'power2.inOut' } });
+
+  tl.to(top, { y: 6, rotation: 45, transformOrigin: 'center center' }, 0)
+    .to(bot, { y: -6, rotation: -45, transformOrigin: 'center center' }, 0)
+    .to(mid, { autoAlpha: 0, duration: 0.2 }, 0);
+
+  return tl;
+}
 
 export function initNav() {
   cleanup?.();
@@ -9,15 +24,19 @@ export function initNav() {
   const panel = document.querySelector<HTMLElement>('[data-menu-panel]');
   if (!toggle || !panel) return;
 
+  const iconTl = createIconTimeline(toggle);
+
   function open() {
     toggle!.setAttribute('aria-expanded', 'true');
     panel!.setAttribute('aria-hidden', 'false');
+    iconTl.play();
     getLenis()?.stop();
   }
 
   function close() {
     toggle!.setAttribute('aria-expanded', 'false');
     panel!.setAttribute('aria-hidden', 'true');
+    iconTl.reverse();
     getLenis()?.start();
   }
 
@@ -43,6 +62,7 @@ export function initNav() {
 
   cleanup = () => {
     close();
+    iconTl.kill();
     toggle.removeEventListener('click', handleToggle);
     document.removeEventListener('keydown', handleKeydown);
     panel.removeEventListener('click', handlePanelClick);
