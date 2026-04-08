@@ -9,7 +9,6 @@
 
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
 gsap.registerPlugin(ScrollTrigger);
 
 /* ── Shader sources ── */
@@ -35,6 +34,8 @@ uniform vec3 uShadowColor;
 uniform float uThreshold;
 uniform float uSoftness;
 uniform float uProgress;
+uniform float uAlphaMin;
+uniform float uAlphaMax;
 
 void main() {
   // Flip Y — video texture is top-down, GL is bottom-up
@@ -51,17 +52,31 @@ void main() {
   vec3 color = mix(uLightColor, uShadowColor, shadow);
 
   // Alpha: shadow areas more opaque, light areas nearly transparent
-  float alpha = mix(0.05, 0.22, shadow) * uProgress;
+  float alpha = mix(uAlphaMin, uAlphaMax, shadow) * uProgress;
 
   gl_FragColor = vec4(color, alpha);
 }
 `;
 
-/* ── Palette (matching footer-haze tones) ── */
+/* ── Tunable params ── */
 
-const LIGHT_COLOR: [number, number, number] = [0.941, 0.769, 0.659];  // #f0c4a8
-const SHADOW_COLOR: [number, number, number] = [0.545, 0.380, 0.302]; // warm muted brown
-const SOFTNESS = 0.15;
+const params = {
+  lightColor: '#ffffff',
+  shadowColor: '#ff5200',
+  threshold: 0.25,
+  thresholdShift: 0.0,
+  softness: 0.50,
+  alphaMin: 0.26,
+  alphaMax: 0.32,
+  mouseInfluence: 0.50,
+  mouseYInfluence: 0.15,
+};
+
+/** Convert hex to [r,g,b] 0-1 */
+function hexToGL(hex: string): [number, number, number] {
+  const n = parseInt(hex.replace('#', ''), 16);
+  return [(n >> 16 & 255) / 255, (n >> 8 & 255) / 255, (n & 255) / 255];
+}
 
 /* ── State ── */
 
@@ -76,8 +91,11 @@ let ioObserver: IntersectionObserver | null = null;
 let rafId = 0;
 let videoReady = false;
 let lastVideoUpdate = 0;
+let mouseHandler: ((e: MouseEvent) => void) | null = null;
 
-const state = { progress: 0 };
+const state = { progress: 0, mouseX: 0.5, mouseY: 0.5 };
+let mouseQuickToX: gsap.QuickToFunc | null = null;
+let mouseQuickToY: gsap.QuickToFunc | null = null;
 
 /* Uniform locations (cached after link) */
 let uVideoLoc: WebGLUniformLocation | null = null;
@@ -86,6 +104,8 @@ let uShadowColorLoc: WebGLUniformLocation | null = null;
 let uThresholdLoc: WebGLUniformLocation | null = null;
 let uSoftnessLoc: WebGLUniformLocation | null = null;
 let uProgressLoc: WebGLUniformLocation | null = null;
+let uAlphaMinLoc: WebGLUniformLocation | null = null;
+let uAlphaMaxLoc: WebGLUniformLocation | null = null;
 
 /* ── WebGL helpers ── */
 
@@ -160,12 +180,11 @@ function initWebGL(): boolean {
   uThresholdLoc = gl.getUniformLocation(program, 'uThreshold');
   uSoftnessLoc = gl.getUniformLocation(program, 'uSoftness');
   uProgressLoc = gl.getUniformLocation(program, 'uProgress');
+  uAlphaMinLoc = gl.getUniformLocation(program, 'uAlphaMin');
+  uAlphaMaxLoc = gl.getUniformLocation(program, 'uAlphaMax');
 
   /* Set static uniforms */
   gl.uniform1i(uVideoLoc, 0); // texture unit 0
-  gl.uniform3fv(uLightColorLoc, LIGHT_COLOR);
-  gl.uniform3fv(uShadowColorLoc, SHADOW_COLOR);
-  gl.uniform1f(uSoftnessLoc, SOFTNESS);
 
   /* Blending for transparent output */
   gl.enable(gl.BLEND);
@@ -234,8 +253,17 @@ function render(): void {
     }
   }
 
-  /* Dynamic uniforms */
-  const threshold = 0.55 - state.progress * 0.2; // shadows grow as sun sets
+  /* Dynamic uniforms — all driven by params for live tuning */
+  gl.uniform3fv(uLightColorLoc, hexToGL(params.lightColor));
+  gl.uniform3fv(uShadowColorLoc, hexToGL(params.shadowColor));
+  gl.uniform1f(uSoftnessLoc, params.softness);
+  gl.uniform1f(uAlphaMinLoc, params.alphaMin);
+  gl.uniform1f(uAlphaMaxLoc, params.alphaMax);
+  // mouseX (0→1) offsets threshold: left = darker, right = lighter
+  // mouseY (0→1) lowers threshold at bottom of viewport → denser shadows
+  const mouseOffsetX = (state.mouseX - 0.5) * params.mouseInfluence;
+  const mouseOffsetY = (state.mouseY - 0.5) * params.mouseYInfluence;
+  const threshold = params.threshold - state.progress * params.thresholdShift + mouseOffsetX - mouseOffsetY;
   gl.uniform1f(uThresholdLoc, threshold);
   gl.uniform1f(uProgressLoc, state.progress);
 
@@ -285,6 +313,22 @@ export function initFooterShadows(): void {
 
   initVideo();
 
+  /* Mouse → threshold interactivity (GSAP quickTo for smooth interpolation) */
+  const quickOpts = { duration: 0.4, ease: 'power2.out', onUpdate: ensureLoop };
+  mouseQuickToX = gsap.quickTo(state, 'mouseX', quickOpts);
+  mouseQuickToY = gsap.quickTo(state, 'mouseY', quickOpts);
+  const footer = document.querySelector('[data-footer]') as HTMLElement | null;
+  mouseHandler = (e: MouseEvent) => {
+    mouseQuickToX!(e.clientX / window.innerWidth);
+    // Map Y relative to footer bounds → 0 at top of footer, 1 at bottom
+    if (footer) {
+      const rect = footer.getBoundingClientRect();
+      const yInFooter = (e.clientY - rect.top) / rect.height;
+      mouseQuickToY!(Math.max(0, Math.min(1, yInFooter)));
+    }
+  };
+  window.addEventListener('mousemove', mouseHandler, { passive: true });
+
   const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   gsapCtx?.revert();
@@ -311,6 +355,7 @@ export function initFooterShadows(): void {
       },
     });
   });
+
 }
 
 export function destroyFooterShadows(): void {
@@ -325,6 +370,13 @@ export function destroyFooterShadows(): void {
 
   gsapCtx?.revert();
   gsapCtx = null;
+
+  if (mouseHandler) {
+    window.removeEventListener('mousemove', mouseHandler);
+    mouseHandler = null;
+  }
+  mouseQuickToX = null;
+  mouseQuickToY = null;
 
   /* WebGL cleanup */
   if (gl) {
@@ -349,4 +401,6 @@ export function destroyFooterShadows(): void {
   videoReady = false;
   lastVideoUpdate = 0;
   state.progress = 0;
+  state.mouseX = 0.5;
+  state.mouseY = 0.5;
 }

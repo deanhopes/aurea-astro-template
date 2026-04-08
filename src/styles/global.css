@@ -608,11 +608,12 @@ a {
 }
 
 .site-footer__tagline {
-  font-family: var(--font-body);
-  font-weight: 400;
-  font-size: 1.5rem;
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: 2.125rem;
   line-height: 1.3;
-  letter-spacing: -0.03em;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
   color: var(--color-black);
   text-align: center;
 }
@@ -620,7 +621,7 @@ a {
 /* Nav links row */
 .site-footer__nav {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: flex-start;
   gap: clamp(4rem, 8vw, 10rem);
   width: 100%;
@@ -634,6 +635,14 @@ a {
   flex-direction: column;
   gap: 0.25rem;
   text-align: center;
+}
+
+.site-footer__links:first-child {
+  text-align: left;
+}
+
+.site-footer__links:last-child {
+  text-align: right;
 }
 
 .site-footer__link {
@@ -977,11 +986,12 @@ a {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 2rem 1.5rem 2rem 1.5rem;
+  padding: 1rem 16.5rem 2rem 1rem;
 }
 
 .vision__panel--card {
   padding: 4px;
+  margin-left: clamp(4rem, 12vw, 16rem);
 }
 
 .vision__panel--images {
@@ -1355,6 +1365,7 @@ a {
   min-width: 0;
   height: 787px;
   overflow: hidden;
+  border-radius: 4px;
 }
 
 .lifestyle__pair-image img {

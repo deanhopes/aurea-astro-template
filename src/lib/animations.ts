@@ -56,6 +56,21 @@ export function initAnimations() {
         });
       }
 
+      /* Contained parallax — images with data-parallax inside overflow:hidden parents */
+      document.querySelectorAll<HTMLElement>('[data-parallax]').forEach((img) => {
+        gsap.set(img, { scale: 1.15 });
+        gsap.to(img, {
+          yPercent: -8,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: img.parentElement,
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: 1,
+          },
+        });
+      });
+
       /* Lifestyle text reveals */
       const lifestyleLabel = document.querySelector('.lifestyle__label');
       const lifestyleCopy = document.querySelectorAll('.lifestyle__copy p');
@@ -121,27 +136,11 @@ export function initAnimations() {
         });
       });
 
-      const nhoodInfo = document.querySelector('.neighbourhood__info');
-      if (nhoodInfo) {
-        gsap.from(nhoodInfo, {
-          y: 30,
-          opacity: 0,
-          duration: 0.9,
-          ease: 'expo.out',
-          scrollTrigger: {
-            trigger: nhoodInfo,
-            start: 'top 90%',
-            toggleActions: 'play none none none',
-          },
-        });
-      }
-
       /* Neighbourhood fade-out as footer reveals */
       const nhood = document.querySelector<HTMLElement>('.neighbourhood');
       if (nhood) {
         const nhoodText = nhood.querySelector('.neighbourhood__text');
         const nhoodImages = nhood.querySelectorAll('.neighbourhood__image');
-        const nhoodInfo = nhood.querySelector('.neighbourhood__info');
 
         const tl = gsap.timeline({
           scrollTrigger: {
@@ -160,11 +159,6 @@ export function initAnimations() {
         // Images next
         if (nhoodImages.length) {
           tl.to(nhoodImages, { opacity: 0, y: -15, stagger: 0.04, ease: 'power2.in' }, 0.1);
-        }
-
-        // Info last — after images
-        if (nhoodInfo) {
-          tl.to(nhoodInfo, { opacity: 0, y: -15, ease: 'power2.in' }, 0.3);
         }
       }
 
