@@ -13,24 +13,24 @@
 
 :root {
   /* Core palette */
-  --color-silver: #F9EFE6;
+  --color-silver: #f9efe6;
   --color-charcoal: #323032;
 
   /* Accent palette (gradient/atmospheric use only) */
-  --color-deep-blue: #0E367C;
-  --color-sky-blue: #8ED4FD;
-  --color-coral: #EF5D2A;
-  --color-hot-pink: #FF5684;
+  --color-deep-blue: #0e367c;
+  --color-sky-blue: #8ed4fd;
+  --color-coral: #ef5d2a;
+  --color-hot-pink: #ff5684;
 
   /* Extended Miami palette */
-  --color-bay-turquoise: #2A9D8F;
-  --color-royal-palm: #2D5F3B;
-  --color-golden-peach: #F0C4A8;
-  --color-horizon-haze: #89C4DC;
-  --color-aurea-bronze: #C4A882;
-  --color-miami-night: #1A1E2E;
-  --color-sunlit-concrete: #F5F0EA;
-  --color-warm-dark: #3D3630;
+  --color-bay-turquoise: #2a9d8f;
+  --color-royal-palm: #2d5f3b;
+  --color-golden-peach: #f0c4a8;
+  --color-horizon-haze: #89c4dc;
+  --color-aurea-bronze: #c4a882;
+  --color-miami-night: #1a1e2e;
+  --color-sunlit-concrete: #f5f0ea;
+  --color-warm-dark: #3d3630;
 
   /* Font families */
   --font-display: 'Test Sohne', system-ui, sans-serif;
@@ -93,7 +93,9 @@ body {
 
 /* ─── Display type defaults ─── */
 
-h1, h2, h3 {
+h1,
+h2,
+h3 {
   font-family: var(--font-display);
   font-weight: 300;
   text-wrap: balance;
@@ -141,6 +143,11 @@ a {
   z-index: 50;
   padding: 8px 8px 0;
   pointer-events: none;
+  transition: transform 300ms var(--ease-premium);
+}
+
+.header--hidden {
+  transform: translateY(-100%);
 }
 
 .header > * {
@@ -237,9 +244,15 @@ a {
   transition: transform 600ms var(--ease-premium);
 }
 
-.menu-card:nth-child(1) .menu-card__image { background-image: url('/images/menu-vision.jpg'); }
-.menu-card:nth-child(2) .menu-card__image { background-image: url('/images/menu-residences.jpg'); }
-.menu-card:nth-child(3) .menu-card__image { background-image: url('/images/menu-lifestyle.jpg'); }
+.menu-card:nth-child(1) .menu-card__image {
+  background-image: url('/images/menu-vision.jpg');
+}
+.menu-card:nth-child(2) .menu-card__image {
+  background-image: url('/images/menu-residences.jpg');
+}
+.menu-card:nth-child(3) .menu-card__image {
+  background-image: url('/images/menu-lifestyle.jpg');
+}
 
 .menu-card__label {
   position: absolute;
@@ -251,7 +264,7 @@ a {
   align-items: center;
   justify-content: center;
   background: var(--color-silver);
-  border: 1px solid #A3A3A3;
+  border: 1px solid #a3a3a3;
   border-radius: 1px;
   font-family: var(--font-body);
   font-weight: 500;
@@ -260,7 +273,9 @@ a {
   text-transform: uppercase;
   letter-spacing: -0.01em;
   color: var(--color-charcoal);
-  transition: background-color 400ms var(--ease-premium), border-color 400ms var(--ease-premium);
+  transition:
+    background-color 400ms var(--ease-premium),
+    border-color 400ms var(--ease-premium);
 }
 
 .menu-card:hover .menu-card__image {
@@ -421,7 +436,11 @@ a {
     right: 0;
     height: auto;
     padding: 24px 8px 12px;
-    background: linear-gradient(to top, color-mix(in srgb, var(--color-charcoal) 50%, transparent), transparent);
+    background: linear-gradient(
+      to top,
+      color-mix(in srgb, var(--color-charcoal) 50%, transparent),
+      transparent
+    );
     border: none;
     color: var(--color-silver);
   }
@@ -468,7 +487,11 @@ a {
     right: 0;
     height: auto;
     padding: 24px 8px 12px;
-    background: linear-gradient(to top, color-mix(in srgb, var(--color-charcoal) 50%, transparent), transparent);
+    background: linear-gradient(
+      to top,
+      color-mix(in srgb, var(--color-charcoal) 50%, transparent),
+      transparent
+    );
     border: none;
     color: var(--color-silver);
   }
@@ -693,7 +716,7 @@ a {
   gap: 24px;
   text-align: center;
   padding: 0 1.5rem;
-  color: #F9EFE6;
+  color: #f9efe6;
 }
 
 .hero__label {
@@ -771,8 +794,12 @@ a {
 
 /* ─── Spacing ─── */
 
-.mt-sm { margin-top: 1rem; }
-.mt-md { margin-top: 2rem; }
+.mt-sm {
+  margin-top: 1rem;
+}
+.mt-md {
+  margin-top: 2rem;
+}
 
 /* ─── Links ─── */
 
@@ -905,6 +932,7 @@ a {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  padding-top: 4rem;
   width: 500px;
   flex-shrink: 0;
   position: relative;

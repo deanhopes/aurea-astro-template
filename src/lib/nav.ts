@@ -39,9 +39,10 @@ function createPanelTimeline(panel: HTMLElement): gsap.core.Timeline {
 export function initNav() {
   cleanup?.();
 
+  const header = document.querySelector<HTMLElement>('[data-nav]');
   const toggle = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
   const panel = document.querySelector<HTMLElement>('[data-menu-panel]');
-  if (!toggle || !panel) return;
+  if (!header || !toggle || !panel) return;
 
   // Pre-promote to GPU layer so backdrop-filter doesn't cause jank on first open
   gsap.set(panel, { autoAlpha: 0, y: -4, force3D: true });
@@ -49,9 +50,34 @@ export function initNav() {
   const iconTl = createIconTimeline(toggle);
   const panelTl = createPanelTimeline(panel);
 
+  /* ── Hide-on-scroll-down, show-on-scroll-up ── */
+  let lastScroll = 0;
+  const SCROLL_THRESHOLD = 80; // Don't hide until past hero area
+
+  function onScroll() {
+    const current = window.scrollY;
+    const isMenuOpen = toggle!.getAttribute('aria-expanded') === 'true';
+
+    // Never hide when menu is open or near top
+    if (isMenuOpen || current < SCROLL_THRESHOLD) {
+      header!.classList.remove('header--hidden');
+    } else if (current > lastScroll) {
+      // Scrolling down — hide
+      header!.classList.add('header--hidden');
+    } else {
+      // Scrolling up — show
+      header!.classList.remove('header--hidden');
+    }
+
+    lastScroll = current;
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+
   function open() {
     toggle!.setAttribute('aria-expanded', 'true');
     panel!.setAttribute('aria-hidden', 'false');
+    header!.classList.remove('header--hidden');
     iconTl.play();
     panelTl.play();
     getLenis()?.stop();
@@ -92,6 +118,8 @@ export function initNav() {
     toggle.removeEventListener('click', handleToggle);
     document.removeEventListener('keydown', handleKeydown);
     panel.removeEventListener('click', handlePanelClick);
+    window.removeEventListener('scroll', onScroll);
+    header.classList.remove('header--hidden');
     cleanup = null;
   };
 }
