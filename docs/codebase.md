@@ -32,7 +32,7 @@ src/
 
 **Border radius:** 4px standard (`border-radius: 4px`). Nested elements must use concentric radii — inner radius = outer radius minus the gap between them. If padding ≥ outer radius, inner element gets `0`.
 
-**Motion:** One easing curve: `var(--ease-premium)`. Lenis handles smooth scroll. `data-reveal` attribute for scroll-triggered fade-up. GSAP only for choreographed sequences (pinned sections, staggered reveals).
+**Motion:** One easing curve: `var(--ease-premium)`. Lenis handles smooth scroll. `data-reveal` attribute for scroll-triggered fade-up. GSAP only for choreographed sequences (pinned sections, staggered reveals). Footer shadows use raw WebGL (no p5.js/Three.js) to keep the bundle lean.
 
 **Typography:** `font-display` for headings (weight 100-300 only). `font-body` for everything else. No bold headlines.
 
@@ -57,6 +57,20 @@ src/
 **Components:** Astro components by default. Framework components only when client interactivity is required (use `client:visible` or `client:idle`, never `client:load` unless above the fold).
 
 **Pages:** Each page is a scene, not a brochure layout. One idea per section. Generous spacing (`py-section`).
+
+---
+
+## Footer Rendering Pipeline
+
+The footer uses a fixed-reveal pattern (`z-index: -1`, `margin-bottom: 100dvh` on `#main-content`). It has three visual layers composited via DOM order inside `.site-footer__inner`:
+
+1. **Haze canvas** (`footer-haze.ts`) — Canvas2D, 7 concentric sunset gradient rings with noise dithering
+2. **Shadow canvas** (`footer-shadows.ts`) — WebGL, video-sourced palm leaf silhouettes through a luminance threshold shader, `mix-blend-mode: multiply`
+3. **Content** — icon, tagline, nav links, AUREA wordmark (z-index: 1, above both canvases)
+
+Both canvases share the same scroll-driven `state.progress` (0→1) via independent GSAP ScrollTriggers on `[data-footer-trigger]`. The shadow shader has a "sunset twist": `uThreshold = 0.55 - (progress * 0.2)` so shadows grow longer as the user scrolls deeper.
+
+**Shadow video requirements:** `public/video/leaf-shadows.webm` + `.mp4` fallback. Palm/monstera leaf shadows on a warm wall. 360p, 6-8s seamless loop, <500KB WebM. Lazy-loaded via IntersectionObserver (200px rootMargin). Texture upload capped at 15fps. System works without the video (renders transparently, no errors).
 
 ---
 

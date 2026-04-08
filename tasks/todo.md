@@ -15,6 +15,7 @@
 - [x] Project docs (CLAUDE.md, docs/codebase.md)
 
 ### Assets needed
+- [ ] **Palm leaf shadow video** — source file at `C:\Users\deanh\Downloads\12394948_3840_2160_24fps.mp4`. Process: downscale to 360p, trim/loop 6-8s, export WebM VP9 (<500KB) + MP4 H.264 fallback → `public/video/leaf-shadows.webm` + `.mp4`. Then test shader compositing and tune threshold/softness/palette.
 - [ ] **Favicon** — design and add `public/favicon.svg`
 - [ ] **OG image** — create `public/og.jpg` (1200x630, hero render or wordmark on silver)
 - [ ] **Font files** — license GT Walsheim + Aktiv Grotesk, add .woff2 to `src/assets/fonts/`, fill in `fonts.css`

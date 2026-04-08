@@ -72,6 +72,14 @@ const {
       document.addEventListener('astro:before-swap', destroyFooterHaze);
     </script>
 
+    <!-- Footer shadow silhouettes -->
+    <script>
+      import { initFooterShadows, destroyFooterShadows } from '@lib/footer-shadows';
+
+      document.addEventListener('astro:page-load', initFooterShadows);
+      document.addEventListener('astro:before-swap', destroyFooterShadows);
+    </script>
+
     <!-- Neighbourhood cursor inertia -->
     <script>
       import { initNeighbourhoodInertia, destroyNeighbourhoodInertia } from '@lib/neighbourhood-inertia';

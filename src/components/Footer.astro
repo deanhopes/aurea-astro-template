@@ -4,6 +4,7 @@
  * Large AUREA wordmark, decorative wave stroke, icon, tagline, nav links.
  */
 import FooterHaze from '@components/FooterHaze.astro';
+import FooterShadows from '@components/FooterShadows.astro';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
@@ -31,6 +32,7 @@ const linkGroups = [
 <footer class="site-footer" data-footer>
   <div class="site-footer__inner">
     <FooterHaze />
+    <FooterShadows />
 
     <div class="site-footer__content">
       <!-- Icon — inlined SVG for draw-in animation -->
