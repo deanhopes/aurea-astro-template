@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(chmod +x:*)",
+      "mcp__chrome-devtools__list_pages",
+      "mcp__chrome-devtools__navigate_page",
+      "mcp__chrome-devtools__take_screenshot",
+      "mcp__chrome-devtools__resize_page",
+      "mcp__chrome-devtools__evaluate_script",
+      "mcp__chrome-devtools__lighthouse_audit",
+      "mcp__snoot__get-screenshot",
+      "mcp__snoot__get-selection",
+      "mcp__plugin_figma_figma__get_design_context",
+      "mcp__chrome-devtools__new_page",
+      "Bash(printf \"file 'forward.mp4'\\\\nfile 'reverse.mp4'\\\\n\")",
+      "Bash(rm:*)"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "snoot"
+  ]
+}
