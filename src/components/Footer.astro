@@ -26,13 +26,22 @@ const linkGroups = [
 
 <footer class="site-footer" data-footer>
   <div class="site-footer__inner">
-    <!-- Decorative wave stroke -->
-    <img
-      src="/images/aurea-wordmark.svg"
-      alt=""
-      aria-hidden="true"
-      class="site-footer__wave"
-    />
+    <!-- Atmospheric haze -->
+    <svg class="site-footer__haze" aria-hidden="true" viewBox="0 0 1440 900" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="haze-blur" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="120" />
+        </filter>
+      </defs>
+      <g filter="url(#haze-blur)">
+        <!-- Warm coral sweep -->
+        <ellipse cx="900" cy="350" rx="600" ry="200" fill="var(--color-coral)" opacity="0.08" transform="rotate(-15 900 350)" />
+        <!-- Golden peach glow -->
+        <ellipse cx="500" cy="500" rx="500" ry="250" fill="var(--color-golden-peach)" opacity="0.12" transform="rotate(-8 500 500)" />
+        <!-- Subtle bronze accent -->
+        <ellipse cx="1100" cy="600" rx="350" ry="180" fill="var(--color-aurea-bronze)" opacity="0.06" transform="rotate(10 1100 600)" />
+      </g>
+    </svg>
 
     <!-- Icon -->
     <img
@@ -41,15 +50,17 @@ const linkGroups = [
       class="site-footer__icon"
     />
 
-    <!-- Tagline -->
-    <p class="site-footer__tagline">
-      A waterfront home on Biscayne Bay.<br />
-      Edgewater, Miami.
-    </p>
+    <!-- Tagline row -->
+    <div class="site-footer__tagline-row">
+      <p class="site-footer__flank">Edgewater</p>
+      <p class="site-footer__tagline">
+        A waterfront home on Biscayne Bay
+      </p>
+      <p class="site-footer__flank">Miami</p>
+    </div>
 
     <!-- Navigation -->
     <div class="site-footer__nav">
-      <p class="site-footer__year">{new Date().getFullYear()}</p>
       {linkGroups.map((group) => (
         <ul class="site-footer__links">
           {group.map(({ label, href }) => (
