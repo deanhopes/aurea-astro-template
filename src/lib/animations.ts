@@ -139,30 +139,33 @@ export function initAnimations() {
       /* Neighbourhood fade-out as footer reveals */
       const nhood = document.querySelector<HTMLElement>('.neighbourhood');
       if (nhood) {
-        const nhoodChildren = nhood.querySelectorAll(
-          '.neighbourhood__text, .neighbourhood__image, .neighbourhood__info',
-        );
+        const nhoodText = nhood.querySelector('.neighbourhood__text');
+        const nhoodImages = nhood.querySelectorAll('.neighbourhood__image');
+        const nhoodInfo = nhood.querySelector('.neighbourhood__info');
 
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: nhood,
             start: 'bottom 90%',
-            end: 'bottom 30%',
-            scrub: 0.6,
+            end: 'bottom 10%',
+            scrub: 1,
           },
         });
 
-        tl.to(nhoodChildren, {
-          opacity: 0,
-          y: -20,
-          stagger: 0.05,
-          ease: 'power2.in',
-        }, 0);
+        // Text first
+        if (nhoodText) {
+          tl.to(nhoodText, { opacity: 0, y: -20, ease: 'power2.in' }, 0);
+        }
 
-        tl.to(nhood, {
-          opacity: 0,
-          ease: 'power2.in',
-        }, 0.15);
+        // Images next
+        if (nhoodImages.length) {
+          tl.to(nhoodImages, { opacity: 0, y: -15, stagger: 0.04, ease: 'power2.in' }, 0.1);
+        }
+
+        // Info last — after images
+        if (nhoodInfo) {
+          tl.to(nhoodInfo, { opacity: 0, y: -15, ease: 'power2.in' }, 0.3);
+        }
       }
 
       /* Footer content + wordmark reveal */
@@ -183,12 +186,11 @@ export function initAnimations() {
           },
         });
 
-        // Icon — blur-in from haze, materialises into focus
+        // Icon — materialises from haze
         const iconEl = footerContent.querySelector('[data-footer-icon]');
         if (iconEl) {
-          gsap.set(iconEl, { filter: 'blur(12px)', opacity: 0, scale: 0.9 });
+          gsap.set(iconEl, { opacity: 0, scale: 0.85 });
           tl.to(iconEl, {
-            filter: 'blur(0px)',
             opacity: 1,
             scale: 1,
             duration: 1.4,
@@ -201,20 +203,9 @@ export function initAnimations() {
         if (navGroups.length) {
           tl.from(navGroups, { y: 20, opacity: 0, duration: 0.8, ease: 'expo.out', stagger: 0.06 }, 0.2);
         }
-      }
-
-      if (wordmark && footerTrigger) {
-        gsap.from(wordmark, {
-          y: 60,
-          opacity: 0,
-          duration: 1.25,
-          ease: 'expo.out',
-          scrollTrigger: {
-            trigger: footerTrigger,
-            start: 'bottom bottom',
-            toggleActions: 'play none none none',
-          },
-        });
+        if (wordmark) {
+          tl.from(wordmark, { y: 60, opacity: 0, duration: 1.25, ease: 'expo.out' }, 0.15);
+        }
       }
     });
   });

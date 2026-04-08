@@ -113,6 +113,7 @@ function applyNoise(ctx: CanvasRenderingContext2D, w: number, h: number, alpha: 
 let canvas: HTMLCanvasElement | null = null;
 let ctx2d: CanvasRenderingContext2D | null = null;
 let gsapCtx: gsap.Context | null = null;
+let ro: ResizeObserver | null = null;
 let rafId = 0;
 let needsDraw = true;
 
@@ -190,7 +191,18 @@ function tick() {
     draw();
     needsDraw = false;
   }
+  // Stop looping once fully revealed — nothing left to animate
+  if (state.progress >= 1) {
+    rafId = 0;
+    return;
+  }
   rafId = requestAnimationFrame(tick);
+}
+
+/** Ensure the rAF loop is running (called by GSAP onUpdate) */
+function ensureLoop() {
+  needsDraw = true;
+  if (!rafId) rafId = requestAnimationFrame(tick);
 }
 
 /* ── Sizing ── */
@@ -215,7 +227,7 @@ export function initFooterHaze() {
 
   resize();
 
-  const ro = new ResizeObserver(() => resize());
+  ro = new ResizeObserver(() => resize());
   ro.observe(canvas);
 
   gsapCtx?.revert();
@@ -235,7 +247,7 @@ export function initFooterHaze() {
     gsap.to(state, {
       progress: 1,
       ease: 'none',
-      onUpdate: () => { needsDraw = true; },
+      onUpdate: ensureLoop,
       scrollTrigger: {
         trigger: footerTrigger,
         start: 'top 130%',
@@ -250,6 +262,8 @@ export function initFooterHaze() {
 
 export function destroyFooterHaze() {
   cancelAnimationFrame(rafId);
+  ro?.disconnect();
+  ro = null;
   gsapCtx?.revert();
   gsapCtx = null;
   canvas = null;

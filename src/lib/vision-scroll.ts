@@ -13,17 +13,17 @@ export function initVisionScroll() {
   ctx?.revert();
   ctx = gsap.context(() => {
     gsap.matchMedia().add('(prefers-reduced-motion: no-preference)', () => {
-      const scrollDistance = track.scrollWidth - window.innerWidth;
+      const getScrollDistance = () => track!.scrollWidth - window.innerWidth;
 
       const horizontalScroll = gsap.to(track, {
-        x: -scrollDistance,
+        x: () => -getScrollDistance(),
         ease: 'none',
         scrollTrigger: {
           trigger: section,
           pin: section,
           scrub: 1,
           anticipatePin: 1,
-          end: () => `+=${scrollDistance}`,
+          end: () => `+=${getScrollDistance()}`,
           invalidateOnRefresh: true,
         },
       });
@@ -97,13 +97,12 @@ export function initVisionScroll() {
           },
         });
 
-        // Subtle L/R parallax during scrub
-        const direction = i % 2 === 0 ? -1 : 1;
+        // Subtle parallax during scrub — both images drift the same direction
         gsap.fromTo(
           img,
-          { xPercent: direction * 3 },
+          { xPercent: -3 },
           {
-            xPercent: direction * -3,
+            xPercent: 3,
             ease: 'none',
             scrollTrigger: {
               trigger: img.parentElement,
