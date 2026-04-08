@@ -1,15 +1,10 @@
 ---
 /**
  * Footer — fixed behind content, revealed as page scrolls past.
- * Large AUREA wordmark, decorative wave stroke, icon, tagline, nav links.
+ * Enquiry form top, nav links, giant AUREA wordmark.
  */
 import FooterHaze from '@components/FooterHaze.astro';
 import FooterShadows from '@components/FooterShadows.astro';
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
-
-const iconSvg = readFileSync(resolve('public/images/aurea-icon.svg'), 'utf-8');
-
 const linkGroups = [
   [
     { label: 'Vision', href: '/vision' },
@@ -35,18 +30,56 @@ const linkGroups = [
     <FooterShadows />
 
     <div class="site-footer__content">
-      <!-- Icon — inlined SVG for draw-in animation -->
-      <div class="site-footer__icon" data-footer-icon>
-        <Fragment set:html={iconSvg} />
-      </div>
+      <!-- Enquiry form -->
+      <div class="site-footer__enquiry" id="enquire">
+        <div class="site-footer__enquiry-left">
+          <h2 class="site-footer__enquiry-heading">Schedule a<br />Private Viewing</h2>
+          <div class="site-footer__enquiry-meta">
+            <p class="site-footer__enquiry-label">Private Viewings</p>
+            <p class="site-footer__enquiry-body">
+              The light changes through the day. The bay sounds different
+              from the 34th floor. These are things a screen can't carry.
+            </p>
+          </div>
+        </div>
 
-      <!-- Tagline row -->
-      <div class="site-footer__tagline-row">
-        <p class="site-footer__flank">Edgewater</p>
-        <p class="site-footer__tagline">
-          A waterfront home on Biscayne Bay
-        </p>
-        <p class="site-footer__flank">Miami</p>
+        <div class="site-footer__enquiry-divider"></div>
+
+        <div class="site-footer__enquiry-right">
+          <form class="site-footer__enquiry-form" action="#" method="post">
+            <input type="text" name="name" required class="site-footer__enquiry-input" placeholder="Full name*" />
+            <input type="email" name="email" required class="site-footer__enquiry-input" placeholder="Email*" />
+            <input type="tel" name="phone" required class="site-footer__enquiry-input" placeholder="Phone*" />
+            <div class="site-footer__enquiry-row">
+              <div class="site-footer__dropdown" data-dropdown>
+                <button type="button" class="site-footer__dropdown-trigger" data-dropdown-trigger>
+                  <span data-dropdown-value>Bedrooms</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                </button>
+                <input type="hidden" name="bedrooms" value="" />
+                <ul class="site-footer__dropdown-menu" data-dropdown-menu>
+                  <li data-value="3">Three Bedroom</li>
+                  <li data-value="4">Four Bedroom</li>
+                  <li data-value="penthouse">Penthouse</li>
+                </ul>
+              </div>
+              <div class="site-footer__dropdown" data-dropdown>
+                <button type="button" class="site-footer__dropdown-trigger" data-dropdown-trigger>
+                  <span data-dropdown-value>Timeline</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                </button>
+                <input type="hidden" name="timeline" value="" />
+                <ul class="site-footer__dropdown-menu" data-dropdown-menu>
+                  <li data-value="immediate">Immediately</li>
+                  <li data-value="3months">Within 3 months</li>
+                  <li data-value="6months">Within 6 months</li>
+                  <li data-value="exploring">Just exploring</li>
+                </ul>
+              </div>
+            </div>
+            <button type="submit" class="site-footer__enquiry-submit">Send</button>
+          </form>
+        </div>
       </div>
 
       <!-- Navigation -->
@@ -67,3 +100,35 @@ const linkGroups = [
     <p class="site-footer__wordmark" aria-hidden="true">AUREA</p>
   </div>
 </footer>
+
+<script>
+  document.addEventListener('astro:page-load', () => {
+    document.querySelectorAll<HTMLElement>('[data-dropdown]').forEach((dropdown) => {
+      const trigger = dropdown.querySelector<HTMLButtonElement>('[data-dropdown-trigger]')!;
+      const menu = dropdown.querySelector<HTMLUListElement>('[data-dropdown-menu]')!;
+      const valueSpan = dropdown.querySelector<HTMLSpanElement>('[data-dropdown-value]')!;
+      const hiddenInput = dropdown.querySelector<HTMLInputElement>('input[type="hidden"]')!;
+
+      trigger.addEventListener('click', () => {
+        const isOpen = dropdown.classList.contains('is-open');
+        document.querySelectorAll('[data-dropdown].is-open').forEach((d) => d.classList.remove('is-open'));
+        if (!isOpen) dropdown.classList.add('is-open');
+      });
+
+      menu.querySelectorAll<HTMLLIElement>('li').forEach((item) => {
+        item.addEventListener('click', () => {
+          valueSpan.textContent = item.textContent;
+          hiddenInput.value = item.dataset.value || '';
+          dropdown.classList.remove('is-open');
+          trigger.classList.add('has-value');
+        });
+      });
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!(e.target as HTMLElement).closest('[data-dropdown]')) {
+        document.querySelectorAll('[data-dropdown].is-open').forEach((d) => d.classList.remove('is-open'));
+      }
+    });
+  });
+</script>

@@ -36,6 +36,9 @@
 - [ ] GSAP scroll sequences (pinned sections, staggered reveals)
 - [ ] Page transitions (dark wash fade, 0.8-1.2s)
 
+### Refactor
+- [ ] **Merge footer haze + shadows into single WebGL pipeline** — currently Canvas 2D (7-ring gradient) + WebGL (video shadow threshold) on two separate canvases. Combine into one fragment shader: procedural gradient + video texture multiply in a single draw call. Eliminates a compositing layer and unifies scroll/mouse state.
+
 ### Polish
 - [ ] Responsive breakpoints (all pages)
 - [ ] Real renders/photography (replace placeholder copy)

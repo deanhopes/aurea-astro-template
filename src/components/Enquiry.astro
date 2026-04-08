@@ -1,0 +1,105 @@
+---
+/**
+ * Enquiry — two-column contact card.
+ * Anchored as #enquire for the Vision CTA link.
+ */
+---
+
+<section class="enquiry" id="enquire">
+  <div class="enquiry__card">
+    <div class="enquiry__left">
+      <h2 class="enquiry__heading">Schedule a<br />Private Viewing</h2>
+      <div class="enquiry__left-footer">
+        <p class="enquiry__label">Private Viewings</p>
+        <p class="enquiry__body">
+          The light changes through the day. The bay sounds different from the
+          34th floor. These are things a screen can't carry.
+        </p>
+      </div>
+    </div>
+
+    <div class="enquiry__divider"></div>
+
+    <div class="enquiry__right">
+      <form class="enquiry__form" action="#" method="post">
+        <div class="enquiry__field">
+          <input type="text" name="name" required class="enquiry__input" placeholder="Full name*" />
+        </div>
+
+        <div class="enquiry__field">
+          <input type="email" name="email" required class="enquiry__input" placeholder="Email*" />
+        </div>
+
+        <div class="enquiry__field">
+          <input type="tel" name="phone" required class="enquiry__input" placeholder="Phone*" />
+        </div>
+
+        <div class="enquiry__field-row">
+          <div class="enquiry__field">
+            <div class="enquiry__dropdown" data-dropdown>
+              <button type="button" class="enquiry__dropdown-trigger" data-dropdown-trigger>
+                <span data-dropdown-value>Bedrooms</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <input type="hidden" name="bedrooms" value="" />
+              <ul class="enquiry__dropdown-menu" data-dropdown-menu>
+                <li data-value="3">Three Bedroom</li>
+                <li data-value="4">Four Bedroom</li>
+                <li data-value="penthouse">Penthouse</li>
+              </ul>
+            </div>
+          </div>
+          <div class="enquiry__field">
+            <div class="enquiry__dropdown" data-dropdown>
+              <button type="button" class="enquiry__dropdown-trigger" data-dropdown-trigger>
+                <span data-dropdown-value>Timeline</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <input type="hidden" name="timeline" value="" />
+              <ul class="enquiry__dropdown-menu" data-dropdown-menu>
+                <li data-value="immediate">Immediately</li>
+                <li data-value="3months">Within 3 months</li>
+                <li data-value="6months">Within 6 months</li>
+                <li data-value="exploring">Just exploring</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="enquiry__submit">Send</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<script>
+  document.addEventListener('astro:page-load', () => {
+    document.querySelectorAll<HTMLElement>('[data-dropdown]').forEach((dropdown) => {
+      const trigger = dropdown.querySelector<HTMLButtonElement>('[data-dropdown-trigger]')!;
+      const menu = dropdown.querySelector<HTMLUListElement>('[data-dropdown-menu]')!;
+      const valueSpan = dropdown.querySelector<HTMLSpanElement>('[data-dropdown-value]')!;
+      const hiddenInput = dropdown.querySelector<HTMLInputElement>('input[type="hidden"]')!;
+
+      trigger.addEventListener('click', () => {
+        const isOpen = dropdown.classList.contains('is-open');
+        document.querySelectorAll('[data-dropdown].is-open').forEach((d) => d.classList.remove('is-open'));
+        if (!isOpen) dropdown.classList.add('is-open');
+      });
+
+      menu.querySelectorAll<HTMLLIElement>('li').forEach((item) => {
+        item.addEventListener('click', () => {
+          valueSpan.textContent = item.textContent;
+          hiddenInput.value = item.dataset.value || '';
+          dropdown.classList.remove('is-open');
+          trigger.classList.add('has-value');
+        });
+      });
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!(e.target as HTMLElement).closest('[data-dropdown]')) {
+        document.querySelectorAll('[data-dropdown].is-open').forEach((d) => d.classList.remove('is-open'));
+      }
+    });
+  });
+</script>

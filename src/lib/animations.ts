@@ -104,6 +104,39 @@ export function initAnimations() {
         });
       }
 
+      /* Residences reveals */
+      const residencesLabel = document.querySelector('.residences__label');
+      const residencesCards = document.querySelectorAll('.residences__card');
+
+      if (residencesLabel) {
+        gsap.from(residencesLabel, {
+          y: 20,
+          opacity: 0,
+          duration: 0.9,
+          ease: 'expo.out',
+          scrollTrigger: {
+            trigger: '.residences',
+            start: 'top 85%',
+            toggleActions: 'play none none none',
+          },
+        });
+      }
+
+      if (residencesCards.length) {
+        gsap.from(residencesCards, {
+          y: 40,
+          opacity: 0,
+          duration: 1,
+          ease: 'expo.out',
+          stagger: 0.1,
+          scrollTrigger: {
+            trigger: '.residences__grid',
+            start: 'top 85%',
+            toggleActions: 'play none none none',
+          },
+        });
+      }
+
       /* Neighbourhood reveals */
       const nhoodText = document.querySelector('.neighbourhood__text');
       if (nhoodText) {
@@ -136,32 +169,6 @@ export function initAnimations() {
         });
       });
 
-      /* Neighbourhood fade-out as footer reveals */
-      const nhood = document.querySelector<HTMLElement>('.neighbourhood');
-      if (nhood) {
-        const nhoodText = nhood.querySelector('.neighbourhood__text');
-        const nhoodImages = nhood.querySelectorAll('.neighbourhood__image');
-
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: nhood,
-            start: 'bottom 90%',
-            end: 'bottom 10%',
-            scrub: 1,
-          },
-        });
-
-        // Text first
-        if (nhoodText) {
-          tl.to(nhoodText, { opacity: 0, y: -20, ease: 'power2.in' }, 0);
-        }
-
-        // Images next
-        if (nhoodImages.length) {
-          tl.to(nhoodImages, { opacity: 0, y: -15, stagger: 0.04, ease: 'power2.in' }, 0.1);
-        }
-      }
-
       /* Footer content + wordmark reveal */
       const footerTrigger = document.querySelector('[data-footer-trigger]');
       const footerContent = document.querySelector('.site-footer__content');
@@ -180,17 +187,6 @@ export function initAnimations() {
           },
         });
 
-        // Icon — materialises from haze
-        const iconEl = footerContent.querySelector('[data-footer-icon]');
-        if (iconEl) {
-          gsap.set(iconEl, { opacity: 0, scale: 0.85 });
-          tl.to(iconEl, {
-            opacity: 1,
-            scale: 1,
-            duration: 1.4,
-            ease: 'expo.out',
-          }, 0);
-        }
         if (tagline) {
           tl.from(tagline, { y: 25, opacity: 0, duration: 0.9, ease: 'expo.out' }, 0.1);
         }
