@@ -87,7 +87,8 @@ export function initNav() {
     toggle!.setAttribute('aria-expanded', 'false');
     panel!.setAttribute('aria-hidden', 'true');
     iconTl.reverse();
-    panelTl.reverse();
+    // Instant out — snap panel and children to hidden state
+    panelTl.pause(0);
     getLenis()?.start();
   }
 
