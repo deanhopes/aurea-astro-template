@@ -107,17 +107,56 @@ export function initNav() {
     if ((e.target as HTMLElement).closest('a')) close();
   }
 
+  // Click outside header closes menu
+  function handleClickOutside(e: MouseEvent) {
+    if (toggle!.getAttribute('aria-expanded') !== 'true') return;
+    if (!header!.contains(e.target as Node)) {
+      close();
+    }
+  }
+
+  // Hover: mouse enters menu toggle → open, mouse leaves header → close
+  let hoverCloseTimer: ReturnType<typeof setTimeout> | null = null;
+
+  function handleToggleEnter() {
+    if (hoverCloseTimer) { clearTimeout(hoverCloseTimer); hoverCloseTimer = null; }
+    if (toggle!.getAttribute('aria-expanded') !== 'true') open();
+  }
+
+  function handleHeaderLeave(e: MouseEvent) {
+    // Only close if mouse actually left the header bounds
+    const related = e.relatedTarget as Node | null;
+    if (related && header!.contains(related)) return;
+    if (toggle!.getAttribute('aria-expanded') !== 'true') return;
+
+    // Small delay so quick mouse movements don't flicker
+    hoverCloseTimer = setTimeout(close, 200);
+  }
+
+  function handleHeaderEnter() {
+    if (hoverCloseTimer) { clearTimeout(hoverCloseTimer); hoverCloseTimer = null; }
+  }
+
   toggle.addEventListener('click', handleToggle);
   document.addEventListener('keydown', handleKeydown);
+  document.addEventListener('click', handleClickOutside);
   panel.addEventListener('click', handlePanelClick);
+  toggle.addEventListener('mouseenter', handleToggleEnter);
+  header.addEventListener('mouseleave', handleHeaderLeave);
+  header.addEventListener('mouseenter', handleHeaderEnter);
 
   cleanup = () => {
     close();
+    if (hoverCloseTimer) clearTimeout(hoverCloseTimer);
     iconTl.kill();
     panelTl.kill();
     toggle.removeEventListener('click', handleToggle);
     document.removeEventListener('keydown', handleKeydown);
+    document.removeEventListener('click', handleClickOutside);
     panel.removeEventListener('click', handlePanelClick);
+    toggle.removeEventListener('mouseenter', handleToggleEnter);
+    header.removeEventListener('mouseleave', handleHeaderLeave);
+    header.removeEventListener('mouseenter', handleHeaderEnter);
     window.removeEventListener('scroll', onScroll);
     header.classList.remove('header--hidden');
     cleanup = null;

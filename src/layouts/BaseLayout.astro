@@ -35,6 +35,8 @@ const {
     <Nav />
     <main id="main-content">
       <slot />
+      <!-- Invisible trigger for footer wordmark animation -->
+      <div data-footer-trigger aria-hidden="true" style="position:relative;height:1px;pointer-events:none;"></div>
     </main>
     <Footer />
 
@@ -60,6 +62,22 @@ const {
 
       document.addEventListener('astro:page-load', initAnimations);
       document.addEventListener('astro:after-swap', cleanupAnimations);
+    </script>
+
+    <!-- Footer haze canvas -->
+    <script>
+      import { initFooterHaze, destroyFooterHaze } from '@lib/footer-haze';
+
+      document.addEventListener('astro:page-load', initFooterHaze);
+      document.addEventListener('astro:before-swap', destroyFooterHaze);
+    </script>
+
+    <!-- Neighbourhood cursor inertia -->
+    <script>
+      import { initNeighbourhoodInertia, destroyNeighbourhoodInertia } from '@lib/neighbourhood-inertia';
+
+      document.addEventListener('astro:page-load', initNeighbourhoodInertia);
+      document.addEventListener('astro:before-swap', destroyNeighbourhoodInertia);
     </script>
 
     <!-- Scroll reveal observer -->

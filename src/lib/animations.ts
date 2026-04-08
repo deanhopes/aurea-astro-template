@@ -135,6 +135,87 @@ export function initAnimations() {
           },
         });
       }
+
+      /* Neighbourhood fade-out as footer reveals */
+      const nhood = document.querySelector<HTMLElement>('.neighbourhood');
+      if (nhood) {
+        const nhoodChildren = nhood.querySelectorAll(
+          '.neighbourhood__text, .neighbourhood__image, .neighbourhood__info',
+        );
+
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: nhood,
+            start: 'bottom 90%',
+            end: 'bottom 30%',
+            scrub: 0.6,
+          },
+        });
+
+        tl.to(nhoodChildren, {
+          opacity: 0,
+          y: -20,
+          stagger: 0.05,
+          ease: 'power2.in',
+        }, 0);
+
+        tl.to(nhood, {
+          opacity: 0,
+          ease: 'power2.in',
+        }, 0.15);
+      }
+
+      /* Footer content + wordmark reveal */
+      const footerTrigger = document.querySelector('[data-footer-trigger]');
+      const footerContent = document.querySelector('.site-footer__content');
+      const wordmark = document.querySelector('.site-footer__wordmark');
+
+      if (footerContent && footerTrigger) {
+        const icon = footerContent.querySelector('.site-footer__icon');
+        const tagline = footerContent.querySelector('.site-footer__tagline-row');
+        const navGroups = footerContent.querySelectorAll('.site-footer__links');
+
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: footerTrigger,
+            start: 'bottom bottom',
+            toggleActions: 'play none none none',
+          },
+        });
+
+        // Icon — blur-in from haze, materialises into focus
+        const iconEl = footerContent.querySelector('[data-footer-icon]');
+        if (iconEl) {
+          gsap.set(iconEl, { filter: 'blur(12px)', opacity: 0, scale: 0.9 });
+          tl.to(iconEl, {
+            filter: 'blur(0px)',
+            opacity: 1,
+            scale: 1,
+            duration: 1.4,
+            ease: 'expo.out',
+          }, 0);
+        }
+        if (tagline) {
+          tl.from(tagline, { y: 25, opacity: 0, duration: 0.9, ease: 'expo.out' }, 0.1);
+        }
+        if (navGroups.length) {
+          tl.from(navGroups, { y: 20, opacity: 0, duration: 0.8, ease: 'expo.out', stagger: 0.06 }, 0.2);
+        }
+      }
+
+      if (wordmark && footerTrigger) {
+        gsap.from(wordmark, {
+          y: 60,
+          opacity: 0,
+          duration: 1.25,
+          ease: 'expo.out',
+          scrollTrigger: {
+            trigger: footerTrigger,
+            start: 'bottom bottom',
+            toggleActions: 'play none none none',
+          },
+        });
+      }
     });
   });
 }

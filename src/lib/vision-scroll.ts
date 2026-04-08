@@ -34,23 +34,23 @@ export function initVisionScroll() {
       );
       if (cardColumns.length) {
         gsap.from(cardColumns, {
-          y: 40,
+          y: 30,
           opacity: 0,
-          duration: 1.0,
-          ease: 'expo.out',
-          stagger: 0.08,
+          duration: 1.4,
+          ease: 'power3.out',
+          stagger: 0.12,
           scrollTrigger: {
             trigger: '.vision__card',
             containerAnimation: horizontalScroll,
-            start: 'left 80%',
+            start: 'left 85%',
             toggleActions: 'play none none none',
           },
         });
       }
 
-      /* ── Panel 2: images scale in ── */
+      /* ── Panel 2: images scale in + subtle parallax ── */
       const cardImages = section.querySelectorAll('.vision__card .vision__card-image img');
-      cardImages.forEach((img) => {
+      cardImages.forEach((img, i) => {
         gsap.from(img, {
           scale: 1.05,
           duration: 1.25,
@@ -62,11 +62,29 @@ export function initVisionScroll() {
             toggleActions: 'play none none none',
           },
         });
+
+        // Subtle L/R parallax during scrub
+        const direction = i % 2 === 0 ? -1 : 1;
+        gsap.fromTo(
+          img,
+          { xPercent: direction * 4 },
+          {
+            xPercent: direction * -4,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: img.parentElement,
+              containerAnimation: horizontalScroll,
+              start: 'left right',
+              end: 'right left',
+              scrub: 1,
+            },
+          },
+        );
       });
 
-      /* ── Panel 3: full-bleed images scale in ── */
+      /* ── Panel 3: full-bleed images scale in + parallax ── */
       const pairImages = section.querySelectorAll('.vision__image-pair .vision__card-image img');
-      pairImages.forEach((img) => {
+      pairImages.forEach((img, i) => {
         gsap.from(img, {
           scale: 1.05,
           duration: 1.25,
@@ -78,6 +96,24 @@ export function initVisionScroll() {
             toggleActions: 'play none none none',
           },
         });
+
+        // Subtle L/R parallax during scrub
+        const direction = i % 2 === 0 ? -1 : 1;
+        gsap.fromTo(
+          img,
+          { xPercent: direction * 3 },
+          {
+            xPercent: direction * -3,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: img.parentElement,
+              containerAnimation: horizontalScroll,
+              start: 'left right',
+              end: 'right left',
+              scrub: 1,
+            },
+          },
+        );
       });
     });
 
