@@ -17,7 +17,10 @@
       "Read(//d/Beanos/Dev Stuff/growth-os/memory/reference/swipe-file/code-snippets/**)",
       "Read(//tmp/**)",
       "Bash(ls .git/hooks/)",
-      "Bash(cat .git/hooks/pre-commit)"
+      "Bash(cat .git/hooks/pre-commit)",
+      "Bash(npx identify:*)",
+      "Bash(python -c \"from PIL import Image; [print\\(f'{f}: {Image.open\\(f\\).size}'\\) for f in ['public/images/neighbourhood-palms.jpg','public/images/neighbourhood-pool.jpg','public/images/neighbourhood-sunset.jpg']]\")",
+      "Bash(file public/images/neighbourhood-*.jpg)"
     ]
   },
   "enableAllProjectMcpServers": true,
