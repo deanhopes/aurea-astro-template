@@ -124,7 +124,10 @@ export function initNeighbourhoodHover() {
     if (id) setActive(state, id);
   }
 
-  lines.forEach((line) => line.addEventListener('mouseenter', onEnter));
+  lines.forEach((line) => {
+    line.addEventListener('mouseenter', onEnter);
+    line.addEventListener('click', onEnter);
+  });
 
   function onVisibility() {
     if (!document.hidden) setActive(state, state.activeId, true);
@@ -132,7 +135,10 @@ export function initNeighbourhoodHover() {
   document.addEventListener('visibilitychange', onVisibility);
 
   cleanup = () => {
-    lines.forEach((line) => line.removeEventListener('mouseenter', onEnter));
+    lines.forEach((line) => {
+      line.removeEventListener('mouseenter', onEnter);
+      line.removeEventListener('click', onEnter);
+    });
     document.removeEventListener('visibilitychange', onVisibility);
     cleanup = null;
   };

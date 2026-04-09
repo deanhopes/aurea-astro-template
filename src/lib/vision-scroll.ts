@@ -111,7 +111,7 @@ export function initVisionScroll() {
 
   ctx?.revert();
   ctx = gsap.context(() => {
-    gsap.matchMedia().add('(prefers-reduced-motion: no-preference)', () => {
+    gsap.matchMedia().add('(min-width: 1025px) and (prefers-reduced-motion: no-preference)', () => {
       setupHorizontalScroll(section!, track!);
     });
   });
