@@ -14,6 +14,7 @@ interface NeighbourhoodState {
   restaurants: HTMLElement | null;
   indicator: HTMLElement | null;
   tabIds: string[];
+  layoutMap: Record<string, string>;
   activeId: string;
   activeIndex: number;
   isMobile: boolean;
@@ -43,44 +44,86 @@ function crossfadeImages(state: NeighbourhoodState, id: string, instant: boolean
   });
 }
 
+function fadeInOnLoad(iframe: HTMLIFrameElement, panel: HTMLElement, instant: boolean) {
+  const ext = iframe as HTMLIFrameElement & { _loaded?: boolean };
+
+  if (ext._loaded) {
+    // Already loaded from a previous visit — show immediately
+    if (instant) {
+      gsap.set(panel, { opacity: 1 });
+    } else {
+      gsap.fromTo(
+        panel,
+        { opacity: 0 },
+        { opacity: 1, duration: 0.5, ease: 'expo.out', overwrite: true },
+      );
+    }
+    return;
+  }
+
+  // Check if iframe already loaded before JS ran (first tab with src in HTML)
+  if (iframe.src && iframe.contentWindow) {
+    try {
+      // If we can access contentWindow without error, it's loaded
+      // (cross-origin will throw, but that means it loaded)
+      void iframe.contentWindow.location;
+      ext._loaded = true;
+      gsap.set(panel, { opacity: 1 });
+      panel.classList.add('is-active');
+      return;
+    } catch {
+      // Cross-origin = loaded
+      ext._loaded = true;
+      gsap.set(panel, { opacity: 1 });
+      panel.classList.add('is-active');
+      return;
+    }
+  }
+
+  // Keep hidden until the iframe content loads
+  gsap.set(panel, { opacity: 0 });
+  panel.classList.add('is-active');
+
+  function onLoad() {
+    iframe.removeEventListener('load', onLoad);
+    ext._loaded = true;
+    gsap.to(panel, { opacity: 1, duration: 0.5, ease: 'expo.out', overwrite: true });
+  }
+  iframe.addEventListener('load', onLoad);
+}
+
 function crossfadeMaps(state: NeighbourhoodState, id: string, instant: boolean) {
   state.maps.forEach((panel) => {
     const isActive = panel.dataset.neighbourhoodMap === id;
+    const iframe = panel.querySelector<HTMLIFrameElement>('iframe');
 
     // Lazy-load iframe src on first activation
-    if (isActive) {
-      const iframe = panel.querySelector<HTMLIFrameElement>('iframe');
-      if (iframe && !iframe.src && iframe.dataset.src) {
-        iframe.src = iframe.dataset.src;
-      }
+    if (isActive && iframe && !iframe.src && iframe.dataset.src) {
+      iframe.src = iframe.dataset.src;
     }
 
-    if (instant) {
-      gsap.set(panel, { opacity: isActive ? 1 : 0, filter: 'saturate(1) brightness(1)' });
-      panel.classList.toggle('is-active', isActive);
-    } else if (isActive) {
+    if (isActive) {
       panel.classList.add('is-active');
-      const tl = gsap.timeline({ overwrite: true });
-      tl.fromTo(
-        panel,
-        { opacity: 0, filter: 'saturate(0.3) brightness(1.02)' },
-        { opacity: 1, duration: 0.4, ease: 'expo.out' },
-      );
-      tl.to(
-        panel,
-        { filter: 'saturate(1) brightness(1)', duration: 0.8, ease: 'power1.out' },
-        '-=0.2',
-      );
+      if (iframe) {
+        fadeInOnLoad(iframe, panel, instant);
+      } else {
+        gsap.set(panel, { opacity: instant ? 1 : 0 });
+        if (!instant) {
+          gsap.to(panel, { opacity: 1, duration: 0.5, ease: 'expo.out', overwrite: true });
+        }
+      }
     } else {
-      gsap.to(panel, {
-        opacity: 0,
-        duration: 0.3,
-        overwrite: true,
-        onComplete: () => {
-          panel.classList.remove('is-active');
-          gsap.set(panel, { filter: 'none' });
-        },
-      });
+      if (instant) {
+        gsap.set(panel, { opacity: 0 });
+        panel.classList.remove('is-active');
+      } else {
+        gsap.to(panel, {
+          opacity: 0,
+          duration: 0.3,
+          overwrite: true,
+          onComplete: () => panel.classList.remove('is-active'),
+        });
+      }
     }
   });
 }
@@ -113,12 +156,10 @@ function crossfadeText(state: NeighbourhoodState, id: string, instant: boolean, 
         },
       );
     } else {
-      gsap.to(panel, {
-        opacity: 0,
-        duration: 0.3,
-        overwrite: true,
-        onComplete: () => panel.classList.remove('is-active'),
-      });
+      gsap.set(panel, { opacity: 0, y: 0 });
+      const children = panel.querySelectorAll('.neighbourhood__body, .neighbourhood__cta');
+      gsap.set(children, { opacity: 0, y: 0 });
+      panel.classList.remove('is-active');
     }
   });
 }
@@ -205,7 +246,7 @@ function animateAccordion(state: NeighbourhoodState, id: string, instant: boolea
           {
             height: 0,
             duration: 0.4,
-            ease: 'expo.inOut',
+            ease: 'expo.out',
             overwrite: true,
             onComplete: () => item.classList.remove('is-active'),
           },
@@ -279,6 +320,10 @@ function setActive(state: NeighbourhoodState, id: string, instant = false) {
       crossfadeMaps(state, id, instant);
       crossfadeText(state, id, instant, newIndex);
     }
+    // Update grid layout variant
+    if (state.content) {
+      state.content.dataset.layout = state.layoutMap[id] ?? 'a';
+    }
   }
 
   state.activeIndex = newIndex;
@@ -308,6 +353,13 @@ export function initNeighbourhood() {
     if (!accIds.length) return;
   }
 
+  // Build layout map from tab data attributes
+  const layoutMap: Record<string, string> = {};
+  tabs.forEach((tab) => {
+    const id = tab.dataset.neighbourhoodTab!;
+    layoutMap[id] = tab.dataset.layout ?? 'a';
+  });
+
   const mobileQuery = window.matchMedia('(max-width: 767px)');
 
   const state: NeighbourhoodState = {
@@ -322,6 +374,7 @@ export function initNeighbourhood() {
     restaurants,
     indicator,
     tabIds,
+    layoutMap,
     activeId: tabIds[0] ?? Array.from(items)[0]?.dataset.neighbourhoodItem ?? '',
     activeIndex: 0,
     isMobile: mobileQuery.matches,
@@ -342,13 +395,28 @@ export function initNeighbourhood() {
 
   setActive(state, state.activeId, true);
 
+  // Desktop: preload map iframe on tab hover so it's ready by click
+  function onTabHover(e: Event) {
+    if (state.isMobile) return;
+    const id = (e.currentTarget as HTMLElement).dataset.neighbourhoodTab;
+    if (!id) return;
+    const panel = Array.from(state.maps).find((m) => m.dataset.neighbourhoodMap === id);
+    const iframe = panel?.querySelector<HTMLIFrameElement>('iframe');
+    if (iframe && !iframe.src && iframe.dataset.src) {
+      iframe.src = iframe.dataset.src;
+    }
+  }
+
   // Desktop: tab clicks
   function onTabClick(e: Event) {
     const id = (e.currentTarget as HTMLElement).dataset.neighbourhoodTab;
     if (id) setActive(state, id);
   }
 
-  tabs.forEach((tab) => tab.addEventListener('click', onTabClick));
+  tabs.forEach((tab) => {
+    tab.addEventListener('mouseenter', onTabHover);
+    tab.addEventListener('click', onTabClick);
+  });
 
   // Mobile: accordion clicks
   function onLineClick(e: Event) {
@@ -381,9 +449,93 @@ export function initNeighbourhood() {
   }
   document.addEventListener('visibilitychange', onVisibility);
 
+  // Restaurant hover — indicator bar, dimming, image crossfade (desktop only)
+  const restaurantRows = restaurants
+    ? Array.from(restaurants.querySelectorAll<HTMLElement>('.neighbourhood__restaurant'))
+    : [];
+  const restaurantIndicator = restaurants?.querySelector<HTMLElement>(
+    '[data-restaurant-indicator]',
+  );
+  const diningImage = section.querySelector<HTMLElement>('[data-neighbourhood-image="dining"] img');
+  const diningImageSrc = diningImage?.getAttribute('src') ?? '';
+  const hoverQuery = window.matchMedia('(hover: hover)');
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  function onRestaurantEnter(this: HTMLElement) {
+    if (state.isMobile || state.activeId !== 'dining' || !hoverQuery.matches) return;
+
+    const imgSrc = this.dataset.restaurantImage;
+
+    // Dim non-hovered rows
+    restaurantRows.forEach((row) => {
+      gsap.to(row, {
+        opacity: row === this ? 1 : 0.35,
+        duration: reducedMotion.matches ? 0 : 0.3,
+        ease: 'expo.out',
+        overwrite: true,
+      });
+    });
+
+    // Move indicator bar
+    if (restaurantIndicator) {
+      const top = this.offsetTop;
+      const height = this.offsetHeight;
+      gsap.to(restaurantIndicator, {
+        top,
+        height,
+        opacity: 1,
+        duration: reducedMotion.matches ? 0 : 0.4,
+        ease: 'expo.out',
+        overwrite: true,
+      });
+    }
+
+    // Crossfade image
+    if (diningImage && imgSrc) {
+      diningImage.setAttribute('src', imgSrc);
+    }
+  }
+
+  function onRestaurantsLeave() {
+    if (state.isMobile || state.activeId !== 'dining') return;
+
+    // Reset all rows
+    restaurantRows.forEach((row) => {
+      gsap.to(row, {
+        opacity: 1,
+        duration: reducedMotion.matches ? 0 : 0.3,
+        ease: 'expo.out',
+        overwrite: true,
+      });
+    });
+
+    // Hide indicator
+    if (restaurantIndicator) {
+      gsap.to(restaurantIndicator, {
+        opacity: 0,
+        duration: reducedMotion.matches ? 0 : 0.3,
+        ease: 'expo.out',
+        overwrite: true,
+      });
+    }
+
+    // Restore original image
+    if (diningImage && diningImageSrc) {
+      diningImage.setAttribute('src', diningImageSrc);
+    }
+  }
+
+  restaurantRows.forEach((row) => row.addEventListener('mouseenter', onRestaurantEnter));
+  restaurants?.addEventListener('mouseleave', onRestaurantsLeave);
+
   cleanup = () => {
-    tabs.forEach((tab) => tab.removeEventListener('click', onTabClick));
+    tabs.forEach((tab) => {
+      tab.removeEventListener('mouseenter', onTabHover);
+      tab.removeEventListener('click', onTabClick);
+    });
     lines.forEach((line) => line.removeEventListener('click', onLineClick));
+    restaurantRows.forEach((row) => row.removeEventListener('mouseenter', onRestaurantEnter));
+    restaurants?.removeEventListener('mouseleave', onRestaurantsLeave);
     mobileQuery.removeEventListener('change', onBreakpoint);
     window.removeEventListener('resize', onResize);
     document.removeEventListener('visibilitychange', onVisibility);
