@@ -1,36 +1,81 @@
 ---
 /**
- * Neighbourhood — editorial scattered layout.
- * Label + copy top-left, three asymmetric images, distance list + CTA bottom-right.
+ * Neighbourhood — interactive hover list.
+ * Hoverable location names on the left, corresponding image on the right,
+ * caption below. First item active by default.
  */
+
+const items = [
+  {
+    id: 'wynwood',
+    label: 'Wynwood',
+    image: '/images/neighbourhood-palms.jpg',
+    alt: 'Palm trees framed by building overhangs, looking up at blue sky',
+    description:
+      "Wynwood's galleries are five minutes away. Street art, independent studios, and restaurants that don't need a reservation.",
+  },
+  {
+    id: 'design-district',
+    label: 'Design District',
+    image: '/images/neighbourhood-sunset.jpg',
+    alt: 'Palm tree silhouettes against a pink and orange sunset',
+    description:
+      'Ten minutes to the Design District. Flagship boutiques, public art installations, and dining that treats the meal as architecture.',
+  },
+  {
+    id: 'the-bay',
+    label: 'The Bay',
+    image: '/images/neighbourhood-pool.jpg',
+    alt: 'Poolside cabanas with tropical greenery',
+    description:
+      'Morning light on the water, fifteen minutes to the sand. Close enough to step into whenever the mood takes you.',
+  },
+];
 ---
 
-<section class="neighbourhood">
-  <div class="neighbourhood__column">
-    <div class="neighbourhood__text">
-      <p class="neighbourhood__label">The Neighbourhood</p>
-      <h2 class="neighbourhood__heading">Switch off or turn it up</h2>
-      <p class="neighbourhood__body">
-        Wynwood's galleries are five minutes away. The Design District, ten.
-        The sand, fifteen. Close enough to step into whenever the mood takes
-        you — and a sanctuary worth coming home to when it doesn't.
-      </p>
-      <a href="/neighbourhood" class="neighbourhood__cta">
-        Discover the Neighbourhood
-      </a>
+<section class="neighbourhood" data-neighbourhood>
+  <div class="neighbourhood__container">
+    <p class="neighbourhood__label">The Neighbourhood</p>
+
+    <div class="neighbourhood__grid">
+      <div class="neighbourhood__list">
+        {items.map((item, i) => (
+          <button
+            class:list={['neighbourhood__line', { 'is-active': i === 0 }]}
+            data-neighbourhood-item={item.id}
+            type="button"
+          >
+            <span class="neighbourhood__line-text">{item.label}</span>
+            <span class="neighbourhood__line-arrow">&rarr;</span>
+          </button>
+        ))}
+      </div>
+
+      <div class="neighbourhood__images">
+        {items.map((item, i) => (
+          <div
+            class:list={['neighbourhood__image', { 'is-active': i === 0 }]}
+            data-neighbourhood-image={item.id}
+          >
+            <img src={item.image} alt={item.alt} loading="lazy" />
+          </div>
+        ))}
+      </div>
     </div>
 
-  </div>
+    <div class="neighbourhood__captions">
+      {items.map((item, i) => (
+        <div
+          class:list={['neighbourhood__caption', { 'is-active': i === 0 }]}
+          data-neighbourhood-caption={item.id}
+        >
+          <p class="neighbourhood__body">{item.description}</p>
+        </div>
+      ))}
+    </div>
 
-  <div class="neighbourhood__image neighbourhood__image--palms">
-    <img src="/images/neighbourhood-palms.jpg" alt="Palm trees framed by building overhangs, looking up at blue sky" loading="lazy" />
-  </div>
-
-  <div class="neighbourhood__image neighbourhood__image--sunset">
-    <img src="/images/neighbourhood-sunset.jpg" alt="Palm tree silhouettes against a pink and orange sunset" loading="lazy" />
-  </div>
-
-  <div class="neighbourhood__image neighbourhood__image--pool">
-    <img src="/images/neighbourhood-pool.jpg" alt="Poolside cabanas with tropical greenery" loading="lazy" />
+    <a href="/neighbourhood" class="neighbourhood__cta">
+      Discover the Neighbourhood
+    </a>
   </div>
 </section>

@@ -24,22 +24,6 @@ export function initAnimations() {
         });
       }
 
-      /* Lifestyle image reveals */
-      const lifestyleMain = document.querySelector('.lifestyle__image img');
-      if (lifestyleMain) {
-        gsap.from(lifestyleMain, {
-          scale: 1.05,
-          opacity: 0,
-          duration: 1.25,
-          ease: 'expo.out',
-          scrollTrigger: {
-            trigger: '.lifestyle__image',
-            start: 'top 85%',
-            toggleActions: 'play none none none',
-          },
-        });
-      }
-
       const pairImages = document.querySelectorAll('.lifestyle__pair-image img');
       if (pairImages.length) {
         gsap.from(pairImages, {
@@ -137,37 +121,36 @@ export function initAnimations() {
         });
       }
 
-      /* Neighbourhood reveals */
-      const nhoodText = document.querySelector('.neighbourhood__text');
-      if (nhoodText) {
-        gsap.from(nhoodText.children, {
-          y: 25,
-          opacity: 0,
-          duration: 0.9,
-          ease: 'expo.out',
-          stagger: 0.06,
+      /* Neighbourhood reveals — animate containers, not individual lines
+         (the hover module manages per-line opacity) */
+      const nhoodSection = document.querySelector('.neighbourhood');
+      if (nhoodSection) {
+        const nhoodLabel = nhoodSection.querySelector('.neighbourhood__label');
+        const nhoodList = nhoodSection.querySelector('.neighbourhood__list');
+        const nhoodImgWrap = nhoodSection.querySelector('.neighbourhood__images');
+        const nhoodCaptions = nhoodSection.querySelector('.neighbourhood__captions');
+
+        const nhoodTl = gsap.timeline({
           scrollTrigger: {
             trigger: '.neighbourhood',
             start: 'top 80%',
             toggleActions: 'play none none none',
           },
         });
-      }
 
-      const nhoodImages = document.querySelectorAll('.neighbourhood__image img');
-      nhoodImages.forEach((img, i) => {
-        gsap.from(img, {
-          scale: 1.05,
-          opacity: 0,
-          duration: 1.25,
-          ease: 'expo.out',
-          scrollTrigger: {
-            trigger: img.parentElement,
-            start: 'top 85%',
-            toggleActions: 'play none none none',
-          },
-        });
-      });
+        if (nhoodLabel) {
+          nhoodTl.from(nhoodLabel, { y: 20, opacity: 0, duration: 0.9, ease: 'expo.out' }, 0);
+        }
+        if (nhoodList) {
+          nhoodTl.from(nhoodList, { y: 25, opacity: 0, duration: 0.9, ease: 'expo.out' }, 0.1);
+        }
+        if (nhoodImgWrap) {
+          nhoodTl.from(nhoodImgWrap, { scale: 0.97, opacity: 0, duration: 1.25, ease: 'expo.out' }, 0.15);
+        }
+        if (nhoodCaptions) {
+          nhoodTl.from(nhoodCaptions, { y: 20, opacity: 0, duration: 0.9, ease: 'expo.out' }, 0.3);
+        }
+      }
 
       /* Footer content + wordmark reveal */
       const footerTrigger = document.querySelector('[data-footer-trigger]');
