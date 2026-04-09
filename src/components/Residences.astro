@@ -52,7 +52,7 @@ const icons = { bed: Bed, maximize: Maximize, compass: Compass, waves: Waves };
     {residences.map((r) => (
       <a href="/residences" class="residences__card">
         <div class="residences__card-image">
-          <img src={r.image} alt={r.alt} loading="lazy" />
+          <img src={r.image} alt={r.alt} loading="lazy" decoding="async" />
         </div>
         <div class="residences__card-info">
           <h3 class="residences__card-name">{r.name}</h3>

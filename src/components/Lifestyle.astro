@@ -67,7 +67,7 @@ const slides = [
           {
             slides.map((slide) => (
               <div class="lifestyle__slide">
-                <img src={slide.image} alt={slide.alt} loading="lazy" />
+                <img src={slide.image} alt={slide.alt} loading="lazy" decoding="async" />
                 <div class="lifestyle__slide-overlay" />
                 <span class="lifestyle__slide-caption lifestyle__slide-caption--top">
                   {slide.top}

@@ -20,7 +20,13 @@
       "Bash(cat .git/hooks/pre-commit)",
       "Bash(npx identify:*)",
       "Bash(python -c \"from PIL import Image; [print\\(f'{f}: {Image.open\\(f\\).size}'\\) for f in ['public/images/neighbourhood-palms.jpg','public/images/neighbourhood-pool.jpg','public/images/neighbourhood-sunset.jpg']]\")",
-      "Bash(file public/images/neighbourhood-*.jpg)"
+      "Bash(file public/images/neighbourhood-*.jpg)",
+      "Bash(du -sh /Users/deanhope/Documents/aurea-residences/src/assets/images/*.jpg)",
+      "Bash(du -sh /Users/deanhope/Documents/aurea-residences/public/images/*.jpg)",
+      "Bash(du -sh /Users/deanhope/Documents/aurea-residences/public/images/*)",
+      "Bash(du:*)",
+      "Bash(awk '{print $5, $9}')",
+      "Bash(sips:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

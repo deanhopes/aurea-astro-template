@@ -4,6 +4,11 @@
  * Sticky container with GSAP ScrollTrigger scrub.
  * Track translates left as user scrolls vertically.
  */
+import { Image } from 'astro:assets';
+import visionTower from '../assets/images/vision-tower.jpg';
+import visionInterior from '../assets/images/vision-interior.jpg';
+import visionSunset from '../assets/images/vision-sunset.jpg';
+import visionTerrace from '../assets/images/vision-terrace.jpg';
 ---
 
 <section class="vision" data-vision>
@@ -29,7 +34,7 @@
           <!-- Left: large image + numbered caption -->
           <div class="vision__card-left">
             <div class="vision__card-image vision__card-image--tower">
-              <img src="/images/vision-tower.jpg" alt="Aurea tower facade, golden light on curved balconies" loading="lazy" />
+              <Image src={visionTower} alt="Aurea tower facade, golden light on curved balconies" widths={[400, 600, 800]} sizes="(max-width: 1024px) 90vw, 35vw" format="webp" quality={80} loading="lazy" decoding="async" />
             </div>
             <p class="vision__caption vision__caption--number">(1)</p>
           </div>
@@ -61,7 +66,7 @@
           <!-- Right: small image + caption -->
           <div class="vision__card-right">
             <div class="vision__card-image vision__card-image--interior">
-              <img src="/images/vision-interior.jpg" alt="Warm interior with bay view" loading="lazy" />
+              <Image src={visionInterior} alt="Warm interior with bay view" widths={[400, 600, 800]} sizes="(max-width: 1024px) 90vw, 25vw" format="webp" quality={80} loading="lazy" decoding="async" />
             </div>
             <div class="vision__caption-group">
               <p class="vision__caption vision__caption--muted">Hospitality, not housing.</p>
@@ -76,10 +81,10 @@
       <div class="vision__panel vision__panel--images">
         <div class="vision__image-pair">
           <div class="vision__card-image vision__card-image--sunset">
-            <img src="/images/vision-sunset.jpg" alt="Sunset through palm trees from terrace" loading="lazy" />
+            <Image src={visionSunset} alt="Sunset through palm trees from terrace" widths={[400, 600, 800]} sizes="(max-width: 1024px) 90vw, 45vw" format="webp" quality={80} loading="lazy" decoding="async" />
           </div>
           <div class="vision__card-image vision__card-image--terrace">
-            <img src="/images/vision-terrace.jpg" alt="Morning light on private terrace with bay view" loading="lazy" />
+            <Image src={visionTerrace} alt="Morning light on private terrace with bay view" widths={[400, 600, 800]} sizes="(max-width: 1024px) 90vw, 45vw" format="webp" quality={80} loading="lazy" decoding="async" />
           </div>
         </div>
       </div>

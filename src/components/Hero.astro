@@ -3,11 +3,22 @@
  * Hero — full-viewport image with bottom-centre text overlay.
  * 4px radius, clipped. Placeholder gradient until real render is dropped in.
  */
+import { Image } from 'astro:assets';
+import heroImage from '../assets/images/hero.jpg';
 ---
 
 <section class="hero" data-hero>
   <div class="hero__image">
-    <img src="/images/hero.jpg" alt="Aurea Residences waterfront tower at golden hour" />
+    <Image
+      src={heroImage}
+      alt="Aurea Residences waterfront tower at golden hour"
+      widths={[640, 1024, 1440, 1920]}
+      sizes="100vw"
+      format="webp"
+      quality={80}
+      loading="eager"
+      decoding="async"
+    />
   </div>
   <div class="hero__content" data-reveal>
     <p class="hero__label">Edgewater, Miami</p>
