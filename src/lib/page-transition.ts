@@ -1,3 +1,4 @@
+import type { TransitionBeforePreparationEvent } from 'astro:transitions/client';
 import gsap from 'gsap';
 import { getLenis } from './lenis';
 
@@ -66,7 +67,7 @@ function curtainOpen(): Promise<void> {
 
 /* ── Lifecycle Handlers ── */
 
-function onBeforePreparation(event: any) {
+function onBeforePreparation(event: TransitionBeforePreparationEvent) {
   // Back/forward: skip curtains, instant swap
   if (event.navigationType === 'traverse') return;
 
@@ -109,6 +110,6 @@ function onPageLoad() {
 /* ── Init (called once, listeners persist across navigations) ── */
 export function initPageTransition() {
   resolvePanels();
-  document.addEventListener('astro:before-preparation', onBeforePreparation);
+  document.addEventListener('astro:before-preparation', onBeforePreparation as EventListener);
   document.addEventListener('astro:page-load', onPageLoad);
 }

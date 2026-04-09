@@ -6,6 +6,170 @@ gsap.registerPlugin(Draggable, InertiaPlugin);
 
 let cleanup: (() => void) | null = null;
 
+interface SliderState {
+  slider: HTMLElement;
+  track: HTMLElement;
+  allSlides: HTMLElement[];
+  slideCount: number;
+  setWidth: number;
+  slideWidths: number[];
+  slideOffsets: number[];
+  activeIndex: number;
+  activeOrigIndex: number;
+  marker: HTMLElement | null;
+  isDragging: boolean;
+  autoTimer: ReturnType<typeof setInterval> | null;
+  draggable: Draggable;
+}
+
+function getGap(track: HTMLElement): number {
+  return parseFloat(getComputedStyle(track).gap) || 0;
+}
+
+function measure(state: SliderState) {
+  const g = getGap(state.track);
+  state.setWidth = 0;
+  state.slideWidths = [];
+  state.slideOffsets = [];
+  for (let i = 0; i < state.slideCount; i++) {
+    state.slideOffsets.push(state.setWidth);
+    state.slideWidths.push(state.allSlides[i]!.offsetWidth);
+    state.setWidth += state.allSlides[i]!.offsetWidth + g;
+  }
+}
+
+function markerX(slider: HTMLElement): number {
+  return slider.offsetWidth * 0.6;
+}
+
+function xForSlide(state: SliderState, index: number): number {
+  const mx = markerX(state.slider);
+  const slideCenter = state.slideOffsets[index]! + state.slideWidths[index]! / 2;
+  return -(slideCenter - mx);
+}
+
+function updateActive(state: SliderState) {
+  const mx = markerX(state.slider);
+  const currentX = gsap.getProperty(state.track, 'x') as number;
+
+  let closest = -1;
+  let closestDist = Infinity;
+
+  for (let i = 0; i < state.allSlides.length; i++) {
+    const origIdx = i % state.slideCount;
+    const offset = state.slideOffsets[origIdx]! + (i >= state.slideCount ? state.setWidth : 0);
+    const center = offset + state.slideWidths[origIdx]! / 2 + currentX;
+    const dist = Math.abs(center - mx);
+    if (dist < closestDist) {
+      closestDist = dist;
+      closest = i;
+    }
+  }
+
+  if (closest === state.activeIndex) return;
+
+  state.allSlides.forEach((el) => el.classList.remove('is-active'));
+  if (closest >= 0) {
+    state.allSlides[closest]!.classList.add('is-active');
+    const mirror = closest >= state.slideCount ? closest - state.slideCount : closest + state.slideCount;
+    state.allSlides[mirror]?.classList.add('is-active');
+    state.activeOrigIndex = closest % state.slideCount;
+  }
+  state.activeIndex = closest;
+}
+
+function snapX(state: SliderState, endValue: number): number {
+  const mx = markerX(state.slider);
+  let best = endValue;
+  let bestDist = Infinity;
+
+  for (let i = 0; i < state.slideCount; i++) {
+    const slideCenter = state.slideOffsets[i]! + state.slideWidths[i]! / 2;
+    const targetX = -(slideCenter - mx);
+    for (const candidate of [targetX, targetX + state.setWidth, targetX - state.setWidth]) {
+      const dist = Math.abs(candidate - endValue);
+      if (dist < bestDist) {
+        bestDist = dist;
+        best = candidate;
+      }
+    }
+  }
+  return best;
+}
+
+function wrapX(state: SliderState) {
+  let x = gsap.getProperty(state.track, 'x') as number;
+  if (x < -state.setWidth || x > 0) {
+    x = ((x % state.setWidth) + state.setWidth) % state.setWidth;
+    if (x > 0) x -= state.setWidth;
+    gsap.set(state.track, { x });
+    state.draggable.update();
+  }
+}
+
+function stopAutoPlay(state: SliderState) {
+  if (state.autoTimer) {
+    clearInterval(state.autoTimer);
+    state.autoTimer = null;
+  }
+}
+
+function advanceToNext(state: SliderState) {
+  const nextOrig = (state.activeOrigIndex + 1) % state.slideCount;
+  const targetX = xForSlide(state, nextOrig);
+  const currentX = gsap.getProperty(state.track, 'x') as number;
+
+  let best = targetX;
+  let bestDist = Infinity;
+  for (const candidate of [targetX, targetX + state.setWidth, targetX - state.setWidth]) {
+    const d = Math.abs(candidate - currentX);
+    if (d < bestDist) { bestDist = d; best = candidate; }
+  }
+
+  if (state.marker) {
+    state.marker.classList.remove('is-pulling');
+    void state.marker.offsetWidth;
+    state.marker.classList.add('is-pulling');
+  }
+
+  gsap.to(state.track, {
+    x: best,
+    duration: 1.2,
+    ease: 'expo.inOut',
+    onUpdate: () => { wrapX(state); updateActive(state); },
+    onComplete: () => { wrapX(state); updateActive(state); state.marker?.classList.remove('is-pulling'); },
+  });
+}
+
+function startAutoPlay(state: SliderState) {
+  if (state.autoTimer) return;
+  state.autoTimer = setInterval(() => advanceToNext(state), 6000);
+}
+
+function resetAutoPlay(state: SliderState) {
+  stopAutoPlay(state);
+  startAutoPlay(state);
+}
+
+function createDraggable(
+  state: SliderState,
+  showMarker: () => void,
+  hideMarker: () => void,
+): Draggable {
+  return Draggable.create(state.track, {
+    type: 'x',
+    inertia: true,
+    snap: { x: (v: number) => snapX(state, v) },
+    onDragStart() { state.isDragging = true; showMarker(); stopAutoPlay(state); },
+    onDrag() { wrapX(state); updateActive(state); },
+    onThrowUpdate() { wrapX(state); updateActive(state); },
+    onThrowComplete() {
+      wrapX(state); updateActive(state);
+      state.isDragging = false; hideMarker(); resetAutoPlay(state);
+    },
+  })[0]!;
+}
+
 export function initLifestyleSlider() {
   cleanup?.();
 
@@ -16,236 +180,61 @@ export function initLifestyleSlider() {
   const originals = Array.from(track.children) as HTMLElement[];
   const slideCount = originals.length;
 
-  // Clone slides for seamless loop
-  originals.forEach((child) => {
-    track.appendChild(child.cloneNode(true));
-  });
+  originals.forEach((child) => track.appendChild(child.cloneNode(true)));
 
-  const allSlides = Array.from(track.children) as HTMLElement[];
+  const state: SliderState = {
+    slider,
+    track,
+    allSlides: Array.from(track.children) as HTMLElement[],
+    slideCount,
+    setWidth: 0,
+    slideWidths: [],
+    slideOffsets: [],
+    activeIndex: -1,
+    activeOrigIndex: 2,
+    marker: slider.querySelector<HTMLElement>('.lifestyle__marker'),
+    isDragging: false,
+    autoTimer: null,
+    draggable: null!,
+  };
 
-  // Measure one full set width
-  let setWidth = 0;
-  let slideWidths: number[] = [];
-  let slideOffsets: number[] = [];
-  const gap = () => parseFloat(getComputedStyle(track).gap) || 0;
+  measure(state);
+  gsap.set(track, { x: xForSlide(state, 2) });
 
-  function measure() {
-    const g = gap();
-    setWidth = 0;
-    slideWidths = [];
-    slideOffsets = [];
-    for (let i = 0; i < slideCount; i++) {
-      const el = allSlides[i];
-      slideOffsets.push(setWidth);
-      slideWidths.push(el.offsetWidth);
-      setWidth += el.offsetWidth + g;
-    }
-  }
-  measure();
-
-  // Marker position — 60% from left edge of slider
-  function markerX() {
-    return slider.offsetWidth * 0.6;
-  }
-
-  // Compute x that centres slide at `index` on the marker
-  function xForSlide(index: number) {
-    const mx = markerX();
-    const slideCenter = slideOffsets[index] + slideWidths[index] / 2;
-    return -(slideCenter - mx);
-  }
-
-  // Set initial position: slide index 2 (3rd child) centred on marker
-  const initialX = xForSlide(2);
-  gsap.set(track, { x: initialX });
-
-  // Track which slide is active (index into allSlides)
-  let activeIndex = -1;
-  // Track the original-set index (0..slideCount-1) for auto-advance
-  let activeOrigIndex = 2;
-
-  function updateActive() {
-    const mx = markerX();
-    const currentX = gsap.getProperty(track, 'x') as number;
-
-    let closest = -1;
-    let closestDist = Infinity;
-
-    for (let i = 0; i < allSlides.length; i++) {
-      const origIdx = i % slideCount;
-      const offset = slideOffsets[origIdx] + (i >= slideCount ? setWidth : 0);
-      const center = offset + slideWidths[origIdx] / 2 + currentX;
-      const dist = Math.abs(center - mx);
-      if (dist < closestDist) {
-        closestDist = dist;
-        closest = i;
-      }
-    }
-
-    if (closest !== activeIndex) {
-      allSlides.forEach((el) => el.classList.remove('is-active'));
-      if (closest >= 0) {
-        allSlides[closest].classList.add('is-active');
-        const mirror = closest >= slideCount ? closest - slideCount : closest + slideCount;
-        if (allSlides[mirror]) allSlides[mirror].classList.add('is-active');
-        activeOrigIndex = closest % slideCount;
-      }
-      activeIndex = closest;
-    }
-  }
-
-  updateActive();
-
-  // Snap function: given an end x value, return the x that snaps the nearest slide to marker
-  function snapX(endValue: number) {
-    const mx = markerX();
-    let best = endValue;
-    let bestDist = Infinity;
-
-    for (let i = 0; i < slideCount; i++) {
-      const slideCenter = slideOffsets[i] + slideWidths[i] / 2;
-      // The x that centres this slide on the marker
-      const targetX = -(slideCenter - mx);
-      // Account for wrapping — check the target and target +/- setWidth
-      for (const candidate of [targetX, targetX + setWidth, targetX - setWidth]) {
-        const dist = Math.abs(candidate - endValue);
-        if (dist < bestDist) {
-          bestDist = dist;
-          best = candidate;
-        }
-      }
-    }
-    return best;
-  }
-
-  // Wrap x with modulo for infinite loop
-  function wrapX() {
-    let x = gsap.getProperty(track, 'x') as number;
-    if (x < -setWidth || x > 0) {
-      x = ((x % setWidth) + setWidth) % setWidth;
-      if (x > 0) x -= setWidth;
-      gsap.set(track, { x });
-      draggable.update();
-    }
-  }
-
-  // Auto-advance: tick to next slide every 6s when section is in view
-  let autoTimer: ReturnType<typeof setInterval> | null = null;
-
-  const marker = slider.querySelector<HTMLElement>('.lifestyle__marker');
-
-  // Marker active state — stays on during hover and drag
-  let isDragging = false;
-
-  function showMarker() { marker?.classList.add('is-active'); }
-  function hideMarker() { if (!isDragging) marker?.classList.remove('is-active'); }
+  const showMarker = () => state.marker?.classList.add('is-active');
+  const hideMarker = () => { if (!state.isDragging) state.marker?.classList.remove('is-active'); };
 
   slider.addEventListener('pointerenter', showMarker);
   slider.addEventListener('pointerleave', hideMarker);
 
-  function advanceToNext() {
-    const nextOrig = (activeOrigIndex + 1) % slideCount;
-    const targetX = xForSlide(nextOrig);
-    const currentX = gsap.getProperty(track, 'x') as number;
+  state.draggable = createDraggable(state, showMarker, hideMarker);
 
-    let best = targetX;
-    let bestDist = Infinity;
-    for (const candidate of [targetX, targetX + setWidth, targetX - setWidth]) {
-      const d = Math.abs(candidate - currentX);
-      if (d < bestDist) { bestDist = d; best = candidate; }
-    }
+  updateActive(state);
 
-    // Marker pull animation — restart each tick
-    if (marker) {
-      marker.classList.remove('is-pulling');
-      void marker.offsetWidth;
-      marker.classList.add('is-pulling');
-    }
-
-    gsap.to(track, {
-      x: best,
-      duration: 1.2,
-      ease: 'expo.inOut',
-      onUpdate() {
-        wrapX();
-        updateActive();
-      },
-      onComplete() {
-        wrapX();
-        updateActive();
-        marker?.classList.remove('is-pulling');
-      },
-    });
-  }
-
-  function startAutoPlay() {
-    if (autoTimer) return;
-    autoTimer = setInterval(advanceToNext, 6000);
-  }
-
-  function stopAutoPlay() {
-    if (autoTimer) {
-      clearInterval(autoTimer);
-      autoTimer = null;
-    }
-  }
-
-  function resetAutoPlay() {
-    stopAutoPlay();
-    startAutoPlay();
-  }
-
-  // IntersectionObserver — play when section is visible, pause when not
   const section = document.querySelector('.lifestyle');
   const observer = new IntersectionObserver(
-    ([entry]) => {
-      if (entry.isIntersecting) startAutoPlay();
-      else stopAutoPlay();
-    },
+    ([entry]) => { entry!.isIntersecting ? startAutoPlay(state) : stopAutoPlay(state); },
     { threshold: 0.3 },
   );
   if (section) observer.observe(section);
 
-  const draggable = Draggable.create(track, {
-    type: 'x',
-    inertia: true,
-    snap: { x: snapX },
-    onDragStart() {
-      isDragging = true;
-      showMarker();
-      stopAutoPlay();
-    },
-    onDrag() {
-      wrapX();
-      updateActive();
-    },
-    onThrowUpdate() {
-      wrapX();
-      updateActive();
-    },
-    onThrowComplete() {
-      wrapX();
-      updateActive();
-      isDragging = false;
-      hideMarker();
-      resetAutoPlay();
-    },
-  })[0];
-
   const onResize = () => {
-    measure();
+    measure(state);
+    gsap.set(track, { x: xForSlide(state, state.activeOrigIndex) });
+    state.draggable.update();
+    updateActive(state);
   };
   window.addEventListener('resize', onResize);
 
   cleanup = () => {
-    stopAutoPlay();
+    stopAutoPlay(state);
     observer.disconnect();
-    draggable.kill();
+    state.draggable.kill();
     slider.removeEventListener('pointerenter', showMarker);
     slider.removeEventListener('pointerleave', hideMarker);
-    marker?.classList.remove('is-active', 'is-pulling');
+    state.marker?.classList.remove('is-active', 'is-pulling');
     window.removeEventListener('resize', onResize);
-    allSlides.forEach((el) => el.classList.remove('is-active'));
+    state.allSlides.forEach((el) => el.classList.remove('is-active'));
     while (track.children.length > slideCount) {
       track.removeChild(track.lastChild!);
     }
