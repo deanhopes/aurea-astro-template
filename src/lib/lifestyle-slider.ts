@@ -133,9 +133,9 @@ function advanceToNext(state: SliderState) {
   }
 
   if (state.marker) {
+    state.marker.getAnimations().forEach((a) => a.cancel());
     state.marker.classList.remove('is-pulling');
-    void state.marker.offsetWidth;
-    state.marker.classList.add('is-pulling');
+    requestAnimationFrame(() => state.marker?.classList.add('is-pulling'));
   }
 
   gsap.to(state.track, {

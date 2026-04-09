@@ -449,13 +449,10 @@ export function initNeighbourhood() {
   }
   document.addEventListener('visibilitychange', onVisibility);
 
-  // Restaurant hover — indicator bar, dimming, image crossfade (desktop only)
+  // Restaurant hover — dimming + image crossfade (desktop only)
   const restaurantRows = restaurants
     ? Array.from(restaurants.querySelectorAll<HTMLElement>('.neighbourhood__restaurant'))
     : [];
-  const restaurantIndicator = restaurants?.querySelector<HTMLElement>(
-    '[data-restaurant-indicator]',
-  );
   const diningImage = section.querySelector<HTMLElement>('[data-neighbourhood-image="dining"] img');
   const diningImageSrc = diningImage?.getAttribute('src') ?? '';
   const hoverQuery = window.matchMedia('(hover: hover)');
@@ -463,8 +460,6 @@ export function initNeighbourhood() {
 
   function onRestaurantEnter(this: HTMLElement) {
     if (state.isMobile || state.activeId !== 'dining' || !hoverQuery.matches) return;
-
-    const imgSrc = this.dataset.restaurantImage;
 
     // Dim non-hovered rows
     restaurantRows.forEach((row) => {
@@ -476,21 +471,8 @@ export function initNeighbourhood() {
       });
     });
 
-    // Move indicator bar
-    if (restaurantIndicator) {
-      const top = this.offsetTop;
-      const height = this.offsetHeight;
-      gsap.to(restaurantIndicator, {
-        top,
-        height,
-        opacity: 1,
-        duration: reducedMotion.matches ? 0 : 0.4,
-        ease: 'expo.out',
-        overwrite: true,
-      });
-    }
-
     // Crossfade image
+    const imgSrc = this.dataset.restaurantImage;
     if (diningImage && imgSrc) {
       diningImage.setAttribute('src', imgSrc);
     }
@@ -508,16 +490,6 @@ export function initNeighbourhood() {
         overwrite: true,
       });
     });
-
-    // Hide indicator
-    if (restaurantIndicator) {
-      gsap.to(restaurantIndicator, {
-        opacity: 0,
-        duration: reducedMotion.matches ? 0 : 0.3,
-        ease: 'expo.out',
-        overwrite: true,
-      });
-    }
 
     // Restore original image
     if (diningImage && diningImageSrc) {

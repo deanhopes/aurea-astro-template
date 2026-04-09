@@ -188,12 +188,11 @@ const restaurants = [
 
       <!-- Dining: stacked restaurant list (replaces map + text for dining tab) -->
       <div class="neighbourhood__restaurants" data-neighbourhood-restaurants>
-        <div class="neighbourhood__restaurant-indicator" data-restaurant-indicator></div>
         {
           restaurants.map((r) => (
             <div class="neighbourhood__restaurant" data-restaurant-image={r.image}>
               <div class="neighbourhood__restaurant-thumb">
-                <img src={r.image} alt={r.alt} loading="lazy" />
+                <img src={r.image} alt={r.alt} loading="lazy" decoding="async" />
               </div>
               <div class="neighbourhood__restaurant-info">
                 <p class="neighbourhood__restaurant-name">{r.name}</p>
@@ -239,7 +238,7 @@ const restaurants = [
                   {restaurants.map((r) => (
                     <div class="neighbourhood__inline-restaurant">
                       <div class="neighbourhood__inline-restaurant-thumb">
-                        <img src={r.image} alt={r.alt} loading="lazy" />
+                        <img src={r.image} alt={r.alt} loading="lazy" decoding="async" />
                       </div>
                       <div class="neighbourhood__inline-restaurant-info">
                         <p class="neighbourhood__restaurant-name">{r.name}</p>
