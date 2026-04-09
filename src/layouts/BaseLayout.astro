@@ -32,6 +32,11 @@ const {
     <!-- Lenis scrollend workaround (known Astro ClientRouter conflict) -->
     <script is:inline>delete window.onscrollend;</script>
 
+    <div id="page-curtain" transition:persist aria-hidden="true">
+      <div class="curtain__panel curtain__panel--left"></div>
+      <div class="curtain__panel curtain__panel--right"></div>
+    </div>
+
     <Nav />
     <main id="main-content">
       <slot />
@@ -64,6 +69,14 @@ const {
       document.addEventListener('astro:after-swap', cleanupAnimations);
     </script>
 
+    <!-- Lifestyle draggable slider -->
+    <script>
+      import { initLifestyleSlider, destroyLifestyleSlider } from '@lib/lifestyle-slider';
+
+      document.addEventListener('astro:page-load', initLifestyleSlider);
+      document.addEventListener('astro:before-swap', destroyLifestyleSlider);
+    </script>
+
     <!-- Footer haze canvas -->
     <script>
       import { initFooterHaze, destroyFooterHaze } from '@lib/footer-haze';
@@ -80,12 +93,12 @@ const {
       document.addEventListener('astro:before-swap', destroyFooterShadows);
     </script>
 
-    <!-- Neighbourhood cursor inertia -->
+    <!-- Neighbourhood hover interaction -->
     <script>
-      import { initNeighbourhoodInertia, destroyNeighbourhoodInertia } from '@lib/neighbourhood-inertia';
+      import { initNeighbourhoodHover, destroyNeighbourhoodHover } from '@lib/neighbourhood-hover';
 
-      document.addEventListener('astro:page-load', initNeighbourhoodInertia);
-      document.addEventListener('astro:before-swap', destroyNeighbourhoodInertia);
+      document.addEventListener('astro:page-load', initNeighbourhoodHover);
+      document.addEventListener('astro:before-swap', destroyNeighbourhoodHover);
     </script>
 
     <!-- Scroll reveal observer -->
@@ -110,6 +123,12 @@ const {
       }
 
       document.addEventListener('astro:page-load', initReveal);
+    </script>
+
+    <!-- Page transitions (curtain wipe) -->
+    <script>
+      import { initPageTransition } from '@lib/page-transition';
+      initPageTransition();
     </script>
   </body>
 </html>

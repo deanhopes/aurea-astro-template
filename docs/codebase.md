@@ -66,9 +66,9 @@ The footer uses a fixed-reveal pattern (`z-index: -1`, `margin-bottom: 100dvh` o
 
 1. **Haze canvas** (`footer-haze.ts`) — Canvas2D, 7 concentric sunset gradient rings with noise dithering
 2. **Shadow canvas** (`footer-shadows.ts`) — WebGL, video-sourced palm leaf silhouettes through a luminance threshold shader, `mix-blend-mode: multiply`
-3. **Content** — icon, tagline, nav links, AUREA wordmark (z-index: 1, above both canvases)
+3. **Content** — enquiry form (two-column card), nav links, AUREA wordmark (z-index: 1, above both canvases)
 
-Both canvases share the same scroll-driven `state.progress` (0→1) via independent GSAP ScrollTriggers on `[data-footer-trigger]`. The shadow shader has a "sunset twist": `uThreshold = 0.55 - (progress * 0.2)` so shadows grow longer as the user scrolls deeper.
+Both canvases share the same scroll-driven `state.progress` (0→1) via independent GSAP ScrollTriggers on `[data-footer-trigger]`. The shadow shader has mouse interactivity (threshold shifts with cursor position via GSAP quickTo) and scroll-driven shadow growth. Planned refactor: merge haze + shadow into a single WebGL pipeline (see `tasks/todo.md`).
 
 **Shadow video requirements:** `public/video/leaf-shadows.webm` + `.mp4` fallback. Palm/monstera leaf shadows on a warm wall. 360p, 6-8s seamless loop, <500KB WebM. Lazy-loaded via IntersectionObserver (200px rootMargin). Texture upload capped at 15fps. System works without the video (renders transparently, no errors).
 

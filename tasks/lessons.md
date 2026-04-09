@@ -19,3 +19,7 @@ Rules discovered through mistakes. Read at session start.
 - **Equal-width nav bookends for centred logo.** If left and right nav items have different widths, the logo shifts. Match them with min-width.
 - **Procedural bezier paths can't match real shadow realism.** For organic effects like leaf shadows, use real video footage processed through a shader — not generated geometry. The organic edge quality, overlapping translucency, and non-uniform blur falloff are what sell it.
 - **Video + shader > video overlay.** A raw video overlay looks like a filter. Running it through a luminance threshold shader with palette mapping makes it feel like part of the design system.
+- **Native `<select>` can't be styled.** The dropdown highlight is OS-controlled. Use custom dropdown components with hidden inputs for brand-consistent forms.
+- **Numbered editorial captions don't work on product cards.** `(1) (2) (3)` creates a curated magazine feel in editorial sections but implies ranking on product cards — card 3 looks worst.
+- **Specs belong in icon rows, not detail lines.** Sq ft and bed counts read like listings when inline. Lucide icons + structured rows feel editorial.
+- **Type hierarchy via opacity tiers.** Footer uses 80% (tagline) → 45% (nav links, hover to full) → 30% (flanks) to create visual hierarchy without different sizes.
