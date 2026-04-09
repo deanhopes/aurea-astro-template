@@ -59,8 +59,10 @@ export function initLifestyleSlider() {
   const initialX = xForSlide(2);
   gsap.set(track, { x: initialX });
 
-  // Track which slide is active
+  // Track which slide is active (index into allSlides)
   let activeIndex = -1;
+  // Track the original-set index (0..slideCount-1) for auto-advance
+  let activeOrigIndex = 2;
 
   function updateActive() {
     const mx = markerX();
@@ -69,7 +71,6 @@ export function initLifestyleSlider() {
     let closest = -1;
     let closestDist = Infinity;
 
-    // Check all slides (originals + clones) to find the one nearest the marker
     for (let i = 0; i < allSlides.length; i++) {
       const origIdx = i % slideCount;
       const offset = slideOffsets[origIdx] + (i >= slideCount ? setWidth : 0);
@@ -85,9 +86,9 @@ export function initLifestyleSlider() {
       allSlides.forEach((el) => el.classList.remove('is-active'));
       if (closest >= 0) {
         allSlides[closest].classList.add('is-active');
-        // Also activate the mirror (original or clone) for visual consistency
         const mirror = closest >= slideCount ? closest - slideCount : closest + slideCount;
         if (allSlides[mirror]) allSlides[mirror].classList.add('is-active');
+        activeOrigIndex = closest % slideCount;
       }
       activeIndex = closest;
     }
@@ -128,10 +129,92 @@ export function initLifestyleSlider() {
     }
   }
 
+  // Auto-advance: tick to next slide every 6s when section is in view
+  let autoTimer: ReturnType<typeof setInterval> | null = null;
+
+  const marker = slider.querySelector<HTMLElement>('.lifestyle__marker');
+
+  // Marker active state — stays on during hover and drag
+  let isDragging = false;
+
+  function showMarker() { marker?.classList.add('is-active'); }
+  function hideMarker() { if (!isDragging) marker?.classList.remove('is-active'); }
+
+  slider.addEventListener('pointerenter', showMarker);
+  slider.addEventListener('pointerleave', hideMarker);
+
+  function advanceToNext() {
+    const nextOrig = (activeOrigIndex + 1) % slideCount;
+    const targetX = xForSlide(nextOrig);
+    const currentX = gsap.getProperty(track, 'x') as number;
+
+    let best = targetX;
+    let bestDist = Infinity;
+    for (const candidate of [targetX, targetX + setWidth, targetX - setWidth]) {
+      const d = Math.abs(candidate - currentX);
+      if (d < bestDist) { bestDist = d; best = candidate; }
+    }
+
+    // Marker pull animation — restart each tick
+    if (marker) {
+      marker.classList.remove('is-pulling');
+      void marker.offsetWidth;
+      marker.classList.add('is-pulling');
+    }
+
+    gsap.to(track, {
+      x: best,
+      duration: 1.2,
+      ease: 'expo.inOut',
+      onUpdate() {
+        wrapX();
+        updateActive();
+      },
+      onComplete() {
+        wrapX();
+        updateActive();
+        marker?.classList.remove('is-pulling');
+      },
+    });
+  }
+
+  function startAutoPlay() {
+    if (autoTimer) return;
+    autoTimer = setInterval(advanceToNext, 6000);
+  }
+
+  function stopAutoPlay() {
+    if (autoTimer) {
+      clearInterval(autoTimer);
+      autoTimer = null;
+    }
+  }
+
+  function resetAutoPlay() {
+    stopAutoPlay();
+    startAutoPlay();
+  }
+
+  // IntersectionObserver — play when section is visible, pause when not
+  const section = document.querySelector('.lifestyle');
+  const observer = new IntersectionObserver(
+    ([entry]) => {
+      if (entry.isIntersecting) startAutoPlay();
+      else stopAutoPlay();
+    },
+    { threshold: 0.3 },
+  );
+  if (section) observer.observe(section);
+
   const draggable = Draggable.create(track, {
     type: 'x',
     inertia: true,
     snap: { x: snapX },
+    onDragStart() {
+      isDragging = true;
+      showMarker();
+      stopAutoPlay();
+    },
     onDrag() {
       wrapX();
       updateActive();
@@ -143,6 +226,9 @@ export function initLifestyleSlider() {
     onThrowComplete() {
       wrapX();
       updateActive();
+      isDragging = false;
+      hideMarker();
+      resetAutoPlay();
     },
   })[0];
 
@@ -152,7 +238,12 @@ export function initLifestyleSlider() {
   window.addEventListener('resize', onResize);
 
   cleanup = () => {
+    stopAutoPlay();
+    observer.disconnect();
     draggable.kill();
+    slider.removeEventListener('pointerenter', showMarker);
+    slider.removeEventListener('pointerleave', hideMarker);
+    marker?.classList.remove('is-active', 'is-pulling');
     window.removeEventListener('resize', onResize);
     allSlides.forEach((el) => el.classList.remove('is-active'));
     while (track.children.length > slideCount) {

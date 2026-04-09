@@ -5,14 +5,14 @@
  */
 
 const slides = [
-  { image: '/images/lifestyle-neighbourhood.jpg', alt: 'Couple walking along the bay at golden hour, Edgewater neighbourhood' },
-  { image: '/images/lifestyle-yoga.jpg', alt: 'Morning yoga on a wooden terrace, aerial view' },
-  { image: '/images/lifestyle-plunge.jpg', alt: 'Cold plunge pool in warm ambient light' },
-  { image: '/images/lifestyle-04.jpg', alt: 'Infrared sauna with floor-to-ceiling glass overlooking the bay' },
-  { image: '/images/lifestyle-05.jpg', alt: 'Rooftop pool deck at sunset with lounge seating' },
-  { image: '/images/lifestyle-06.jpg', alt: 'Breathwork terrace surrounded by tropical planting' },
-  { image: '/images/lifestyle-07.jpg', alt: 'Spa treatment room with natural stone and soft lighting' },
-  { image: '/images/lifestyle-08.jpg', alt: 'Residents lounge with curated art and bay views' },
+  { image: '/images/lifestyle-neighbourhood.jpg', alt: 'Couple walking along the bay at golden hour, Edgewater neighbourhood', top: 'Edgewater', bottom: 'The Neighbourhood' },
+  { image: '/images/lifestyle-yoga.jpg', alt: 'Morning yoga on a wooden terrace, aerial view', top: 'Dawn Practice', bottom: 'Rooftop Terrace' },
+  { image: '/images/lifestyle-plunge.jpg', alt: 'Cold plunge pool in warm ambient light', top: 'Cold Plunge', bottom: 'Wellness Circuit' },
+  { image: '/images/lifestyle-04.jpg', alt: 'Infrared sauna with floor-to-ceiling glass overlooking the bay', top: 'Infrared Sauna', bottom: 'Recovery Suite' },
+  { image: '/images/lifestyle-05.jpg', alt: 'Rooftop pool deck at sunset with lounge seating', top: 'Sunset Pool', bottom: 'Rooftop Deck' },
+  { image: '/images/lifestyle-06.jpg', alt: 'Breathwork terrace surrounded by tropical planting', top: 'Breathwork', bottom: 'Garden Terrace' },
+  { image: '/images/lifestyle-07.jpg', alt: 'Spa treatment room with natural stone and soft lighting', top: 'Spa Suite', bottom: 'Natural Stone' },
+  { image: '/images/lifestyle-08.jpg', alt: 'Residents lounge with curated art and bay views', top: 'Residents Lounge', bottom: 'Bay Views' },
 ];
 ---
 
@@ -26,6 +26,9 @@ const slides = [
         {slides.map((slide) => (
           <div class="lifestyle__slide">
             <img src={slide.image} alt={slide.alt} loading="lazy" />
+            <div class="lifestyle__slide-overlay"></div>
+            <span class="lifestyle__slide-caption lifestyle__slide-caption--top">{slide.top}</span>
+            <span class="lifestyle__slide-caption lifestyle__slide-caption--bottom">{slide.bottom}</span>
           </div>
         ))}
       </div>
