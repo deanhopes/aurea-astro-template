@@ -1421,6 +1421,41 @@ a {
 
 /* ── Reduced motion ── */
 @media (prefers-reduced-motion: reduce) {
+  .vision__sticky {
+    height: auto;
+    overflow: visible;
+  }
+
+  .vision__track {
+    flex-direction: column;
+    gap: 0;
+    width: 100%;
+    height: auto;
+  }
+
+  .vision__panel {
+    height: auto;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .vision__card {
+    flex-direction: column;
+    height: auto;
+    gap: 1.5rem;
+  }
+
+  .vision__card-left,
+  .vision__card-centre,
+  .vision__card-right {
+    width: 100%;
+  }
+
+  .vision__image-pair {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
   .vision__card-image img {
     transition: none;
   }
