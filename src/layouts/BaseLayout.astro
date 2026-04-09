@@ -93,12 +93,12 @@ const {
       document.addEventListener('astro:before-swap', destroyFooterShadows);
     </script>
 
-    <!-- Neighbourhood hover interaction -->
+    <!-- Neighbourhood tabbed interaction -->
     <script>
-      import { initNeighbourhoodHover, destroyNeighbourhoodHover } from '@lib/neighbourhood-hover';
+      import { initNeighbourhood, destroyNeighbourhood } from '@lib/neighbourhood';
 
-      document.addEventListener('astro:page-load', initNeighbourhoodHover);
-      document.addEventListener('astro:before-swap', destroyNeighbourhoodHover);
+      document.addEventListener('astro:page-load', initNeighbourhood);
+      document.addEventListener('astro:before-swap', destroyNeighbourhood);
     </script>
 
     <!-- Scroll reveal observer -->

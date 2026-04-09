@@ -1,8 +1,9 @@
 ---
 /**
- * Neighbourhood — interactive hover list.
- * Hoverable location names on the left, corresponding image on the right,
- * caption below. First item active by default.
+ * Neighbourhood — tabbed section.
+ * Tabs across the top, 12-col grid below: image left, map top-right, body copy + CTA right.
+ * Dining tab: no map, stacked restaurant list replaces map + text area.
+ * Mobile: accordion with inline image + text per item.
  */
 
 const items = [
@@ -11,24 +12,77 @@ const items = [
     label: 'Wynwood',
     image: '/images/neighbourhood-palms.jpg',
     alt: 'Palm trees framed by building overhangs, looking up at blue sky',
+    mapEmbed:
+      'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14354.2!2d-80.199!3d25.805!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x88d9b71242d3b06d%3A0xaf81178f07a54bb3!2sWynwood%2C%20Miami%2C%20FL!5e0!3m2!1sen!2sus!4v1',
     description:
-      "Wynwood's galleries are five minutes away. Street art, independent studios, and restaurants that don't need a reservation.",
+      "Five minutes on foot and you're in Wynwood. Over seventy galleries, open-wall murals that rotate seasonally, and restaurants like KYU where the wood-fire grill does the talking. No velvet ropes, no reservations required.",
   },
   {
     id: 'design-district',
     label: 'Design District',
     image: '/images/neighbourhood-sunset.jpg',
     alt: 'Palm tree silhouettes against a pink and orange sunset',
+    mapEmbed:
+      'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14354.2!2d-80.192!3d25.813!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x88d9b6f3e1d4ef9b%3A0x6f1e3c5a7c3d1a0b!2sMiami%20Design%20District!5e0!3m2!1sen!2sus!4v1',
     description:
-      'Ten minutes to the Design District. Flagship boutiques, public art installations, and dining that treats the meal as architecture.',
+      'Ten minutes by bike to flagship Louis Vuitton, Dior, and Cartier. Public art installations between the boutiques. Dining that treats every meal as architecture. The creative capital of Miami, on your doorstep.',
   },
   {
     id: 'the-bay',
     label: 'The Bay',
     image: '/images/neighbourhood-pool.jpg',
     alt: 'Poolside cabanas with tropical greenery',
+    mapEmbed:
+      'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14354.2!2d-80.186!3d25.800!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x88d9b6a0b0b0b0b0%3A0x0!2sBiscayne%20Bay%2C%20Miami%2C%20FL!5e0!3m2!1sen!2sus!4v1',
     description:
-      'Morning light on the water, fifteen minutes to the sand. Close enough to step into whenever the mood takes you.',
+      'Biscayne Bay is not a backdrop. Paddleboard at dawn, kayak to Monument Island, watch dolphins break the surface at golden hour. The Venetian Islands sit in the middle distance, Miami Beach beyond. A layered view with texture and life, not a postcard.',
+  },
+  {
+    id: 'margaret-pace',
+    label: 'Margaret Pace Park',
+    image: '/images/neighbourhood-palms.jpg',
+    alt: 'Bayfront park with palm trees and waterfront walkway',
+    mapEmbed:
+      'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3588.5!2d-80.186!3d25.793!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x88d9b6f0b4a1b5b1%3A0x1c2d3e4f5a6b7c8d!2sMargaret%20Pace%20Park!5e0!3m2!1sen!2sus!4v1',
+    description:
+      'Eight acres of bayfront green space with views of the Venetian Islands. Tennis, volleyball, sunset yoga, and a dog park that doubles as the neighbourhood social club. At golden hour, this is where Edgewater meets itself.',
+  },
+  {
+    id: 'dining',
+    label: 'Dining',
+    image: '/images/neighbourhood-sunset.jpg',
+    alt: 'Warm evening light over waterfront dining',
+  },
+];
+
+const restaurants = [
+  {
+    name: 'Amara at Paraiso',
+    cuisine: 'Latin waterfront',
+    description: 'James Beard winner Michael Schwartz. Yuca cheese puffs, arroz verde. The quintessential Edgewater table.',
+    image: '/images/neighbourhood-sunset.jpg',
+    alt: 'Amara at Paraiso waterfront dining',
+  },
+  {
+    name: 'Klaw Miami',
+    cuisine: 'Steakhouse & seafood',
+    description: "Inside the historic 1926 Miami Women's Club. Floor-to-ceiling bay views. Ranked among the world's best steakhouses.",
+    image: '/images/neighbourhood-sunset.jpg',
+    alt: 'Klaw Miami interior with bay views',
+  },
+  {
+    name: "Enriqueta's",
+    cuisine: 'Cuban',
+    description: 'Cash only, no frills. The best Cubano in Miami. Been here longer than the high-rises.',
+    image: '/images/neighbourhood-sunset.jpg',
+    alt: "Enriqueta's Sandwich Shop storefront",
+  },
+  {
+    name: 'Mignonette',
+    cuisine: 'Oyster bar & seafood',
+    description: 'Oysters, caviar, and lobster rolls in a restored 1930s gas station. Raw bar with character.',
+    image: '/images/neighbourhood-sunset.jpg',
+    alt: 'Mignonette oyster bar exterior',
   },
 ];
 ---
@@ -37,21 +91,26 @@ const items = [
   <div class="neighbourhood__container">
     <p class="neighbourhood__label">The Neighbourhood</p>
 
-    <div class="neighbourhood__grid">
-      <div class="neighbourhood__list">
-        {items.map((item, i) => (
-          <button
-            class:list={['neighbourhood__line', { 'is-active': i === 0 }]}
-            data-neighbourhood-item={item.id}
-            type="button"
-          >
-            <span class="neighbourhood__line-text">{item.label}</span>
-            <span class="neighbourhood__line-arrow">&rarr;</span>
-          </button>
-        ))}
-      </div>
+    <!-- Desktop tabs -->
+    <div class="neighbourhood__tabs" role="tablist">
+      {items.map((item, i) => (
+        <button
+          class:list={['neighbourhood__tab', { 'is-active': i === 0 }]}
+          role="tab"
+          type="button"
+          aria-selected={i === 0 ? 'true' : 'false'}
+          aria-controls={`panel-${item.id}`}
+          data-neighbourhood-tab={item.id}
+        >
+          {item.label}
+        </button>
+      ))}
+      <div class="neighbourhood__indicator" data-neighbourhood-indicator></div>
+    </div>
 
-      <div class="neighbourhood__images">
+    <!-- Desktop content grid -->
+    <div class="neighbourhood__content" role="tabpanel">
+      <div class="neighbourhood__media">
         {items.map((item, i) => (
           <div
             class:list={['neighbourhood__image', { 'is-active': i === 0 }]}
@@ -61,21 +120,96 @@ const items = [
           </div>
         ))}
       </div>
+
+      <div class="neighbourhood__map">
+        {items.map((item, i) => (
+          <div
+            class:list={['neighbourhood__map-panel', { 'is-active': i === 0 }]}
+            data-neighbourhood-map={item.id}
+          >
+            <iframe
+              src={i === 0 ? item.mapEmbed : undefined}
+              data-src={item.mapEmbed}
+              title={`Map of ${item.label}`}
+              loading="lazy"
+              allowfullscreen=""
+            />
+          </div>
+        ))}
+      </div>
+
+      <div class="neighbourhood__text">
+        {items.map((item, i) => (
+          <div
+            class:list={['neighbourhood__text-panel', { 'is-active': i === 0 }]}
+            data-neighbourhood-text={item.id}
+          >
+            {item.description ? (
+              <>
+                <p class="neighbourhood__body">{item.description}</p>
+                <a href="/neighbourhood" class="neighbourhood__cta">
+                  Discover the Neighbourhood
+                </a>
+              </>
+            ) : null}
+          </div>
+        ))}
+      </div>
+
+      <!-- Dining: stacked restaurant list (replaces map + text for dining tab) -->
+      <div class="neighbourhood__restaurants" data-neighbourhood-restaurants>
+        {restaurants.map((r) => (
+          <div class="neighbourhood__restaurant">
+            <div class="neighbourhood__restaurant-thumb">
+              <img src={r.image} alt={r.alt} loading="lazy" />
+            </div>
+            <div class="neighbourhood__restaurant-info">
+              <p class="neighbourhood__restaurant-name">{r.name}</p>
+              <p class="neighbourhood__restaurant-cuisine">{r.cuisine}</p>
+              <p class="neighbourhood__restaurant-desc">{r.description}</p>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
 
-    <div class="neighbourhood__captions">
+    <!-- Mobile accordion -->
+    <div class="neighbourhood__accordion">
       {items.map((item, i) => (
-        <div
-          class:list={['neighbourhood__caption', { 'is-active': i === 0 }]}
-          data-neighbourhood-caption={item.id}
-        >
-          <p class="neighbourhood__body">{item.description}</p>
+        <div class:list={['neighbourhood__item', { 'is-active': i === 0 }]} data-neighbourhood-item={item.id}>
+          <button class="neighbourhood__line" type="button">
+            <span class="neighbourhood__line-text">{item.label}</span>
+            <svg class="neighbourhood__line-chevron" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div class="neighbourhood__inline-content" data-neighbourhood-inline={item.id}>
+            {item.id === 'dining' ? (
+              <div class="neighbourhood__inline-restaurants">
+                {restaurants.map((r) => (
+                  <div class="neighbourhood__inline-restaurant">
+                    <div class="neighbourhood__inline-restaurant-thumb">
+                      <img src={r.image} alt={r.alt} loading="lazy" />
+                    </div>
+                    <div class="neighbourhood__inline-restaurant-info">
+                      <p class="neighbourhood__restaurant-name">{r.name}</p>
+                      <p class="neighbourhood__restaurant-cuisine">{r.cuisine}</p>
+                      <p class="neighbourhood__restaurant-desc">{r.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <>
+                <div class="neighbourhood__inline-image">
+                  <img src={item.image} alt={item.alt} loading="lazy" />
+                </div>
+                <p class="neighbourhood__inline-body">{item.description}</p>
+              </>
+            )}
+          </div>
         </div>
       ))}
     </div>
-
-    <a href="/neighbourhood" class="neighbourhood__cta">
-      Discover the Neighbourhood
-    </a>
   </div>
 </section>

@@ -14,7 +14,10 @@
       "mcp__chrome-devtools__new_page",
       "Bash(printf \"file 'forward.mp4'\\\\nfile 'reverse.mp4'\\\\n\")",
       "Bash(rm:*)",
-      "Read(//d/Beanos/Dev Stuff/growth-os/memory/reference/swipe-file/code-snippets/**)"
+      "Read(//d/Beanos/Dev Stuff/growth-os/memory/reference/swipe-file/code-snippets/**)",
+      "Read(//tmp/**)",
+      "Bash(ls .git/hooks/)",
+      "Bash(cat .git/hooks/pre-commit)"
     ]
   },
   "enableAllProjectMcpServers": true,

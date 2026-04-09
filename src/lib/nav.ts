@@ -18,18 +18,31 @@ function createIconTimeline(toggle: HTMLElement): gsap.core.Timeline {
 }
 
 function createPanelTimeline(panel: HTMLElement): gsap.core.Timeline {
-  const cards = panel.querySelectorAll('.menu-card');
-  const links = panel.querySelectorAll('.menu-sidebar__link');
-  const cta = panel.querySelector('.menu-sidebar__cta');
-
+  const isMobile = window.matchMedia('(max-width: 767px)').matches;
   const tl = gsap.timeline({ paused: true });
 
-  tl.to(panel, { autoAlpha: 1, y: 0, duration: 0.25, ease: 'expo.out' })
-    .fromTo(cards, { autoAlpha: 0, y: 8 }, { autoAlpha: 1, y: 0, duration: 0.25, ease: 'expo.out', stagger: 0.05 }, 0.1)
-    .fromTo(links, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.2, ease: 'expo.out', stagger: 0.04 }, 0.15);
+  tl.to(panel, { autoAlpha: 1, y: 0, duration: 0.25, ease: 'expo.out' });
 
-  if (cta) {
-    tl.fromTo(cta, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.2, ease: 'expo.out' }, 0.25);
+  if (isMobile) {
+    // Mobile: all items are flat text links — stagger as one sequence
+    const allItems = panel.querySelectorAll('.menu-card__label, .menu-sidebar__link, .menu-sidebar__cta');
+    tl.fromTo(allItems,
+      { autoAlpha: 0, y: 12 },
+      { autoAlpha: 1, y: 0, duration: 0.35, ease: 'expo.out', stagger: 0.03 },
+      0.1,
+    );
+  } else {
+    // Desktop: cards with images + sidebar links
+    const cards = panel.querySelectorAll('.menu-card');
+    const links = panel.querySelectorAll('.menu-sidebar__link');
+    const cta = panel.querySelector('.menu-sidebar__cta');
+
+    tl.fromTo(cards, { autoAlpha: 0, y: 8 }, { autoAlpha: 1, y: 0, duration: 0.25, ease: 'expo.out', stagger: 0.05 }, 0.1)
+      .fromTo(links, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.2, ease: 'expo.out', stagger: 0.04 }, 0.15);
+
+    if (cta) {
+      tl.fromTo(cta, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.2, ease: 'expo.out' }, 0.25);
+    }
   }
 
   return tl;
@@ -67,6 +80,9 @@ function setupHoverBehavior(
   open: () => void,
   close: () => void,
 ): () => void {
+  // Only attach hover-to-open on devices with real hover (not touch)
+  if (!window.matchMedia('(hover: hover)').matches) return () => {};
+
   let hoverCloseTimer: ReturnType<typeof setTimeout> | null = null;
 
   function handleToggleEnter() {
@@ -120,19 +136,25 @@ export function initNav() {
     panel.setAttribute('aria-hidden', 'false');
     header.classList.remove('header--hidden');
     iconTl.play();
-    panelTl.play();
+    panelTl.restart();
     getLenis()?.stop();
   }
 
   function close() {
+    if (!isMenuOpen(toggle)) return;
     toggle.setAttribute('aria-expanded', 'false');
     panel.setAttribute('aria-hidden', 'true');
     iconTl.reverse();
-    panelTl.pause(0);
+    panelTl.progress(0).pause();
+    gsap.set(panel, { autoAlpha: 0, y: -4 });
     getLenis()?.start();
   }
 
-  function handleToggle() {
+  let toggleClicked = false;
+
+  function handleToggle(e: MouseEvent) {
+    e.stopPropagation();
+    toggleClicked = true;
     isMenuOpen(toggle) ? close() : open();
   }
 
@@ -148,6 +170,7 @@ export function initNav() {
   }
 
   function handleClickOutside(e: MouseEvent) {
+    if (toggleClicked) { toggleClicked = false; return; }
     if (!isMenuOpen(toggle)) return;
     if (!header.contains(e.target as Node)) close();
   }
