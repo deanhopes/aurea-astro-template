@@ -8,6 +8,7 @@ let cleanup: (() => void) | null = null;
 
 interface SliderState {
   slider: HTMLElement;
+  container: HTMLElement;
   track: HTMLElement;
   allSlides: HTMLElement[];
   slideCount: number;
@@ -38,18 +39,19 @@ function measure(state: SliderState) {
   }
 }
 
-function markerX(slider: HTMLElement): number {
-  return slider.offsetWidth * 0.6;
+function markerX(state: SliderState): number {
+  const pad = parseFloat(getComputedStyle(state.container).paddingLeft) || 0;
+  return state.container.offsetWidth * 0.6 - pad;
 }
 
 function xForSlide(state: SliderState, index: number): number {
-  const mx = markerX(state.slider);
+  const mx = markerX(state);
   const slideCenter = state.slideOffsets[index]! + state.slideWidths[index]! / 2;
   return -(slideCenter - mx);
 }
 
 function updateActive(state: SliderState) {
-  const mx = markerX(state.slider);
+  const mx = markerX(state);
   const currentX = gsap.getProperty(state.track, 'x') as number;
 
   let closest = -1;
@@ -71,7 +73,8 @@ function updateActive(state: SliderState) {
   state.allSlides.forEach((el) => el.classList.remove('is-active'));
   if (closest >= 0) {
     state.allSlides[closest]!.classList.add('is-active');
-    const mirror = closest >= state.slideCount ? closest - state.slideCount : closest + state.slideCount;
+    const mirror =
+      closest >= state.slideCount ? closest - state.slideCount : closest + state.slideCount;
     state.allSlides[mirror]?.classList.add('is-active');
     state.activeOrigIndex = closest % state.slideCount;
   }
@@ -79,7 +82,7 @@ function updateActive(state: SliderState) {
 }
 
 function snapX(state: SliderState, endValue: number): number {
-  const mx = markerX(state.slider);
+  const mx = markerX(state);
   let best = endValue;
   let bestDist = Infinity;
 
@@ -123,7 +126,10 @@ function advanceToNext(state: SliderState) {
   let bestDist = Infinity;
   for (const candidate of [targetX, targetX + state.setWidth, targetX - state.setWidth]) {
     const d = Math.abs(candidate - currentX);
-    if (d < bestDist) { bestDist = d; best = candidate; }
+    if (d < bestDist) {
+      bestDist = d;
+      best = candidate;
+    }
   }
 
   if (state.marker) {
@@ -136,8 +142,15 @@ function advanceToNext(state: SliderState) {
     x: best,
     duration: 1.2,
     ease: 'expo.inOut',
-    onUpdate: () => { wrapX(state); updateActive(state); },
-    onComplete: () => { wrapX(state); updateActive(state); state.marker?.classList.remove('is-pulling'); },
+    onUpdate: () => {
+      wrapX(state);
+      updateActive(state);
+    },
+    onComplete: () => {
+      wrapX(state);
+      updateActive(state);
+      state.marker?.classList.remove('is-pulling');
+    },
   });
 }
 
@@ -160,12 +173,25 @@ function createDraggable(
     type: 'x',
     inertia: true,
     snap: { x: (v: number) => snapX(state, v) },
-    onDragStart() { state.isDragging = true; showMarker(); stopAutoPlay(state); },
-    onDrag() { wrapX(state); updateActive(state); },
-    onThrowUpdate() { wrapX(state); updateActive(state); },
+    onDragStart() {
+      state.isDragging = true;
+      showMarker();
+      stopAutoPlay(state);
+    },
+    onDrag() {
+      wrapX(state);
+      updateActive(state);
+    },
+    onThrowUpdate() {
+      wrapX(state);
+      updateActive(state);
+    },
     onThrowComplete() {
-      wrapX(state); updateActive(state);
-      state.isDragging = false; hideMarker(); resetAutoPlay(state);
+      wrapX(state);
+      updateActive(state);
+      state.isDragging = false;
+      hideMarker();
+      resetAutoPlay(state);
     },
   })[0]!;
 }
@@ -174,8 +200,9 @@ export function initLifestyleSlider() {
   cleanup?.();
 
   const slider = document.querySelector<HTMLElement>('.lifestyle__slider');
+  const container = document.querySelector<HTMLElement>('.lifestyle__slider-container');
   const track = document.querySelector<HTMLElement>('.lifestyle__track');
-  if (!slider || !track) return;
+  if (!slider || !container || !track) return;
 
   const originals = Array.from(track.children) as HTMLElement[];
   const slideCount = originals.length;
@@ -184,6 +211,7 @@ export function initLifestyleSlider() {
 
   const state: SliderState = {
     slider,
+    container,
     track,
     allSlides: Array.from(track.children) as HTMLElement[],
     slideCount,
@@ -202,7 +230,9 @@ export function initLifestyleSlider() {
   gsap.set(track, { x: xForSlide(state, 2) });
 
   const showMarker = () => state.marker?.classList.add('is-active');
-  const hideMarker = () => { if (!state.isDragging) state.marker?.classList.remove('is-active'); };
+  const hideMarker = () => {
+    if (!state.isDragging) state.marker?.classList.remove('is-active');
+  };
 
   slider.addEventListener('pointerenter', showMarker);
   slider.addEventListener('pointerleave', hideMarker);
@@ -212,8 +242,24 @@ export function initLifestyleSlider() {
   updateActive(state);
 
   const section = document.querySelector('.lifestyle');
+  let autoStarted = false;
+  let delayTimer: ReturnType<typeof setTimeout> | null = null;
   const observer = new IntersectionObserver(
-    ([entry]) => { entry!.isIntersecting ? startAutoPlay(state) : stopAutoPlay(state); },
+    ([entry]) => {
+      if (entry!.isIntersecting) {
+        if (!autoStarted) {
+          autoStarted = true;
+          delayTimer = setTimeout(() => {
+            delayTimer = null;
+            startAutoPlay(state);
+          }, 3000);
+        } else {
+          startAutoPlay(state);
+        }
+      } else {
+        stopAutoPlay(state);
+      }
+    },
     { threshold: 0.3 },
   );
   if (section) observer.observe(section);
@@ -227,6 +273,7 @@ export function initLifestyleSlider() {
   window.addEventListener('resize', onResize);
 
   cleanup = () => {
+    if (delayTimer) clearTimeout(delayTimer);
     stopAutoPlay(state);
     observer.disconnect();
     state.draggable.kill();
