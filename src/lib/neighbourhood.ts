@@ -134,31 +134,31 @@ function crossfadeText(state: NeighbourhoodState, id: string, instant: boolean, 
 
   state.texts.forEach((panel) => {
     const isActive = panel.dataset.neighbourhoodText === id;
+    const children = panel.querySelectorAll('.neighbourhood__body, .neighbourhood__cta');
     if (instant) {
       gsap.set(panel, { opacity: isActive ? 1 : 0, y: 0 });
-      const children = panel.querySelectorAll('.neighbourhood__body, .neighbourhood__cta');
-      gsap.set(children, { opacity: isActive ? 1 : 0, y: 0 });
+      if (children.length) gsap.set(children, { opacity: isActive ? 1 : 0, y: 0 });
       panel.classList.toggle('is-active', isActive);
     } else if (isActive) {
       panel.classList.add('is-active');
-      const children = panel.querySelectorAll('.neighbourhood__body, .neighbourhood__cta');
       gsap.set(panel, { opacity: 1 });
-      gsap.fromTo(
-        children,
-        { opacity: 0, y: yOffset },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.6,
-          ease: 'expo.out',
-          stagger: 0.08,
-          overwrite: true,
-        },
-      );
+      if (children.length) {
+        gsap.fromTo(
+          children,
+          { opacity: 0, y: yOffset },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.6,
+            ease: 'expo.out',
+            stagger: 0.08,
+            overwrite: true,
+          },
+        );
+      }
     } else {
       gsap.set(panel, { opacity: 0, y: 0 });
-      const children = panel.querySelectorAll('.neighbourhood__body, .neighbourhood__cta');
-      gsap.set(children, { opacity: 0, y: 0 });
+      if (children.length) gsap.set(children, { opacity: 0, y: 0 });
       panel.classList.remove('is-active');
     }
   });

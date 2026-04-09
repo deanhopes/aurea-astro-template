@@ -88,6 +88,8 @@ let videoTexture: WebGLTexture | null = null;
 let gsapCtx: gsap.Context | null = null;
 let ro: ResizeObserver | null = null;
 let ioObserver: IntersectionObserver | null = null;
+let visibilityObserver: IntersectionObserver | null = null;
+let isVisible = false;
 let rafId = 0;
 let videoReady = false;
 let lastVideoUpdate = 0;
@@ -276,8 +278,8 @@ function render(): void {
 function tick(): void {
   render();
 
-  // Stop looping when nothing to show
-  if (state.progress <= 0 && !videoReady) {
+  // Stop looping when nothing to show or off-screen
+  if (!isVisible || (state.progress <= 0 && !videoReady)) {
     rafId = 0;
     return;
   }
@@ -285,7 +287,7 @@ function tick(): void {
 }
 
 function ensureLoop(): void {
-  if (!rafId) rafId = requestAnimationFrame(tick);
+  if (!rafId && isVisible) rafId = requestAnimationFrame(tick);
 }
 
 /* ── Sizing ── */
@@ -310,6 +312,16 @@ export function initFooterShadows(): void {
 
   ro = new ResizeObserver(() => resize());
   ro.observe(canvas);
+
+  /* Pause rAF loop when footer is off-screen */
+  visibilityObserver = new IntersectionObserver(
+    ([entry]) => {
+      isVisible = entry.isIntersecting;
+      if (isVisible) ensureLoop();
+    },
+    { rootMargin: '200px 0px' },
+  );
+  visibilityObserver.observe(canvas);
 
   initVideo();
 
@@ -364,6 +376,9 @@ export function destroyFooterShadows(): void {
 
   ioObserver?.disconnect();
   ioObserver = null;
+  visibilityObserver?.disconnect();
+  visibilityObserver = null;
+  isVisible = false;
 
   ro?.disconnect();
   ro = null;

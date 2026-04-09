@@ -23,6 +23,7 @@ const {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://www.google.com" />
     <link rel="sitemap" href="/sitemap-index.xml" />
     <SEO title={title} description={description} />
     <slot name="head" />
@@ -75,14 +76,6 @@ const {
 
       document.addEventListener('astro:page-load', initLifestyleSlider);
       document.addEventListener('astro:before-swap', destroyLifestyleSlider);
-    </script>
-
-    <!-- Footer haze canvas -->
-    <script>
-      import { initFooterHaze, destroyFooterHaze } from '@lib/footer-haze';
-
-      document.addEventListener('astro:page-load', initFooterHaze);
-      document.addEventListener('astro:before-swap', destroyFooterHaze);
     </script>
 
     <!-- Footer shadow silhouettes -->

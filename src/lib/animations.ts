@@ -93,42 +93,6 @@ function animateResidencesReveals() {
   }
 }
 
-function animateNeighbourhoodReveals() {
-  const section = document.querySelector('.neighbourhood');
-  if (!section) return;
-
-  const label = section.querySelector('.neighbourhood__label');
-  const list = section.querySelector('.neighbourhood__list');
-  const imgWrap = section.querySelector('.neighbourhood__images');
-  const captions = section.querySelector('.neighbourhood__captions');
-
-  const tl = gsap.timeline({
-    scrollTrigger: { trigger: '.neighbourhood', start: 'top 80%', once: true },
-  });
-
-  if (label) tl.from(label, { y: 20, opacity: 0, duration: 0.9, ease: 'expo.out' }, 0);
-  if (list) tl.from(list, { y: 25, opacity: 0, duration: 0.9, ease: 'expo.out' }, 0.1);
-  if (imgWrap) tl.from(imgWrap, { scale: 0.97, opacity: 0, duration: 1.25, ease: 'expo.out' }, 0.15);
-  if (captions) tl.from(captions, { y: 20, opacity: 0, duration: 0.9, ease: 'expo.out' }, 0.3);
-}
-
-function animateFooterReveal() {
-  const trigger = document.querySelector('[data-footer-trigger]');
-  const content = document.querySelector('.site-footer__content');
-  const wordmark = document.querySelector('.site-footer__wordmark');
-  if (!content || !trigger) return;
-
-  const tagline = content.querySelector('.site-footer__tagline-row');
-  const navGroups = content.querySelectorAll('.site-footer__links');
-
-  const tl = gsap.timeline({
-    scrollTrigger: { trigger, start: 'bottom bottom', once: true },
-  });
-
-  if (tagline) tl.from(tagline, { y: 25, opacity: 0, duration: 0.9, ease: 'expo.out' }, 0.1);
-  if (navGroups.length) tl.from(navGroups, { y: 20, opacity: 0, duration: 0.8, ease: 'expo.out', stagger: 0.06 }, 0.2);
-  if (wordmark) tl.from(wordmark, { y: 60, opacity: 0, duration: 1.25, ease: 'expo.out' }, 0.15);
-}
 
 export function initAnimations() {
   ctx?.revert();
@@ -139,8 +103,6 @@ export function initAnimations() {
       animateContainedParallax();
       animateLifestyleText();
       animateResidencesReveals();
-      animateNeighbourhoodReveals();
-      animateFooterReveal();
     });
   });
 }

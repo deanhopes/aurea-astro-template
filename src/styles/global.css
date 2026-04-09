@@ -1744,7 +1744,7 @@
     background: var(--color-surface-subtle);
     border-radius: 6px;
     padding: var(--space-element);
-    padding-bottom: calc(var(--space-element) + 18px);
+    padding-bottom: calc(var(--space-element) + 10px);
     position: relative;
     overflow: clip;
     contain: inline-size;
