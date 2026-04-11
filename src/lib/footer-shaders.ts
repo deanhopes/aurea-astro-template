@@ -108,59 +108,47 @@ const gradientFn = Fn(() => {
 
 /* ── TSL: fBm caustics ── */
 
-// 2D pseudo-random hash — maps vec2 → vec2 of floats 0–1
-const hash2 = Fn(([pRaw]: [any]) => {
-  const p = vec2(pRaw); // re-materialise as TSL node so .x/.y/.mul() work
-  const px = p.x.mul(127.1).add(p.y.mul(311.7));
-  const py = p.x.mul(269.5).add(p.y.mul(183.3));
-  return fract(vec2(sin(px), sin(py)).mul(43758.5453));
-});
-
-// Value noise — bilinear interpolation of hashed corners
-const valueNoise = Fn(([pRaw]: [any]) => {
-  const p = vec2(pRaw); // re-materialise as TSL node
-  const i = floor(p);
-  const f = fract(p);
-  // Quintic smoothstep for interpolation weight
-  const u = f.mul(f).mul(f).mul(f.mul(f.mul(6.0).sub(15.0)).add(10.0));
-  const a = hash2([i]).x;
-  const b = hash2([i.add(vec2(1.0, 0.0))]).x;
-  const c = hash2([i.add(vec2(0.0, 1.0))]).x;
-  const d = hash2([i.add(vec2(1.0, 1.0))]).x;
-  return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
-});
-
-// 4-octave fBm — accumulated value noise at increasing frequencies
-const fbm4 = Fn(([pRaw]: [any]) => {
-  const p = vec2(pRaw); // re-materialise as TSL node
-  const v1 = valueNoise([p]);
-  const v2 = valueNoise([p.mul(2.0)]).mul(0.5);
-  const v3 = valueNoise([p.mul(4.0)]).mul(0.25);
-  const v4 = valueNoise([p.mul(8.0)]).mul(0.125);
-  return v1.add(v2).add(v3).add(v4);
-});
+// Inline hash: dot-based pseudo-random float from vec2
+// Avoids Fn parameter passing issues — inlined directly where needed
+const hashInline = (px: any, py: any) =>
+  fract(sin(px.mul(127.1).add(py.mul(311.7))).mul(43758.5453));
 
 const causticFn = Fn(() => {
   const p = uv().sub(uMouse.mul(uMouseInfluence)).mul(uCausticScale);
   const animP = p.add(uTime);
-  // uTime scalar broadcasts to both X and Y — produces omnidirectional drift
 
-  // Domain warp — sample fbm twice with offsets to distort input coords
-  const warpX = fbm4([animP.add(vec2(1.7, 9.2))]);
-  const warpY = fbm4([animP.add(vec2(8.3, 2.8))]);
-  const warpedP = animP.add(vec2(warpX, warpY).mul(uCausticWarp));
+  // Inline 2-octave value noise — no Fn param passing, all inlined
+  const noiseAt = (cx: any, cy: any) => {
+    const ix = floor(cx);
+    const iy = floor(cy);
+    const fx = fract(cx);
+    const fy = fract(cy);
+    const ux = fx.mul(fx).mul(float(3.0).sub(fx.mul(2.0)));
+    const uy = fy.mul(fy).mul(float(3.0).sub(fy.mul(2.0)));
+    const a = hashInline(ix,            iy           );
+    const b = hashInline(ix.add(1.0),   iy           );
+    const c = hashInline(ix,            iy.add(1.0)  );
+    const d = hashInline(ix.add(1.0),   iy.add(1.0)  );
+    return mix(mix(a, b, ux), mix(c, d, ux), uy);
+  };
 
-  // Final fBm on warped coords — normalise to 0–1 (fbm4 sums to ~1.875 max)
-  const n = clamp(fbm4([warpedP]).mul(0.533), float(0.0), float(1.0));
+  const px = animP.x;
+  const py = animP.y;
+
+  // 3 octaves inlined
+  const n1 = noiseAt(px,          py         );
+  const n2 = noiseAt(px.mul(2.0), py.mul(2.0)).mul(0.5);
+  const n3 = noiseAt(px.mul(4.0), py.mul(4.0)).mul(0.25);
+  const n = clamp(n1.add(n2).add(n3).mul(0.571), float(0.0), float(1.0));
 
   // Caustic sharpen: abs(sin(n * PI)) → bright veins, dark gaps
-  // n is 0–1 so sin completes exactly one half-cycle — single clean vein pattern
   const sharpened = abs(sin(n.mul(PI))).pow(uCausticPower);
 
   // 1.43 = ramp-in overshoot scale — reaches full strength at ~70% progress
   const causticStrength = clamp(uProgress.mul(1.43), float(0.0), float(1.0));
   return sharpened.mul(causticStrength).mul(uCausticBrightness);
 });
+
 
 const causticColorFn = Fn(() => {
   const intensity = causticFn();
@@ -288,12 +276,7 @@ async function initRenderer(): Promise<boolean> {
   const finalColorFn = Fn(() => {
     const bg = gradientFn();
     const shadow = shadowMaskFn();
-
-    // Caustics add warm light on top of gradient, fully visible — shadow attenuates them
     const caustic = causticColorFn().mul(float(1.0).sub(shadow.mul(0.8)));
-
-    // Palm shadow: subtle darkening only — leaves read as translucent shadow shapes
-    // uShadowAlpha controls how dark the shadow is (keep low, ~0.15–0.25)
     const shadowDarken = bg.mul(shadow.mul(uShadowAlpha));
     return bg.add(caustic).sub(shadowDarken);
   });
