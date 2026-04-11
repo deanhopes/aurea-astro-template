@@ -67,7 +67,7 @@ export const uTime = uniform(0);
 export const uCausticScale = uniform(6.6);
 export const uCausticSpeed = uniform(0.5);
 export const uCausticPower = uniform(2.0);
-export const uCausticBrightness = uniform(0.39);
+export const uCausticBrightness = uniform(0.25);
 export const uMouseInfluence = uniform(0.2);
 
 // Shadow tuning uniforms
@@ -163,9 +163,9 @@ const causticFn = Fn(() => {
 
 const causticColorFn = Fn(() => {
   const intensity = causticFn();
-  const warmWhite = color(0xfff5e0);
-  const warmGold = color(0xffd97a);
-  return mix(warmWhite, warmGold, intensity);
+  // Caustics tint toward orange-gold — blends with the gradient rather than blowing it out
+  const causticTint = color(0xd96030);
+  return causticTint.mul(intensity);
 });
 
 /* ── TSL: Shadow mask ── */
