@@ -64,10 +64,10 @@ export const uMouse = uniform(new THREE.Vector2(0.5, 0.5));
 export const uTime = uniform(0);
 
 // Caustic tuning uniforms — exposed for tweakpane
-export const uCausticScale = uniform(6.6);
+export const uCausticScale = uniform(3.0);
 export const uCausticSpeed = uniform(0.5);
 export const uCausticPower = uniform(2.0);
-export const uCausticBrightness = uniform(0.25);
+export const uCausticBrightness = uniform(0.5);
 export const uMouseInfluence = uniform(0.2);
 
 // Shadow tuning uniforms
@@ -150,10 +150,11 @@ const causticFn = Fn(() => {
   const warpY = fbm4([animP.add(vec2(8.3, 2.8))]);
   const warpedP = animP.add(vec2(warpX, warpY).mul(uCausticWarp));
 
-  // Final fBm on warped coords
-  const n = fbm4([warpedP]);
+  // Final fBm on warped coords — normalise to 0–1 (fbm4 sums to ~1.875 max)
+  const n = clamp(fbm4([warpedP]).mul(0.533), float(0.0), float(1.0));
 
   // Caustic sharpen: abs(sin(n * PI)) → bright veins, dark gaps
+  // n is 0–1 so sin completes exactly one half-cycle — single clean vein pattern
   const sharpened = abs(sin(n.mul(PI))).pow(uCausticPower);
 
   // 1.43 = ramp-in overshoot scale — reaches full strength at ~70% progress
