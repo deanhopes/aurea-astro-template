@@ -66,7 +66,7 @@ export const uTime = uniform(0);
 // Caustic tuning uniforms — exposed for tweakpane
 export const uCausticScale = uniform(6.6);
 export const uCausticSpeed = uniform(0.5);
-export const uCausticPower = uniform(6.0);
+export const uCausticPower = uniform(2.0);
 export const uCausticBrightness = uniform(0.39);
 export const uMouseInfluence = uniform(0.2);
 
@@ -97,7 +97,11 @@ const gradientFn = Fn(() => {
   // At progress=1: full 0→1 gradient visible — parchment at top, orange at bottom.
   // Like a blind being raised: warm light floods in from the bottom.
   const safeProgress = clamp(uProgress, float(0.001), float(1.0));
-  const scaledY = clamp(uv().y.div(safeProgress), float(0.0), float(1.0));
+
+  // Ripple: distort the reveal edge with a slow horizontal sine wave
+  // so it looks like the gradient is spreading like a disturbance in water
+  const ripple = sin(uv().x.mul(6.0).add(uTime.mul(0.3))).mul(0.03);
+  const scaledY = clamp(uv().y.div(safeProgress).add(ripple), float(0.0), float(1.0));
 
   return mix(cOrange, cParchment, scaledY);
 });
@@ -161,8 +165,7 @@ const causticColorFn = Fn(() => {
   const intensity = causticFn();
   const warmWhite = color(0xfff5e0);
   const warmGold = color(0xffd97a);
-  // Fade to black at zero intensity — mix selects hue, mul controls brightness
-  return mix(warmWhite, warmGold, intensity).mul(intensity);
+  return mix(warmWhite, warmGold, intensity);
 });
 
 /* ── TSL: Shadow mask ── */
@@ -280,14 +283,17 @@ async function initRenderer(): Promise<boolean> {
   const geo = new THREE.PlaneGeometry(2, 2);
   material = new THREE.MeshBasicNodeMaterial();
 
-  const shadowColor = color(0x2a1a0a);
-
   const finalColorFn = Fn(() => {
     const bg = gradientFn();
     const shadow = shadowMaskFn();
-    const caustic = causticColorFn().mul(float(1.0).sub(shadow)); // caustics suppressed by shadow
-    const shadowC = shadowColor.mul(shadow).mul(uShadowAlpha);
-    return bg.add(caustic).add(shadowC);
+
+    // Caustics add warm light on top of gradient, suppressed where palm shadows fall
+    const caustic = causticColorFn().mul(float(1.0).sub(shadow));
+
+    // Palm shadow: darken gradient by uShadowAlpha where leaves are bright in video
+    const lit = bg.add(caustic);
+    const shadowed = bg.mul(float(1.0).sub(uShadowAlpha));
+    return mix(lit, shadowed, shadow);
   });
 
   material.colorNode = vec4(finalColorFn(), uProgress);
