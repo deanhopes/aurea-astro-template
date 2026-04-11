@@ -2,11 +2,11 @@
  * Footer shaders — Three.js WebGPU + TSL.
  *
  * Single canvas renders three TSL layers:
- *   1. Vertical gradient background (warm parchment → deep orange)
- *   2. Animated caustic light (three-octave sin interference)
+ *   1. Radial bloom gradient (progress-driven cone: orange core → peach → parchment → dark edges)
+ *   2. Animated caustic light (4-octave fBm with domain warp — deep water diffuse pools)
  *   3. Video shadow mask (luminance threshold, palm leaf silhouettes)
  *
- * Scroll progress and mouse position driven by GSAP (same pattern as WebGL1 predecessor).
+ * Scroll progress and mouse position driven by GSAP.
  */
 
 import * as THREE from 'three/webgpu';
