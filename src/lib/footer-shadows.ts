@@ -243,8 +243,9 @@ function initVideo(): void {
       if (entries[0]?.isIntersecting) {
         videoEl!.load();
         videoEl!.play().catch(() => {
+          // Autoplay blocked — shadow mask stays transparent (placeholder texture).
+          // Do not set videoReady: the loop stop condition stays correct.
           videoEl!.currentTime = 0;
-          videoReady = true;
         });
         ioObserver!.disconnect();
         ioObserver = null;
@@ -255,6 +256,7 @@ function initVideo(): void {
   ioObserver.observe(footer);
 
   const onReady = () => {
+    if (!videoEl) return; // destroyed before event fired
     videoReady = true;
     videoTexture = new THREE.VideoTexture(videoEl!);
     videoTexture.minFilter = THREE.LinearFilter;
@@ -362,6 +364,7 @@ export function destroyFooterShadows(): void {
   videoEl = null;
   videoTexture?.dispose();
   videoTexture = null;
+  uVideoTex.value = placeholderTex;
   videoReady = false;
   lastVideoUpdate = 0;
 
