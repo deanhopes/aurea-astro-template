@@ -1,12 +1,27 @@
 /**
  * Footer shaders — Three.js WebGPU + TSL.
  *
- * Single canvas renders three TSL layers:
- *   1. Radial bloom gradient (progress-driven cone: orange core → peach → parchment → dark edges)
- *   2. Animated caustic light (4-octave fBm with domain warp — deep water diffuse pools)
- *   3. Video shadow mask (luminance threshold, palm leaf silhouettes)
+ * Physical model: sunlit water surface, viewer looking down through warm water.
  *
- * Scroll progress and mouse position driven by GSAP.
+ * Composite (fullscreen quad, orthographic):
+ *   1. Smooth fBm height field (water surface shape) — domain-warped value noise,
+ *      continuous and nonzero everywhere so the finite-difference gradient is
+ *      meaningful at every pixel.
+ *   2. Surface normal from 4-tap central differences on the height field.
+ *   3. Caustic brightness = |∇h|² — bright where the surface is steep, which is
+ *      where refracted light physically concentrates. No "thin filament" sampling
+ *      problem; the signal is smooth across the whole field.
+ *   4. Refraction: n.xy offsets the UV at which the gradient and shadow mask are
+ *      sampled, so the warm palette and palm leaf silhouettes visibly distort
+ *      around caustic regions as if seen through rippling water.
+ *   5. Directional lighting: half-lambert [0.75..1.25] modulates the gradient.
+ *      Lit slopes brighten, shaded slopes gently dim. Plus a tight specular
+ *      gated by caustic brightness — bright glints only on slope peaks.
+ *   6. Video shadow mask: cool-to-warm burnt-umber tint under palm leaves.
+ *
+ * Mouse position drives the virtual sun direction (X horizontal, Y subtle vertical
+ * breathing), so moving the cursor makes the light dance across the slopes without
+ * the underlying pattern changing. Progress drives the scroll reveal fade.
  */
 
 import * as THREE from 'three/webgpu';
@@ -23,14 +38,16 @@ import {
   color,
   Fn,
   sin,
-  abs,
+  max,
   dot,
   floor,
   fract,
+  normalize,
+  pow,
   smoothstep,
   clamp,
   texture,
-  PI,
+  time,
 } from 'three/tsl';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -49,122 +66,139 @@ let gsapCtx: gsap.Context | null = null;
 let ro: ResizeObserver | null = null;
 let ioObserver: IntersectionObserver | null = null;
 let rafId = 0;
-let lastTime = 0;
 let mouseHandler: ((e: MouseEvent) => void) | null = null;
 let videoReady = false;
 let lastVideoUpdate = 0;
 
-const state = { progress: 0, mouseX: 0.5, mouseY: 0.5 };
+const state = { progress: 0, mouseX: 0.34, mouseY: 0.5 };
 let mouseQuickToX: gsap.QuickToFunc | null = null;
 let mouseQuickToY: gsap.QuickToFunc | null = null;
 
 /* ── TSL Uniforms ── */
 export const uProgress = uniform(0);
-export const uMouse = uniform(new THREE.Vector2(0.5, 0.5));
-export const uTime = uniform(0);
+export const uSunX = uniform(0.34); // sun horizontal position, driven by mouseX
+export const uSunY = uniform(0.5); // sun vertical tilt, driven by mouseY — narrow range
 
-// Caustic tuning uniforms — exposed for tweakpane
-export const uCausticScale = uniform(3.0);
-export const uCausticSpeed = uniform(0.5);
-export const uCausticPower = uniform(2.0);
-export const uCausticBrightness = uniform(0.5);
-export const uMouseInfluence = uniform(0.2);
+// Caustic tuning — exposed for tweakpane
+export const uCausticScale = uniform(2.3);
+export const uCausticSpeed = uniform(0.14);
+export const uCausticSharpness = uniform(2.5);
+export const uCausticHeight = uniform(2.0);
 
-// Shadow tuning uniforms
-export const uShadowThreshold = uniform(0.41);
-export const uShadowSoftness = uniform(1.0);
-export const uShadowAlpha = uniform(0.2);
+// Shadow mask tuning
+export const uShadowThreshold = uniform(0.0);
+export const uShadowSoftness = uniform(2.0);
+export const uShadowAlpha = uniform(0.54);
 
-// Gradient tuning
-export const uGradientWidth = uniform(1.8);   // cone horizontal spread
+// Lighting
+export const uRefraction = uniform(0.02);
+export const uSpecStrength = uniform(0.9);
+export const uSpecSharp = uniform(128.0);
 
-// Caustic fBm tuning
-export const uCausticWarp = uniform(0.3);     // domain warp strength
-
-// videoTexNode is a TextureNode bound to a 1×1 CanvasTexture placeholder at build.
-// When the video is ready, we swap `.value` to the real VideoTexture — TextureNode's
-// setter rebinds the sampler without rebuilding the shader graph.
+// VideoTexNode — placeholder swapped to real VideoTexture when video plays
 let placeholderTex: THREE.Texture | null = null;
 let videoTexNode: ReturnType<typeof texture> | null = null;
 
-/* ── TSL: Gradient reveal ── */
-const gradientFn = Fn(() => {
-  const cDeep      = color(0xc94020); // deep burnt orange — bottom anchor
-  const cOrange    = color(0xef5d2a); // --color-orange
-  const cCoral     = color(0xf0a080); // warm coral mid
-  const cPeach     = color(0xf0c4a8); // --color-peach
-  const cParchment = color(0xf9efe6); // --color-background — top
+/* ── TSL: Gradient ──────────────────────────────────────────────────────────
+ * Vertical 5-stop ramp: deep burnt orange at the bottom → orange → coral →
+ * peach → parchment at the top. A gentle horizontal sine ripple offsets the
+ * sample so the bands read as a painted blend rather than a hard ramp.
+ * Progress compresses the Y axis — at progress=0 nothing lit, at 1 full cone.
+ *
+ * Parameterized by UV so the fragment can sample it at a refracted position.
+ * ───────────────────────────────────────────────────────────────────────────*/
+const gradientFn = Fn(([sampleUV]: [any]) => {
+  const cDeep = color(0xc94020);
+  const cOrange = color(0xef5d2a);
+  const cCoral = color(0xf0a080);
+  const cPeach = color(0xf0c4a8);
+  const cParchment = color(0xf9efe6);
 
   const safeProgress = clamp(uProgress, float(0.001), float(1.0));
-  const ripple = sin(uv().x.mul(6.0).add(uTime.mul(0.3))).mul(0.03);
-  const t = clamp(uv().y.div(safeProgress).add(ripple), float(0.0), float(1.0));
+  const ripple = sin(sampleUV.x.mul(6.0).add(time.mul(0.3))).mul(0.03);
+  const t = clamp(sampleUV.y.div(safeProgress).add(ripple), float(0.0), float(1.0));
 
-  // 5-stop gradient: deep → orange → coral → peach → parchment
-  const c01 = mix(cDeep,   cOrange,    smoothstep(float(0.0),  float(0.25), t));
-  const c12 = mix(c01,     cCoral,     smoothstep(float(0.25), float(0.5),  t));
-  const c23 = mix(c12,     cPeach,     smoothstep(float(0.5),  float(0.75), t));
-  const c34 = mix(c23,     cParchment, smoothstep(float(0.75), float(1.0),  t));
+  const c01 = mix(cDeep, cOrange, smoothstep(float(0.0), float(0.45), t));
+  const c12 = mix(c01, cCoral, smoothstep(float(0.2), float(0.65), t));
+  const c23 = mix(c12, cPeach, smoothstep(float(0.45), float(0.85), t));
+  const c34 = mix(c23, cParchment, smoothstep(float(0.65), float(1.0), t));
 
   return c34;
 });
 
-/* ── TSL: Water caustics ── */
-
-// Value noise cell — smoothstep-interpolated hash grid, inlined to avoid Fn param issues
-const hashF = (px: any, py: any) =>
-  fract(sin(px.mul(127.1).add(py.mul(311.7))).mul(43758.5453));
-
-const causticFn = Fn(() => {
-  const p = uv().mul(uCausticScale);
-
-  // Three noise layers at different scales and speeds — GPU Gems multiplicative pattern.
-  // Multiplying layers together creates sharp bright focal points (caustic veins)
-  // rather than uniform noise — where all three are bright simultaneously, light focuses.
-  const noiseLayer = (cx: any, cy: any) => {
-    const ix = floor(cx); const iy = floor(cy);
-    const fx = fract(cx); const fy = fract(cy);
-    const ux = fx.mul(fx).mul(float(3.0).sub(fx.mul(2.0)));
-    const uy = fy.mul(fy).mul(float(3.0).sub(fy.mul(2.0)));
-    return mix(
-      mix(hashF(ix,          iy         ), hashF(ix.add(1.0), iy         ), ux),
-      mix(hashF(ix,          iy.add(1.0)), hashF(ix.add(1.0), iy.add(1.0)), ux),
-      uy,
-    );
-  };
-
-  // Layer 1: large slow cells
-  const t1 = uTime.mul(0.4);
-  const l1 = noiseLayer(p.x.add(t1), p.y.add(t1.mul(0.7)));
-
-  // Layer 2: medium, different direction
-  const t2 = uTime.mul(0.7);
-  const l2 = noiseLayer(p.x.mul(1.7).sub(t2.mul(0.5)), p.y.mul(1.7).add(t2));
-
-  // Layer 3: fine fast detail
-  const t3 = uTime.mul(1.1);
-  const l3 = noiseLayer(p.x.mul(3.1).add(t3), p.y.mul(3.1).sub(t3.mul(0.8)));
-
-  // Multiply layers — only where all are bright does caustic focal point appear
-  const raw = l1.mul(l2).mul(l3);
-
-  // Raise to power for contrast — higher = tighter brighter veins
-  const sharpened = raw.pow(uCausticPower);
-
-  const causticStrength = clamp(uProgress.mul(1.43), float(0.0), float(1.0));
-  return clamp(sharpened.mul(causticStrength).mul(uCausticBrightness.mul(8.0)), float(0.0), float(1.0));
+/* ── TSL: Smooth caustic height field ───────────────────────────────────────
+ * Three-octave domain-warped fBm. A continuous, nonzero-everywhere scalar
+ * field representing the shape of the rippling water surface (not the caustic
+ * brightness directly — that comes from the gradient of this field).
+ *
+ * Why not Voronoi edges? F2−F1 produces thin filaments that are near-zero
+ * everywhere except on a 1-pixel-wide crease. Finite-difference sampling
+ * (eps ≈ a few pixels) misses the crease entirely 99% of the time, so the
+ * derived normal is flat almost everywhere and lighting doesn't register.
+ *
+ * fBm gives smooth slopes nonzero across the whole field. |∇h| is high where
+ * the surface is steep — which is where physical caustics form (light
+ * concentrates on slope changes). Same field provides (a) a smooth normal
+ * for lighting + refraction and (b) caustic brightness from the gradient.
+ * ───────────────────────────────────────────────────────────────────────────*/
+const hash2 = Fn(([p]: [any]) => {
+  return fract(sin(p.x.mul(127.1).add(p.y.mul(311.7))).mul(43758.5453));
 });
 
+// Smooth value noise — bilinear interp of 4 hashed corners, quintic smooth
+const valueNoise = Fn(([p]: [any]) => {
+  const i = floor(p);
+  const f = fract(p);
 
-const causticColorFn = Fn(() => {
-  return causticFn();
+  // Quintic smoothstep for smoother derivatives at cell boundaries
+  const u = f
+    .mul(f)
+    .mul(f)
+    .mul(f.mul(f.mul(6.0).sub(15.0)).add(10.0));
+
+  const a = hash2(i);
+  const b = hash2(i.add(vec2(1.0, 0.0)));
+  const c = hash2(i.add(vec2(0.0, 1.0)));
+  const d = hash2(i.add(vec2(1.0, 1.0)));
+
+  return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
 });
 
-/* ── TSL: Shadow mask ── */
-const shadowMaskFn = Fn(() => {
-  // Bright video pixels (lit leaves) = shadow=1. Dark pixels = shadow=0.
-  // Placeholder is opaque black → luminance=0 → shadow=0 → no shadow until video loads.
-  // Invert luminance — dark areas of video (leaf shapes) become shadow=1
-  const luma = dot(videoTexNode!.rgb, vec3(0.2126, 0.7152, 0.0722));
+// 3-octave fBm — sum of value noise at doubling frequencies, halving amplitudes
+const fbm = Fn(([p]: [any]) => {
+  const n1 = valueNoise(p);
+  const n2 = valueNoise(p.mul(2.0)).mul(0.5);
+  const n3 = valueNoise(p.mul(4.0)).mul(0.25);
+  return n1.add(n2).add(n3).mul(0.571); // normalise to [0, 1]
+});
+
+// The scalar height field. Domain-warped so it flows rather than obviously tiles.
+const causticHeightFn = Fn(([sampleUV]: [any]) => {
+  const t = time.mul(uCausticSpeed);
+  const p = sampleUV.mul(uCausticScale);
+
+  // Domain warp — feed p into fbm, use the result to offset p, sample fbm again.
+  // This destroys the grid structure of valueNoise and creates flowing forms.
+  const warpX = fbm(p.add(vec2(t, float(0.0))));
+  const warpY = fbm(p.add(vec2(float(0.0), t.mul(0.8))));
+  const warped = p.add(vec2(warpX, warpY).mul(1.5)).add(vec2(t.mul(0.3), t.mul(-0.2)));
+
+  // Final sample — smooth animated field ∈ [0, 1]
+  return fbm(warped);
+});
+
+/* ── TSL: Shadow mask ───────────────────────────────────────────────────────
+ * Dark video pixels (leaf silhouettes) → shadow = 1.
+ * Bright video pixels (lit sky between leaves) → shadow = 0.
+ * Sampled at an arbitrary UV so the refraction pass can displace it.
+ * ───────────────────────────────────────────────────────────────────────────*/
+const shadowMaskFn = Fn(([sampleUV]: [any]) => {
+  // Video texture is Y-flipped relative to canvas UV convention
+  const flipped = vec2(sampleUV.x, float(1.0).sub(sampleUV.y));
+  // Sample the same videoTexNode at a new UV — TSL clones with referenceNode
+  // so `.value =` swaps still apply to this sample.
+  const videoRgb = texture(videoTexNode!, flipped).rgb;
+  const luma = dot(videoRgb, vec3(0.2126, 0.7152, 0.0722));
   return smoothstep(
     uShadowThreshold.sub(uShadowSoftness),
     uShadowThreshold.add(uShadowSoftness),
@@ -177,25 +211,17 @@ const shadowMaskFn = Fn(() => {
 function resize(): void {
   if (!canvas || !renderer) return;
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  const w = canvas.clientWidth;
-  const h = canvas.clientHeight;
   renderer.setPixelRatio(dpr);
-  renderer.setSize(w, h, false);
+  renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
 }
 
 /* ── Render loop ── */
 
 const VIDEO_UPDATE_INTERVAL = 1000 / 15;
 
-
-function tick(timestamp: number): void {
+function tick(_timestamp: number): void {
   if (!renderer || !scene || !camera) return;
 
-  const delta = lastTime ? (timestamp - lastTime) / 1000 : 0;
-  lastTime = timestamp;
-  uTime.value += delta * uCausticSpeed.value;
-
-  // Upload video texture at capped rate (~15fps)
   if (videoReady && videoEl && videoEl.readyState >= videoEl.HAVE_CURRENT_DATA) {
     const now = performance.now();
     if (now - lastVideoUpdate > VIDEO_UPDATE_INTERVAL) {
@@ -208,7 +234,6 @@ function tick(timestamp: number): void {
 
   if (state.progress <= 0 && !videoReady) {
     rafId = 0;
-    lastTime = 0;
     return;
   }
   rafId = requestAnimationFrame(tick);
@@ -216,7 +241,8 @@ function tick(timestamp: number): void {
 
 function ensureLoop(): void {
   uProgress.value = state.progress;
-  uMouse.value.set(state.mouseX, state.mouseY);
+  uSunX.value = state.mouseX;
+  uSunY.value = state.mouseY;
   if (!rafId) rafId = requestAnimationFrame(tick);
 }
 
@@ -231,11 +257,7 @@ export function setProgress(v: number): void {
 async function initRenderer(): Promise<boolean> {
   if (!canvas) return false;
 
-  renderer = new THREE.WebGPURenderer({
-    canvas,
-    alpha: true,
-    antialias: false,
-  });
+  renderer = new THREE.WebGPURenderer({ canvas, alpha: true, antialias: false });
 
   try {
     await renderer.init();
@@ -244,60 +266,117 @@ async function initRenderer(): Promise<boolean> {
     return false;
   }
 
-  const w = canvas.clientWidth;
-  const h = canvas.clientHeight;
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
   renderer.setPixelRatio(dpr);
-  renderer.setSize(w, h, false);
+  renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
   renderer.setClearColor(0x000000, 0);
 
   scene = new THREE.Scene();
-
   camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 10);
   camera.position.z = 1;
 
-  // Initialise video placeholder here (not at module scope) so document is available.
-  // A 1×1 CanvasTexture is the minimal valid THREE.Texture for TSL's texture() node.
+  // Placeholder 1×1 canvas texture for videoTexNode until the video plays.
+  // Must have pixel data — empty canvas → CopyExternalImageToTexture error on WebGPU.
   if (!placeholderTex) {
     const c = document.createElement('canvas');
     c.width = 1;
     c.height = 1;
-    c.getContext('2d')!.fillRect(0, 0, 1, 1); // ensure canvas has pixel data — empty canvas → CopyExternalImageToTexture error
+    c.getContext('2d')!.fillRect(0, 0, 1, 1);
     placeholderTex = new THREE.CanvasTexture(c);
     placeholderTex.colorSpace = THREE.SRGBColorSpace;
   }
 
-  // Build the TextureNode once, bound to the placeholder. Later we swap
-  // `videoTexNode.value` to the real VideoTexture — no graph rebuild needed.
-  videoTexNode = texture(placeholderTex, vec2(uv().x, float(1.0).sub(uv().y)));
+  // Build the base TextureNode once with no UV. Samples elsewhere use
+  // texture(videoTexNode, customUV) which clones with a referenceNode —
+  // so swapping `.value` to the real VideoTexture still updates every sample.
+  videoTexNode = texture(placeholderTex);
 
-  // Fullscreen quad — normalized to camera frustum
   const geo = new THREE.PlaneGeometry(2, 2);
   material = new THREE.MeshBasicNodeMaterial();
 
+  // Warm shadow tint — deep burnt umber reads as shade without going cold.
+  // A blue-grey here pulls the whole palette away from the brand's warmth.
+  const shadowTint = color(0x5a2818);
+  // Warm specular tint — sunlight glint on caustic peaks
+  const specTint = color(0xfff4d8);
+
+  /* ── Physical model ──────────────────────────────────────────────────────
+   * Treat the caustic field as a height map. Sample it at four neighbouring
+   * points; the central differences give a surface normal. From that normal:
+   *
+   *  1. Refraction — n.xy displaces where we sample the gradient and shadow
+   *     mask, so the underlying image visibly distorts around caustic regions.
+   *  2. Diffuse — n · sunDir, centred above 1.0 so slopes facing the sun
+   *     *brighten* the gradient rather than only shading darker.
+   *  3. Specular — pow(n · sunDir, hard) weighted by |∇h|², so only steep
+   *     slopes facing the sun sparkle. Tied to sun direction → moves with mouse.
+   *
+   * Everything composites on the refracted gradient sample — one field drives
+   * the whole composite, no layer-on-layer fighting.
+   * ────────────────────────────────────────────────────────────────────────*/
   const finalColorFn = Fn(() => {
-    const bg = gradientFn();
-    const shadow = shadowMaskFn();
-    const caustic = causticColorFn();
+    const baseUV = uv();
 
-    // Caustics are brightest through leaf gaps (where shadow=0) and
-    // at leaf edges where light focuses. Suppressed under solid leaf (shadow=1).
-    // shadow edge sharpens caustic — multiply caustic by (1-shadow) so veins
-    // appear through gaps and fade under leaves, like sunlight through a canopy.
-    const causticThroughLeaves = caustic.mul(float(1.0).sub(shadow));
+    // Finite-difference epsilon. fBm at modest scale has slopes ~0.1/unit-UV,
+    // so we need enough separation to see a meaningful difference.
+    const eps = float(0.008);
 
-    // Caustics brighten the gradient multiplicatively — warm shimmer on lit surface
-    const causticLight = bg.mul(float(1.0).add(causticThroughLeaves.mul(uCausticBrightness.mul(3.0))));
+    // Four-tap central differences give symmetric normals with no bias.
+    const hL = causticHeightFn(baseUV.sub(vec2(eps, float(0.0))));
+    const hR = causticHeightFn(baseUV.add(vec2(eps, float(0.0))));
+    const hD = causticHeightFn(baseUV.sub(vec2(float(0.0), eps)));
+    const hU = causticHeightFn(baseUV.add(vec2(float(0.0), eps)));
 
-    // Leaf shadow darkens the gradient — cool slightly to feel like shade
-    const shadedBg = bg.mul(float(1.0).sub(shadow.mul(uShadowAlpha)));
+    // Gradient in UV space — slopes of the height field
+    const dhdx = hR.sub(hL).mul(uCausticHeight);
+    const dhdy = hU.sub(hD).mul(uCausticHeight);
 
-    // Blend: lit+caustics in open areas, shaded under leaves
-    return mix(causticLight, shadedBg, shadow);
+    // Surface normal. Smaller z = more dramatic tilts → stronger lighting response.
+    const n = normalize(vec3(dhdx.negate(), dhdy.negate(), float(0.04)));
+
+    // Caustic brightness = |∇h|². Bright where the surface is steep, which
+    // is where refracted light physically concentrates. Smooth falloff.
+    const slopeSq = dhdx.mul(dhdx).add(dhdy.mul(dhdy));
+    const causticBright = clamp(slopeSq.mul(8.0), float(0.0), float(1.0)).pow(uCausticSharpness);
+
+    // Refraction — tilt direction offsets where we sample the underlying image
+    const refractOffset = n.xy.mul(uRefraction);
+    const refractedUV = baseUV.add(refractOffset);
+
+    const grad = gradientFn(refractedUV);
+    const shadow = shadowMaskFn(refractedUV);
+
+    // Sun direction — horizontal tracks mouseX, vertical tilts with mouseY
+    // in a narrow [0.35, 0.65] range so the light "breathes" as the cursor
+    // moves without ever looking like a control surface.
+    const sunDir = normalize(vec3(uSunX.mul(2.0).sub(1.0), uSunY.mul(0.3).add(0.35), float(0.7)));
+
+    // Diffuse lighting — centred above 1.0 so lit slopes *brighten* the
+    // underlying gradient (range [0.75..1.25]). A symmetric [0.5..1.0]
+    // half-lambert darkens more than it lights, which fights the brand palette.
+    const nDotL = max(dot(n, sunDir), float(0.0));
+    const diffuse = nDotL.mul(0.5).add(0.75);
+
+    // Specular — tight highlight on slopes facing the sun, gated by caustic brightness
+    const spec = pow(nDotL, uSpecSharp).mul(causticBright).mul(uSpecStrength);
+
+    // Base lit surface — gradient modulated by diffuse, with warm caustic glow
+    // added where |∇h| is high. Specular is the bright glint.
+    const causticGlow = specTint.mul(causticBright).mul(0.55);
+    const lit = grad.mul(diffuse).add(causticGlow).add(specTint.mul(spec));
+
+    // Shadow overlay — warm burnt umber where leaves block the sun
+    const shaded = mix(lit, shadowTint, shadow.mul(uShadowAlpha));
+
+    // Progress fades in from the flat un-refracted gradient
+    const flatGrad = gradientFn(baseUV);
+    return mix(flatGrad, shaded, clamp(uProgress.mul(1.2), float(0.0), float(1.0)));
   });
 
-  material.colorNode = vec4(finalColorFn(), uProgress);
-  material.transparent = true;
+  // Alpha = 1: the canvas is always opaque. Progress only drives the composite
+  // fade inside finalColorFn — easier to diagnose scroll pipeline issues.
+  material.colorNode = vec4(finalColorFn(), float(1.0));
+  material.transparent = false;
   quad = new THREE.Mesh(geo, material);
   scene.add(quad);
 
@@ -318,8 +397,6 @@ function initVideo(): void {
       if (entries[0]?.isIntersecting) {
         videoEl!.load();
         videoEl!.play().catch(() => {
-          // Autoplay blocked — shadow mask stays transparent (placeholder texture).
-          // Do not set videoReady: the loop stop condition stays correct.
           videoEl!.currentTime = 0;
         });
         ioObserver!.disconnect();
@@ -331,14 +408,13 @@ function initVideo(): void {
   ioObserver.observe(footer);
 
   const onReady = () => {
-    if (!videoEl || !videoTexNode) return; // destroyed before event fired
+    if (!videoEl || !videoTexNode) return;
     videoReady = true;
     videoTexture = new THREE.VideoTexture(videoEl);
     videoTexture.minFilter = THREE.LinearFilter;
     videoTexture.magFilter = THREE.LinearFilter;
     videoTexture.format = THREE.RGBAFormat;
     videoTexture.colorSpace = THREE.SRGBColorSpace;
-    // Swap the TextureNode's bound texture — sampler rebinds, graph stays intact.
     videoTexNode.value = videoTexture;
     ensureLoop();
   };
@@ -362,20 +438,20 @@ export async function initFooterShaders(opts?: { staticProgress?: number }): Pro
 
   const quickOpts = { duration: 0.4, ease: 'power2.out', onUpdate: ensureLoop };
   mouseQuickToX = gsap.quickTo(state, 'mouseX', quickOpts);
-  mouseQuickToY = gsap.quickTo(state, 'mouseY', { ...quickOpts, duration: 0.6 });
+  // Longer duration on Y — vertical cursor motion is usually incidental, so
+  // a lazier lag makes the sun feel like it's drifting rather than tracking.
+  mouseQuickToY = gsap.quickTo(state, 'mouseY', { ...quickOpts, duration: 0.9 });
 
   const footer = document.querySelector('[data-footer]') as HTMLElement | null;
   mouseHandler = (e: MouseEvent) => {
     mouseQuickToX!(e.clientX / window.innerWidth);
     if (footer) {
       const rect = footer.getBoundingClientRect();
-      const yInFooter = (e.clientY - rect.top) / rect.height;
-      mouseQuickToY!(Math.max(0, Math.min(1, yInFooter)));
+      mouseQuickToY!(Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height)));
     }
   };
   window.addEventListener('mousemove', mouseHandler, { passive: true });
 
-  // Dev / static mode: skip ScrollTrigger, lock progress at provided value
   if (opts?.staticProgress !== undefined) {
     state.progress = opts.staticProgress;
     ensureLoop();
@@ -401,8 +477,8 @@ export async function initFooterShaders(opts?: { staticProgress?: number }): Pro
       onUpdate: ensureLoop,
       scrollTrigger: {
         trigger: footerTrigger,
-        start: 'top 130%',
-        end: 'bottom 40%',
+        start: 'top 85%',
+        end: 'bottom 50%',
         scrub: 1,
       },
     });
@@ -412,7 +488,6 @@ export async function initFooterShaders(opts?: { staticProgress?: number }): Pro
 export function destroyFooterShaders(): void {
   cancelAnimationFrame(rafId);
   rafId = 0;
-  lastTime = 0;
 
   ioObserver?.disconnect();
   ioObserver = null;
@@ -448,16 +523,15 @@ export function destroyFooterShaders(): void {
   videoEl = null;
   videoTexture?.dispose();
   videoTexture = null;
-  // Rebind the TextureNode to the placeholder so a subsequent init won't sample a disposed texture.
   if (videoTexNode && placeholderTex) videoTexNode.value = placeholderTex;
   videoTexNode = null;
   videoReady = false;
   lastVideoUpdate = 0;
 
   state.progress = 0;
-  state.mouseX = 0.5;
+  state.mouseX = 0.34;
   state.mouseY = 0.5;
 }
 
-// Back-compat aliases so BaseLayout doesn't need updating until we're ready to clean up
+// Back-compat aliases
 export { initFooterShaders as initFooterShadows, destroyFooterShaders as destroyFooterShadows };

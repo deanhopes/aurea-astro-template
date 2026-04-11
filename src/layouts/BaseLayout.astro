@@ -11,10 +11,8 @@ export interface Props {
   description?: string;
 }
 
-const {
-  title,
-  description = 'Aurea Residences — Waterfront living in Edgewater, Miami',
-} = Astro.props;
+const { title, description = 'Aurea Residences — Waterfront living in Edgewater, Miami' } =
+  Astro.props;
 ---
 
 <!doctype html>
@@ -31,7 +29,9 @@ const {
   </head>
   <body>
     <!-- Lenis scrollend workaround (known Astro ClientRouter conflict) -->
-    <script is:inline>delete window.onscrollend;</script>
+    <script is:inline>
+      delete window.onscrollend;
+    </script>
 
     <div id="page-curtain" transition:persist aria-hidden="true">
       <div class="curtain__panel curtain__panel--left"></div>
@@ -42,7 +42,12 @@ const {
     <main id="main-content">
       <slot />
       <!-- Invisible trigger for footer wordmark animation -->
-      <div data-footer-trigger aria-hidden="true" style="position:relative;height:1px;pointer-events:none;"></div>
+      <div
+        data-footer-trigger
+        aria-hidden="true"
+        style="position:relative;height:1px;pointer-events:none;"
+      >
+      </div>
     </main>
     <Footer />
 
@@ -80,9 +85,9 @@ const {
 
     <!-- Footer shadow silhouettes -->
     <script>
-      import { initFooterShadows, destroyFooterShadows } from '@lib/footer-shadows';
+      import { initFooterShadows, destroyFooterShadows } from '@lib/footer-shaders';
 
-      document.addEventListener('astro:page-load', initFooterShadows);
+      document.addEventListener('astro:page-load', () => initFooterShadows());
       document.addEventListener('astro:before-swap', destroyFooterShadows);
     </script>
 
@@ -109,7 +114,7 @@ const {
               }
             });
           },
-          { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+          { threshold: 0.1, rootMargin: '0px 0px -50px 0px' },
         );
 
         elements.forEach((el) => observer.observe(el));
