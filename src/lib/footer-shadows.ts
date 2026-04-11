@@ -12,6 +12,7 @@
 import * as THREE from 'three/webgpu';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { uniform, vec4, mix, uv, color, Fn } from 'three/tsl';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -29,11 +30,25 @@ let gsapCtx: gsap.Context | null = null;
 let ro: ResizeObserver | null = null;
 let ioObserver: IntersectionObserver | null = null;
 let rafId = 0;
+let lastTime = 0;
 let mouseHandler: ((e: MouseEvent) => void) | null = null;
 
 const state = { progress: 0, mouseX: 0.5, mouseY: 0.5 };
 let mouseQuickToX: gsap.QuickToFunc | null = null;
 let mouseQuickToY: gsap.QuickToFunc | null = null;
+
+/* ── TSL Uniforms ── */
+const uProgress = uniform(0);
+const uMouse = uniform(new THREE.Vector2(0.5, 0.5));
+const uTime = uniform(0);
+
+/* ── TSL: Background gradient ── */
+const gradientFn = Fn(() => {
+  const bgTop = color(0xf9efe6); // warm parchment — matches --color-background
+  const bgBottom = color(0xd95f2a); // deep sunset orange
+  // uv().y = 0 at bottom, 1 at top in Three.js orthographic
+  return mix(bgBottom, bgTop, uv().y);
+});
 
 /* ── Sizing ── */
 
@@ -48,18 +63,26 @@ function resize(): void {
 
 /* ── Render loop ── */
 
-function tick(): void {
+function tick(timestamp: number): void {
   if (!renderer || !scene || !camera) return;
+
+  const delta = lastTime ? (timestamp - lastTime) / 1000 : 0;
+  lastTime = timestamp;
+  uTime.value += delta * 0.1; // slow clock — caustics animate at ~0.1 units/sec
+
   renderer.renderAsync(scene, camera);
 
   if (state.progress <= 0) {
     rafId = 0;
+    lastTime = 0;
     return;
   }
   rafId = requestAnimationFrame(tick);
 }
 
 function ensureLoop(): void {
+  uProgress.value = state.progress;
+  uMouse.value.set(state.mouseX, state.mouseY);
   if (!rafId) rafId = requestAnimationFrame(tick);
 }
 
@@ -96,7 +119,8 @@ async function initRenderer(): Promise<boolean> {
   // Fullscreen quad — normalized to camera frustum
   const geo = new THREE.PlaneGeometry(2, 2);
   material = new THREE.MeshBasicNodeMaterial();
-  // colorNode wired in Task 5
+  material.colorNode = vec4(gradientFn(), uProgress);
+  material.transparent = true;
   quad = new THREE.Mesh(geo, material);
   scene.add(quad);
 
@@ -160,6 +184,7 @@ export async function initFooterShadows(): Promise<void> {
 export function destroyFooterShadows(): void {
   cancelAnimationFrame(rafId);
   rafId = 0;
+  lastTime = 0;
 
   ioObserver?.disconnect();
   ioObserver = null;
