@@ -87,32 +87,19 @@ export const uCausticWarp = uniform(0.3);     // domain warp strength
 let placeholderTex: THREE.Texture | null = null;
 let videoTexNode: ReturnType<typeof texture> | null = null;
 
-/* ── TSL: Radial bloom gradient ── */
+/* ── TSL: Gradient reveal ── */
 const gradientFn = Fn(() => {
-  const cOrange    = color(0xef5d2a); // --color-orange        hot core
-  const cPeach     = color(0xf0c4a8); // --color-peach         warm mid
-  const cParchment = color(0xf9efe6); // --color-background    outer glow
-  const cDark      = color(0x323032); // --color-black         edges
+  const cOrange    = color(0xef5d2a); // --color-orange   bottom
+  const cParchment = color(0xf9efe6); // --color-background top
 
-  // Compress Y by progress — cone grows upward from 0 to full height
+  // progress drives how much of the gradient is revealed from the bottom up.
+  // At progress=0: scaledY always >= 1, whole canvas maps to cOrange.
+  // At progress=1: full 0→1 gradient visible — parchment at top, orange at bottom.
+  // Like a blind being raised: warm light floods in from the bottom.
   const safeProgress = clamp(uProgress, float(0.001), float(1.0));
-  const scaledY = uv().y.div(safeProgress);
+  const scaledY = clamp(uv().y.div(safeProgress), float(0.0), float(1.0));
 
-  // Cone distance from bottom-centre in compressed space
-  // uGradientWidth widens the cone horizontally relative to height
-  const dx = uv().x.sub(0.5).mul(uGradientWidth);
-  const dist = dx.mul(dx).add(scaledY.mul(scaledY)).sqrt();
-
-  // Four colour stops blended via smoothstep chains
-  const t01 = smoothstep(float(0.0),  float(0.15), dist); // orange → peach
-  const t12 = smoothstep(float(0.15), float(0.45), dist); // peach → parchment
-  const t23 = smoothstep(float(0.45), float(0.75), dist); // parchment → dark
-
-  const c0 = mix(cOrange,    cPeach,     t01);
-  const c1 = mix(c0,         cParchment, t12);
-  const c2 = mix(c1,         cDark,      t23);
-
-  return c2;
+  return mix(cOrange, cParchment, scaledY);
 });
 
 /* ── TSL: fBm caustics ── */
@@ -180,16 +167,13 @@ const causticColorFn = Fn(() => {
 
 /* ── TSL: Shadow mask ── */
 const shadowMaskFn = Fn(() => {
-  // Sample the live VideoTexture (or 1×1 placeholder before video is ready).
-  // Placeholder is transparent black → luminance ≈ 0 → smoothstep returns ~1 →
-  // 1 - smoothstep ≈ 0 → no shadow visible until the real video is bound.
-  return float(1.0).sub(
-    smoothstep(
-      uShadowThreshold.sub(uShadowSoftness),
-      uShadowThreshold.add(uShadowSoftness),
-      // Luminance (Rec. 709) of video texel, Y-flipped
-      dot(videoTexNode!.rgb, vec3(0.2126, 0.7152, 0.0722)),
-    ),
+  // Bright video pixels (lit leaves) = shadow=1. Dark pixels = shadow=0.
+  // Placeholder is opaque black → luminance=0 → shadow=0 → no shadow until video loads.
+  return smoothstep(
+    uShadowThreshold.sub(uShadowSoftness),
+    uShadowThreshold.add(uShadowSoftness),
+    // Luminance (Rec. 709) of video texel, Y-flipped
+    dot(videoTexNode!.rgb, vec3(0.2126, 0.7152, 0.0722)),
   );
 });
 
