@@ -101,7 +101,7 @@ const gradientFn = Fn(() => {
 const hash2 = Fn(([p]: [any]) => {
   const px = p.x.mul(127.1).add(p.y.mul(311.7));
   const py = p.x.mul(269.5).add(p.y.mul(183.3));
-  return fract(sin(vec2(px, py)).mul(43758.5453));
+  return fract(vec2(sin(px), sin(py)).mul(43758.5453));
 });
 
 // Value noise — bilinear interpolation of hashed corners
@@ -129,6 +129,7 @@ const fbm4 = Fn(([p]: [any]) => {
 const causticFn = Fn(() => {
   const p = uv().sub(uMouse.mul(uMouseInfluence)).mul(uCausticScale);
   const animP = p.add(uTime);
+  // uTime scalar broadcasts to both X and Y — produces omnidirectional drift
 
   // Domain warp — sample fbm twice with offsets to distort input coords
   const warpX = fbm4([animP.add(vec2(1.7, 9.2))]);
@@ -141,6 +142,7 @@ const causticFn = Fn(() => {
   // Caustic sharpen: abs(sin(n * PI)) → bright veins, dark gaps
   const sharpened = abs(sin(n.mul(PI))).pow(uCausticPower);
 
+  // 1.43 = ramp-in overshoot scale — reaches full strength at ~70% progress
   const causticStrength = clamp(uProgress.mul(1.43), float(0.0), float(1.0));
   return sharpened.mul(causticStrength).mul(uCausticBrightness);
 });
@@ -149,6 +151,7 @@ const causticColorFn = Fn(() => {
   const intensity = causticFn();
   const warmWhite = color(0xfff5e0);
   const warmGold = color(0xffd97a);
+  // Fade to black at zero intensity — mix selects hue, mul controls brightness
   return mix(warmWhite, warmGold, intensity).mul(intensity);
 });
 
