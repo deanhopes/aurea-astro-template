@@ -664,11 +664,6 @@
     right: 0;
     z-index: -1;
     height: 100dvh;
-    background: linear-gradient(
-      180deg,
-      var(--color-background) 0%,
-      color-mix(in srgb, var(--color-peach) 30%, var(--color-background)) 100%
-    );
     overflow: hidden;
   }
 
@@ -2453,7 +2448,6 @@
   .neighbourhood__restaurant {
     transition: opacity 400ms var(--ease-premium);
   }
-
 
   /* When dining is active — image full width row 1, restaurants row 2 */
   .neighbourhood__content.is-dining .neighbourhood__map,
