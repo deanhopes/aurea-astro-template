@@ -73,7 +73,7 @@ export const uMouseInfluence = uniform(0.2);
 // Shadow tuning uniforms
 export const uShadowThreshold = uniform(0.41);
 export const uShadowSoftness = uniform(1.0);
-export const uShadowAlpha = uniform(0.37);
+export const uShadowAlpha = uniform(0.2);
 
 // Gradient tuning
 export const uGradientWidth = uniform(1.8);   // cone horizontal spread
@@ -287,13 +287,13 @@ async function initRenderer(): Promise<boolean> {
     const bg = gradientFn();
     const shadow = shadowMaskFn();
 
-    // Caustics add warm light on top of gradient, suppressed where palm shadows fall
-    const caustic = causticColorFn().mul(float(1.0).sub(shadow));
+    // Caustics add warm light on top of gradient, fully visible — shadow attenuates them
+    const caustic = causticColorFn().mul(float(1.0).sub(shadow.mul(0.8)));
 
-    // Palm shadow: darken gradient by uShadowAlpha where leaves are bright in video
-    const lit = bg.add(caustic);
-    const shadowed = bg.mul(float(1.0).sub(uShadowAlpha));
-    return mix(lit, shadowed, shadow);
+    // Palm shadow: subtle darkening only — leaves read as translucent shadow shapes
+    // uShadowAlpha controls how dark the shadow is (keep low, ~0.15–0.25)
+    const shadowDarken = bg.mul(shadow.mul(uShadowAlpha));
+    return bg.add(caustic).sub(shadowDarken);
   });
 
   material.colorNode = vec4(finalColorFn(), uProgress);
