@@ -106,55 +106,55 @@ const gradientFn = Fn(() => {
   return mix(cOrange, cParchment, scaledY);
 });
 
-/* ── TSL: fBm caustics ── */
+/* ── TSL: Water caustics ── */
 
-// Inline hash: dot-based pseudo-random float from vec2
-// Avoids Fn parameter passing issues — inlined directly where needed
-const hashInline = (px: any, py: any) =>
+// Value noise cell — smoothstep-interpolated hash grid, inlined to avoid Fn param issues
+const hashF = (px: any, py: any) =>
   fract(sin(px.mul(127.1).add(py.mul(311.7))).mul(43758.5453));
 
 const causticFn = Fn(() => {
   const p = uv().sub(uMouse.mul(uMouseInfluence)).mul(uCausticScale);
-  const animP = p.add(uTime);
 
-  // Inline 2-octave value noise — no Fn param passing, all inlined
-  const noiseAt = (cx: any, cy: any) => {
-    const ix = floor(cx);
-    const iy = floor(cy);
-    const fx = fract(cx);
-    const fy = fract(cy);
+  // Three noise layers at different scales and speeds — GPU Gems multiplicative pattern.
+  // Multiplying layers together creates sharp bright focal points (caustic veins)
+  // rather than uniform noise — where all three are bright simultaneously, light focuses.
+  const noiseLayer = (cx: any, cy: any) => {
+    const ix = floor(cx); const iy = floor(cy);
+    const fx = fract(cx); const fy = fract(cy);
     const ux = fx.mul(fx).mul(float(3.0).sub(fx.mul(2.0)));
     const uy = fy.mul(fy).mul(float(3.0).sub(fy.mul(2.0)));
-    const a = hashInline(ix,            iy           );
-    const b = hashInline(ix.add(1.0),   iy           );
-    const c = hashInline(ix,            iy.add(1.0)  );
-    const d = hashInline(ix.add(1.0),   iy.add(1.0)  );
-    return mix(mix(a, b, ux), mix(c, d, ux), uy);
+    return mix(
+      mix(hashF(ix,          iy         ), hashF(ix.add(1.0), iy         ), ux),
+      mix(hashF(ix,          iy.add(1.0)), hashF(ix.add(1.0), iy.add(1.0)), ux),
+      uy,
+    );
   };
 
-  const px = animP.x;
-  const py = animP.y;
+  // Layer 1: large slow cells
+  const t1 = uTime.mul(0.4);
+  const l1 = noiseLayer(p.x.add(t1), p.y.add(t1.mul(0.7)));
 
-  // 3 octaves inlined
-  const n1 = noiseAt(px,          py         );
-  const n2 = noiseAt(px.mul(2.0), py.mul(2.0)).mul(0.5);
-  const n3 = noiseAt(px.mul(4.0), py.mul(4.0)).mul(0.25);
-  const n = clamp(n1.add(n2).add(n3).mul(0.571), float(0.0), float(1.0));
+  // Layer 2: medium, different direction
+  const t2 = uTime.mul(0.7);
+  const l2 = noiseLayer(p.x.mul(1.7).sub(t2.mul(0.5)), p.y.mul(1.7).add(t2));
 
-  // Caustic sharpen: abs(sin(n * PI)) → bright veins, dark gaps
-  const sharpened = abs(sin(n.mul(PI))).pow(uCausticPower);
+  // Layer 3: fine fast detail
+  const t3 = uTime.mul(1.1);
+  const l3 = noiseLayer(p.x.mul(3.1).add(t3), p.y.mul(3.1).sub(t3.mul(0.8)));
 
-  // 1.43 = ramp-in overshoot scale — reaches full strength at ~70% progress
+  // Multiply layers — only where all are bright does caustic focal point appear
+  const raw = l1.mul(l2).mul(l3);
+
+  // Raise to power for contrast — higher = tighter brighter veins
+  const sharpened = raw.pow(uCausticPower);
+
   const causticStrength = clamp(uProgress.mul(1.43), float(0.0), float(1.0));
-  return sharpened.mul(causticStrength).mul(uCausticBrightness);
+  return clamp(sharpened.mul(causticStrength).mul(uCausticBrightness.mul(8.0)), float(0.0), float(1.0));
 });
 
 
 const causticColorFn = Fn(() => {
-  const intensity = causticFn();
-  // Caustics tint toward orange-gold — blends with the gradient rather than blowing it out
-  const causticTint = color(0xd96030);
-  return causticTint.mul(intensity);
+  return causticFn();
 });
 
 /* ── TSL: Shadow mask ── */
@@ -276,9 +276,17 @@ async function initRenderer(): Promise<boolean> {
   const finalColorFn = Fn(() => {
     const bg = gradientFn();
     const shadow = shadowMaskFn();
-    const caustic = causticColorFn().mul(float(1.0).sub(shadow.mul(0.8)));
-    const shadowDarken = bg.mul(shadow.mul(uShadowAlpha));
-    return bg.add(caustic).sub(shadowDarken);
+    const caustic = causticColorFn();
+
+    // Caustics modulate gradient brightness — multiply so they warm the lit areas
+    // suppressed by shadow: leaf silhouettes block caustic light just like real leaves
+    const litArea = float(1.0).sub(shadow);
+    const causticLight = bg.mul(float(1.0).add(caustic.mul(litArea).mul(uCausticBrightness.mul(2.0))));
+
+    // Shadow darkens gradient where leaves block light
+    const withShadow = mix(causticLight, bg.mul(float(1.0).sub(uShadowAlpha)), shadow);
+
+    return withShadow;
   });
 
   material.colorNode = vec4(finalColorFn(), uProgress);
