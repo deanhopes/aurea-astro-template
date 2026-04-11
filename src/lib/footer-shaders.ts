@@ -172,11 +172,12 @@ const causticColorFn = Fn(() => {
 const shadowMaskFn = Fn(() => {
   // Bright video pixels (lit leaves) = shadow=1. Dark pixels = shadow=0.
   // Placeholder is opaque black → luminance=0 → shadow=0 → no shadow until video loads.
+  // Invert luminance — dark areas of video (leaf shapes) become shadow=1
+  const luma = dot(videoTexNode!.rgb, vec3(0.2126, 0.7152, 0.0722));
   return smoothstep(
     uShadowThreshold.sub(uShadowSoftness),
     uShadowThreshold.add(uShadowSoftness),
-    // Luminance (Rec. 709) of video texel, Y-flipped
-    dot(videoTexNode!.rgb, vec3(0.2126, 0.7152, 0.0722)),
+    float(1.0).sub(luma),
   );
 });
 
