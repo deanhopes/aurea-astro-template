@@ -6,6 +6,20 @@
 import Button from '@components/Button.astro';
 ---
 
+<style>
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+</style>
+
 <section class="enquiry" id="enquire">
   <div class="enquiry__left">
     <div class="enquiry__left-top">
@@ -23,9 +37,42 @@ import Button from '@components/Button.astro';
 
   <form class="enquiry__form" action="#" method="post">
     <div class="enquiry__fields">
-      <input type="text" name="name" required class="enquiry__input" placeholder="Full name" />
-      <input type="email" name="email" required class="enquiry__input" placeholder="Email" />
-      <input type="tel" name="phone" required class="enquiry__input" placeholder="Phone" />
+      <div>
+        <label for="enquiry-name" class="sr-only">Full name</label>
+        <input
+          id="enquiry-name"
+          type="text"
+          name="name"
+          required
+          class="enquiry__input"
+          placeholder="Full name"
+          autocomplete="name"
+        />
+      </div>
+      <div>
+        <label for="enquiry-email" class="sr-only">Email</label>
+        <input
+          id="enquiry-email"
+          type="email"
+          name="email"
+          required
+          class="enquiry__input"
+          placeholder="Email"
+          autocomplete="email"
+        />
+      </div>
+      <div>
+        <label for="enquiry-phone" class="sr-only">Phone</label>
+        <input
+          id="enquiry-phone"
+          type="tel"
+          name="phone"
+          required
+          class="enquiry__input"
+          placeholder="Phone"
+          autocomplete="tel"
+        />
+      </div>
 
       <div class="enquiry__dropdown" data-dropdown>
         <button type="button" class="enquiry__dropdown-trigger" data-dropdown-trigger>
@@ -83,12 +130,20 @@ import Button from '@components/Button.astro';
       });
     });
 
-    document.addEventListener('click', (e) => {
+    const handleOutsideClick = (e: MouseEvent) => {
       if (!(e.target as HTMLElement).closest('.enquiry [data-dropdown]')) {
         enquiry
           .querySelectorAll('[data-dropdown].is-open')
           .forEach((d) => d.classList.remove('is-open'));
       }
-    });
+    };
+    document.addEventListener('click', handleOutsideClick);
+    document.addEventListener(
+      'astro:before-swap',
+      () => {
+        document.removeEventListener('click', handleOutsideClick);
+      },
+      { once: true },
+    );
   });
 </script>
