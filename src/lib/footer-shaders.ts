@@ -87,12 +87,32 @@ export const uCausticWarp = uniform(0.3);     // domain warp strength
 let placeholderTex: THREE.Texture | null = null;
 let videoTexNode: ReturnType<typeof texture> | null = null;
 
-/* ── TSL: Background gradient ── */
+/* ── TSL: Radial bloom gradient ── */
 const gradientFn = Fn(() => {
-  const bgTop = color(0xf9efe6); // warm parchment — matches --color-background
-  const bgBottom = color(0xd95f2a); // deep sunset orange
-  // uv().y = 0 at bottom, 1 at top in Three.js orthographic
-  return mix(bgBottom, bgTop, uv().y);
+  const cOrange    = color(0xef5d2a); // --color-orange        hot core
+  const cPeach     = color(0xf0c4a8); // --color-peach         warm mid
+  const cParchment = color(0xf9efe6); // --color-background    outer glow
+  const cDark      = color(0x323032); // --color-black         edges
+
+  // Compress Y by progress — cone grows upward from 0 to full height
+  const safeProgress = clamp(uProgress, float(0.001), float(1.0));
+  const scaledY = uv().y.div(safeProgress);
+
+  // Cone distance from bottom-centre in compressed space
+  // uGradientWidth widens the cone horizontally relative to height
+  const dx = uv().x.sub(0.5).mul(uGradientWidth);
+  const dist = dx.mul(dx).add(scaledY.mul(scaledY)).sqrt();
+
+  // Four colour stops blended via smoothstep chains
+  const t01 = smoothstep(float(0.0),  float(0.15), dist); // orange → peach
+  const t12 = smoothstep(float(0.15), float(0.45), dist); // peach → parchment
+  const t23 = smoothstep(float(0.45), float(0.75), dist); // parchment → dark
+
+  const c0 = mix(cOrange,    cPeach,     t01);
+  const c1 = mix(c0,         cParchment, t12);
+  const c2 = mix(c1,         cDark,      t23);
+
+  return c2;
 });
 
 /* ── TSL: fBm caustics ── */
