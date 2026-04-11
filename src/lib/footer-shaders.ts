@@ -205,8 +205,6 @@ function resize(): void {
 
 const VIDEO_UPDATE_INTERVAL = 1000 / 15;
 
-// Speed scalar written by tick() so tweakpane changes uCausticSpeed take effect live
-let _causticSpeedSnapshot = 0.1;
 
 function tick(timestamp: number): void {
   if (!renderer || !scene || !camera) return;
