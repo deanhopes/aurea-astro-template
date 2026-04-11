@@ -215,7 +215,9 @@ async function initRenderer(): Promise<boolean> {
     const c = document.createElement('canvas');
     c.width = 1;
     c.height = 1;
+    c.getContext('2d')!.fillRect(0, 0, 1, 1); // ensure canvas has pixel data — empty canvas → CopyExternalImageToTexture error
     placeholderTex = new THREE.CanvasTexture(c);
+    placeholderTex.colorSpace = THREE.SRGBColorSpace;
   }
 
   // Build the TextureNode once, bound to the placeholder. Later we swap
@@ -278,7 +280,7 @@ function initVideo(): void {
     videoTexture.minFilter = THREE.LinearFilter;
     videoTexture.magFilter = THREE.LinearFilter;
     videoTexture.format = THREE.RGBAFormat;
-    videoTexture.colorSpace = THREE.SRGBColorSpace; // WebGPU requires sRGB for video
+    videoTexture.colorSpace = THREE.SRGBColorSpace;
     // Swap the TextureNode's bound texture — sampler rebinds, graph stays intact.
     videoTexNode.value = videoTexture;
     ensureLoop();

@@ -37,6 +37,12 @@ export default [
         CustomEvent: 'readonly',
         NodeListOf: 'readonly',
         Element: 'readonly',
+        HTMLVideoElement: 'readonly',
+        HTMLButtonElement: 'readonly',
+        HTMLInputElement: 'readonly',
+        HTMLUListElement: 'readonly',
+        HTMLSpanElement: 'readonly',
+        performance: 'readonly',
       },
     },
     plugins: {
@@ -44,10 +50,7 @@ export default [
     },
     rules: {
       ...tsPlugin.configs.recommended.rules,
-      '@typescript-eslint/no-unused-vars': [
-        'warn',
-        { argsIgnorePattern: '^_' },
-      ],
+      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
     },
   },
 
