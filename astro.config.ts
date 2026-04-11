@@ -10,7 +10,8 @@ export default defineConfig({
   vite: {
     server: {
       watch: {
-        ignored: ['**/.worktrees/**'],
+        usePolling: true,
+        interval: 300,
       },
     },
   },

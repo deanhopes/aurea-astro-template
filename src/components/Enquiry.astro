@@ -6,138 +6,330 @@
 import Button from '@components/Button.astro';
 ---
 
-<style>
-  .sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border-width: 0;
-  }
-</style>
-
 <section class="enquiry" id="enquire">
-  <div class="enquiry__left">
-    <div class="enquiry__left-top">
-      <h2 class="enquiry__heading">Schedule a<br />Private Viewing</h2>
-      <p class="enquiry__editorial">
-        Residences available from the 12th floor.<br />Sales office open by appointment.
-      </p>
+  <div class="enquiry__inner">
+    <div class="enquiry__left">
+      <div class="enquiry__left-top">
+        <h2 class="enquiry__heading">Schedule a<br />Private Viewing</h2>
+        <p class="enquiry__editorial">
+          Residences available from the 12th floor.<br />Sales office open by appointment.
+        </p>
+      </div>
+      <address class="enquiry__address">
+        Aurea Residences<br />
+        3900 Biscayne Blvd<br />
+        Edgewater, Miami FL
+      </address>
     </div>
-    <address class="enquiry__address">
-      Aurea Residences<br />
-      3900 Biscayne Blvd<br />
-      Edgewater, Miami FL
-    </address>
+
+    <div class="enquiry__form-wrap">
+      <form class="enquiry__form" action="#" method="post" novalidate>
+        <div class="enquiry__fields">
+          <div class="enquiry__field">
+            <label for="enquiry-name" class="enquiry__label">Full name</label>
+            <input
+              id="enquiry-name"
+              type="text"
+              name="name"
+              required
+              class="enquiry__input"
+              placeholder="James Anderson"
+              autocomplete="name"
+            />
+          </div>
+
+          <div class="enquiry__field">
+            <label for="enquiry-email" class="enquiry__label">Email</label>
+            <input
+              id="enquiry-email"
+              type="email"
+              name="email"
+              required
+              class="enquiry__input"
+              placeholder="james@example.com"
+              autocomplete="email"
+            />
+          </div>
+
+          <!-- Phone with country code selector -->
+          <div class="enquiry__field">
+            <label for="enquiry-phone" class="enquiry__label enquiry__label--optional">Phone</label>
+            <div class="enquiry__phone">
+              <div class="enquiry__phone-country" data-phone-country>
+                <button
+                  type="button"
+                  class="enquiry__phone-trigger"
+                  data-phone-trigger
+                  aria-haspopup="listbox"
+                  aria-expanded="false"
+                  aria-label="Select country code"
+                >
+                  <span class="enquiry__phone-flag" data-phone-flag>🇺🇸</span>
+                  <span class="enquiry__phone-dialcode" data-phone-dialcode>+1</span>
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg
+                  >
+                </button>
+                <input type="hidden" name="phone_country" value="US" />
+
+                <div class="enquiry__phone-popover" data-phone-popover>
+                  <div class="enquiry__phone-search-wrap">
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                      ><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg
+                    >
+                    <input
+                      type="text"
+                      class="enquiry__phone-search"
+                      data-phone-search
+                      placeholder="Search country..."
+                      autocomplete="off"
+                      aria-label="Search country"
+                    />
+                  </div>
+                  <ul class="enquiry__phone-list" data-phone-list data-lenis-prevent role="listbox">
+                    <!-- populated by JS -->
+                  </ul>
+                </div>
+              </div>
+              <input
+                id="enquiry-phone"
+                type="tel"
+                name="phone"
+                class="enquiry__input enquiry__phone-input"
+                placeholder="(305) 000 0000"
+                autocomplete="tel-national"
+              />
+            </div>
+          </div>
+
+          <!-- Residence type dropdown -->
+          <div class="enquiry__field">
+            <label id="enquiry-residence-label" class="enquiry__label">Residence type</label>
+            <div class="enquiry__select" data-select aria-labelledby="enquiry-residence-label">
+              <button
+                type="button"
+                class="enquiry__select-trigger"
+                data-select-trigger
+                aria-haspopup="listbox"
+                aria-expanded="false"
+              >
+                <span data-select-value class="enquiry__select-placeholder"
+                  >Select residence...</span
+                >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg
+                >
+              </button>
+              <input type="hidden" name="residence" value="" />
+              <ul class="enquiry__select-menu" data-select-menu role="listbox">
+                <li class="enquiry__select-option" data-value="3" role="option">
+                  <span class="enquiry__select-option-name">Three Bedroom</span>
+                  <span class="enquiry__select-option-meta">From 12th floor</span>
+                </li>
+                <li class="enquiry__select-option" data-value="4" role="option">
+                  <span class="enquiry__select-option-name">Four Bedroom</span>
+                  <span class="enquiry__select-option-meta">Upper floors</span>
+                </li>
+                <li class="enquiry__select-option" data-value="penthouse" role="option">
+                  <span class="enquiry__select-option-name">Penthouse</span>
+                  <span class="enquiry__select-option-meta">Full floor residences</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <Button type="submit" class="enquiry__submit">Request a Viewing</Button>
+      </form>
+
+      <div class="enquiry__success" aria-live="polite">
+        <p class="enquiry__success-heading">We'll be in touch.</p>
+        <p class="enquiry__success-body">
+          Our sales team will reach out within one business day to arrange your private viewing.
+        </p>
+      </div>
+    </div>
   </div>
-
-  <form class="enquiry__form" action="#" method="post">
-    <div class="enquiry__fields">
-      <div>
-        <label for="enquiry-name" class="sr-only">Full name</label>
-        <input
-          id="enquiry-name"
-          type="text"
-          name="name"
-          required
-          class="enquiry__input"
-          placeholder="Full name"
-          autocomplete="name"
-        />
-      </div>
-      <div>
-        <label for="enquiry-email" class="sr-only">Email</label>
-        <input
-          id="enquiry-email"
-          type="email"
-          name="email"
-          required
-          class="enquiry__input"
-          placeholder="Email"
-          autocomplete="email"
-        />
-      </div>
-      <div>
-        <label for="enquiry-phone" class="sr-only">Phone</label>
-        <input
-          id="enquiry-phone"
-          type="tel"
-          name="phone"
-          required
-          class="enquiry__input"
-          placeholder="Phone"
-          autocomplete="tel"
-        />
-      </div>
-
-      <div class="enquiry__dropdown" data-dropdown>
-        <button type="button" class="enquiry__dropdown-trigger" data-dropdown-trigger>
-          <span data-dropdown-value>Bedrooms</span>
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg
-          >
-        </button>
-        <input type="hidden" name="bedrooms" value="" />
-        <ul class="enquiry__dropdown-menu" data-dropdown-menu>
-          <li data-value="3">Three Bedroom</li>
-          <li data-value="4">Four Bedroom</li>
-          <li data-value="penthouse">Penthouse</li>
-        </ul>
-      </div>
-    </div>
-
-    <Button type="submit" class="enquiry__submit">Send Enquiry</Button>
-  </form>
 </section>
 
 <script>
+  // ── Country data ─────────────────────────────────────────
+  const COUNTRIES = [
+    { code: 'US', flag: '🇺🇸', name: 'United States', dial: '+1' },
+    { code: 'GB', flag: '🇬🇧', name: 'United Kingdom', dial: '+44' },
+    { code: 'AU', flag: '🇦🇺', name: 'Australia', dial: '+61' },
+    { code: 'CA', flag: '🇨🇦', name: 'Canada', dial: '+1' },
+    { code: 'AE', flag: '🇦🇪', name: 'UAE', dial: '+971' },
+    { code: 'SA', flag: '🇸🇦', name: 'Saudi Arabia', dial: '+966' },
+    { code: 'DE', flag: '🇩🇪', name: 'Germany', dial: '+49' },
+    { code: 'FR', flag: '🇫🇷', name: 'France', dial: '+33' },
+    { code: 'IT', flag: '🇮🇹', name: 'Italy', dial: '+39' },
+    { code: 'ES', flag: '🇪🇸', name: 'Spain', dial: '+34' },
+    { code: 'CH', flag: '🇨🇭', name: 'Switzerland', dial: '+41' },
+    { code: 'BR', flag: '🇧🇷', name: 'Brazil', dial: '+55' },
+    { code: 'MX', flag: '🇲🇽', name: 'Mexico', dial: '+52' },
+    { code: 'AR', flag: '🇦🇷', name: 'Argentina', dial: '+54' },
+    { code: 'CN', flag: '🇨🇳', name: 'China', dial: '+86' },
+    { code: 'JP', flag: '🇯🇵', name: 'Japan', dial: '+81' },
+    { code: 'SG', flag: '🇸🇬', name: 'Singapore', dial: '+65' },
+    { code: 'HK', flag: '🇭🇰', name: 'Hong Kong', dial: '+852' },
+    { code: 'RU', flag: '🇷🇺', name: 'Russia', dial: '+7' },
+    { code: 'IN', flag: '🇮🇳', name: 'India', dial: '+91' },
+    { code: 'ZA', flag: '🇿🇦', name: 'South Africa', dial: '+27' },
+    { code: 'NG', flag: '🇳🇬', name: 'Nigeria', dial: '+234' },
+    { code: 'IL', flag: '🇮🇱', name: 'Israel', dial: '+972' },
+    { code: 'TR', flag: '🇹🇷', name: 'Turkey', dial: '+90' },
+    { code: 'KW', flag: '🇰🇼', name: 'Kuwait', dial: '+965' },
+    { code: 'QA', flag: '🇶🇦', name: 'Qatar', dial: '+974' },
+  ];
+
   document.addEventListener('astro:page-load', () => {
     const enquiry = document.querySelector<HTMLElement>('.enquiry');
     if (!enquiry) return;
 
-    enquiry.querySelectorAll<HTMLElement>('[data-dropdown]').forEach((dropdown) => {
-      const trigger = dropdown.querySelector<HTMLButtonElement>('[data-dropdown-trigger]')!;
-      const menu = dropdown.querySelector<HTMLUListElement>('[data-dropdown-menu]')!;
-      const valueSpan = dropdown.querySelector<HTMLSpanElement>('[data-dropdown-value]')!;
-      const hiddenInput = dropdown.querySelector<HTMLInputElement>('input[type="hidden"]')!;
+    // ── Phone country selector ────────────────────
+    const phoneCountry = enquiry.querySelector<HTMLElement>('[data-phone-country]');
+    if (phoneCountry) {
+      const trigger = phoneCountry.querySelector<HTMLButtonElement>('[data-phone-trigger]')!;
+      const popover = phoneCountry.querySelector<HTMLElement>('[data-phone-popover]')!;
+      const searchInput = phoneCountry.querySelector<HTMLInputElement>('[data-phone-search]')!;
+      const list = phoneCountry.querySelector<HTMLUListElement>('[data-phone-list]')!;
+      const flagEl = phoneCountry.querySelector<HTMLElement>('[data-phone-flag]')!;
+      const dialEl = phoneCountry.querySelector<HTMLElement>('[data-phone-dialcode]')!;
+      const hiddenInput = phoneCountry.querySelector<HTMLInputElement>('input[type="hidden"]')!;
+
+      const renderList = (filter = '') => {
+        const q = filter.toLowerCase();
+        const filtered = COUNTRIES.filter(
+          (c) => c.name.toLowerCase().includes(q) || c.dial.includes(q),
+        );
+        list.innerHTML = filtered
+          .map(
+            (c) =>
+              `<li class="enquiry__phone-option" data-code="${c.code}" data-dial="${c.dial}" role="option">
+                <span class="enquiry__phone-option-flag">${c.flag}</span>
+                <span class="enquiry__phone-option-name">${c.name}</span>
+                <span class="enquiry__phone-option-dial">${c.dial}</span>
+              </li>`,
+          )
+          .join('');
+
+        list.querySelectorAll<HTMLLIElement>('.enquiry__phone-option').forEach((item) => {
+          item.addEventListener('click', () => {
+            flagEl.textContent = item.querySelector('.enquiry__phone-option-flag')!.textContent;
+            dialEl.textContent = item.dataset.dial!;
+            hiddenInput.value = item.dataset.code!;
+            phoneCountry.classList.remove('is-open');
+            trigger.setAttribute('aria-expanded', 'false');
+            searchInput.value = '';
+            renderList();
+          });
+        });
+      };
+
+      renderList();
 
       trigger.addEventListener('click', () => {
-        const isOpen = dropdown.classList.contains('is-open');
-        enquiry
-          .querySelectorAll('[data-dropdown].is-open')
-          .forEach((d) => d.classList.remove('is-open'));
-        if (!isOpen) dropdown.classList.add('is-open');
+        const isOpen = phoneCountry.classList.contains('is-open');
+        closeAll();
+        if (!isOpen) {
+          phoneCountry.classList.add('is-open');
+          trigger.setAttribute('aria-expanded', 'true');
+          setTimeout(() => searchInput.focus(), 50);
+        }
       });
 
-      menu.querySelectorAll<HTMLLIElement>('li').forEach((item) => {
+      searchInput.addEventListener('input', () => renderList(searchInput.value));
+    }
+
+    // ── Residence select ──────────────────────────
+    enquiry.querySelectorAll<HTMLElement>('[data-select]').forEach((select) => {
+      const trigger = select.querySelector<HTMLButtonElement>('[data-select-trigger]')!;
+      const menu = select.querySelector<HTMLUListElement>('[data-select-menu]')!;
+      const valueEl = select.querySelector<HTMLElement>('[data-select-value]')!;
+      const hidden = select.querySelector<HTMLInputElement>('input[type="hidden"]')!;
+
+      trigger.addEventListener('click', () => {
+        const isOpen = select.classList.contains('is-open');
+        closeAll();
+        if (!isOpen) {
+          select.classList.add('is-open');
+          trigger.setAttribute('aria-expanded', 'true');
+        }
+      });
+
+      menu.querySelectorAll<HTMLLIElement>('.enquiry__select-option').forEach((item) => {
         item.addEventListener('click', () => {
-          valueSpan.textContent = item.textContent;
-          hiddenInput.value = item.dataset.value || '';
-          dropdown.classList.remove('is-open');
-          trigger.classList.add('has-value');
+          const name = item.querySelector('.enquiry__select-option-name')!.textContent!;
+          valueEl.textContent = name;
+          valueEl.classList.remove('enquiry__select-placeholder');
+          hidden.value = item.dataset.value || '';
+          select.classList.remove('is-open');
+          select.classList.add('has-value');
+          trigger.setAttribute('aria-expanded', 'false');
         });
       });
     });
 
+    // ── Close all ─────────────────────────────────
+    function closeAll() {
+      enquiry.querySelectorAll('[data-phone-country].is-open').forEach((el) => {
+        el.classList.remove('is-open');
+        el.querySelector<HTMLButtonElement>('[data-phone-trigger]')?.setAttribute(
+          'aria-expanded',
+          'false',
+        );
+      });
+      enquiry.querySelectorAll('[data-select].is-open').forEach((el) => {
+        el.classList.remove('is-open');
+        el.querySelector<HTMLButtonElement>('[data-select-trigger]')?.setAttribute(
+          'aria-expanded',
+          'false',
+        );
+      });
+    }
+
     const handleOutsideClick = (e: MouseEvent) => {
-      if (!(e.target as HTMLElement).closest('.enquiry [data-dropdown]')) {
-        enquiry
-          .querySelectorAll('[data-dropdown].is-open')
-          .forEach((d) => d.classList.remove('is-open'));
-      }
+      const t = e.target as HTMLElement;
+      if (!t.closest('[data-phone-country]') && !t.closest('[data-select]')) closeAll();
     };
     document.addEventListener('click', handleOutsideClick);
+
+    // ── Form submission ───────────────────────────
+    const form = enquiry.querySelector<HTMLFormElement>('.enquiry__form')!;
+    const wrap = enquiry.querySelector<HTMLElement>('.enquiry__form-wrap')!;
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      form.classList.add('is-submitting');
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      wrap.classList.add('is-done');
+    });
+
     document.addEventListener(
       'astro:before-swap',
       () => {
