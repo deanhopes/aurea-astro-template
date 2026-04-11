@@ -95,36 +95,52 @@ const gradientFn = Fn(() => {
   return mix(bgBottom, bgTop, uv().y);
 });
 
-/* ── TSL: Caustic light ── */
+/* ── TSL: fBm caustics ── */
+
+// 2D pseudo-random hash — maps vec2 → vec2 of floats 0–1
+const hash2 = Fn(([p]: [any]) => {
+  const px = p.x.mul(127.1).add(p.y.mul(311.7));
+  const py = p.x.mul(269.5).add(p.y.mul(183.3));
+  return fract(sin(vec2(px, py)).mul(43758.5453));
+});
+
+// Value noise — bilinear interpolation of hashed corners
+const valueNoise = Fn(([p]: [any]) => {
+  const i = floor(p);
+  const f = fract(p);
+  // Quintic smoothstep for interpolation weight
+  const u = f.mul(f).mul(f).mul(f.mul(f.mul(6.0).sub(15.0)).add(10.0));
+  const a = hash2([i]).x;
+  const b = hash2([i.add(vec2(1.0, 0.0))]).x;
+  const c = hash2([i.add(vec2(0.0, 1.0))]).x;
+  const d = hash2([i.add(vec2(1.0, 1.0))]).x;
+  return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
+});
+
+// 4-octave fBm — accumulated value noise at increasing frequencies
+const fbm4 = Fn(([p]: [any]) => {
+  const v1 = valueNoise([p]);
+  const v2 = valueNoise([p.mul(2.0)]).mul(0.5);
+  const v3 = valueNoise([p.mul(4.0)]).mul(0.25);
+  const v4 = valueNoise([p.mul(8.0)]).mul(0.125);
+  return v1.add(v2).add(v3).add(v4);
+});
+
 const causticFn = Fn(() => {
-  // Three UV offsets at different rotation angles — simulate multi-angle water refraction
-  const p = uv().sub(uMouse.mul(uMouseInfluence)); // subtle mouse shift on caustic origin
+  const p = uv().sub(uMouse.mul(uMouseInfluence)).mul(uCausticScale);
+  const animP = p.add(uTime);
 
-  // Octave 1 — primary interference (0°)
-  const oct1 = sin(p.x.mul(uCausticScale).add(uTime.mul(1.0)))
-    .add(sin(p.y.mul(uCausticScale).add(uTime.mul(0.8))))
-    .mul(0.5);
+  // Domain warp — sample fbm twice with offsets to distort input coords
+  const warpX = fbm4([animP.add(vec2(1.7, 9.2))]);
+  const warpY = fbm4([animP.add(vec2(8.3, 2.8))]);
+  const warpedP = animP.add(vec2(warpX, warpY).mul(uCausticWarp));
 
-  // Octave 2 — secondary interference (~45°)
-  const p2x = p.x.mul(0.707).sub(p.y.mul(0.707));
-  const p2y = p.x.mul(0.707).add(p.y.mul(0.707));
-  const oct2 = sin(p2x.mul(uCausticScale.mul(1.167)).add(uTime.mul(1.3)))
-    .add(sin(p2y.mul(uCausticScale.mul(0.833)).add(uTime.mul(0.6))))
-    .mul(0.35);
+  // Final fBm on warped coords
+  const n = fbm4([warpedP]);
 
-  // Octave 3 — fine detail (~22°)
-  const p3x = p.x.mul(0.924).sub(p.y.mul(0.383));
-  const p3y = p.x.mul(0.383).add(p.y.mul(0.924));
-  const oct3 = sin(p3x.mul(uCausticScale.mul(1.833)).add(uTime.mul(1.7)))
-    .add(sin(p3y.mul(uCausticScale.mul(1.5)).add(uTime.mul(1.1))))
-    .mul(0.15);
+  // Caustic sharpen: abs(sin(n * PI)) → bright veins, dark gaps
+  const sharpened = abs(sin(n.mul(PI))).pow(uCausticPower);
 
-  // Sum octaves → normalize 0–1, clamp before pow() to prevent negative → dark blob artifacts
-  const raw = clamp(oct1.add(oct2).add(oct3).mul(0.5).add(0.5), float(0.0), float(1.0));
-  // Sharpen: higher power → brighter patches, darker gaps
-  const sharpened = raw.pow(uCausticPower);
-
-  // Cap intensity at 0.7 progress — present but not overwhelming at full reveal
   const causticStrength = clamp(uProgress.mul(1.43), float(0.0), float(1.0));
   return sharpened.mul(causticStrength).mul(uCausticBrightness);
 });
