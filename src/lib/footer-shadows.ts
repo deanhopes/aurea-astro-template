@@ -12,7 +12,21 @@
 import * as THREE from 'three/webgpu';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { uniform, vec4, mix, uv, color, Fn } from 'three/tsl';
+import {
+  uniform,
+  vec2,
+  vec3,
+  vec4,
+  float,
+  mix,
+  uv,
+  color,
+  Fn,
+  sin,
+  dot,
+  smoothstep,
+  clamp,
+} from 'three/tsl';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -48,6 +62,47 @@ const gradientFn = Fn(() => {
   const bgBottom = color(0xd95f2a); // deep sunset orange
   // uv().y = 0 at bottom, 1 at top in Three.js orthographic
   return mix(bgBottom, bgTop, uv().y);
+});
+
+/* ── TSL: Caustic light ── */
+const causticFn = Fn(() => {
+  // Three UV offsets at different rotation angles — simulate multi-angle water refraction
+  const p = uv().sub(uMouse.mul(0.04)); // subtle mouse shift on caustic origin
+
+  // Octave 1 — primary interference (0°)
+  const oct1 = sin(p.x.mul(6.0).add(uTime.mul(1.0)))
+    .add(sin(p.y.mul(6.0).add(uTime.mul(0.8))))
+    .mul(0.5);
+
+  // Octave 2 — secondary interference (~45°)
+  const p2x = p.x.mul(0.707).sub(p.y.mul(0.707));
+  const p2y = p.x.mul(0.707).add(p.y.mul(0.707));
+  const oct2 = sin(p2x.mul(7.0).add(uTime.mul(1.3)))
+    .add(sin(p2y.mul(5.0).add(uTime.mul(0.6))))
+    .mul(0.35);
+
+  // Octave 3 — fine detail (~22°)
+  const p3x = p.x.mul(0.924).sub(p.y.mul(0.383));
+  const p3y = p.x.mul(0.383).add(p.y.mul(0.924));
+  const oct3 = sin(p3x.mul(11.0).add(uTime.mul(1.7)))
+    .add(sin(p3y.mul(9.0).add(uTime.mul(1.1))))
+    .mul(0.15);
+
+  // Sum octaves → normalize 0–1
+  const raw = oct1.add(oct2).add(oct3).mul(0.5).add(0.5);
+  // Sharpen: raise to power 3 → bright patches, dark gaps (interior light character)
+  const sharpened = raw.pow(3.0);
+
+  // Cap intensity at 0.7 progress — present but not overwhelming at full reveal
+  const causticStrength = clamp(uProgress.mul(1.43), float(0.0), float(1.0));
+  return sharpened.mul(causticStrength).mul(0.45); // 0.45 = max brightness
+});
+
+const causticColorFn = Fn(() => {
+  const intensity = causticFn();
+  const warmWhite = color(0xfff5e0);
+  const warmGold = color(0xffd97a);
+  return mix(warmWhite, warmGold, intensity).mul(intensity);
 });
 
 /* ── Sizing ── */
@@ -119,7 +174,7 @@ async function initRenderer(): Promise<boolean> {
   // Fullscreen quad — normalized to camera frustum
   const geo = new THREE.PlaneGeometry(2, 2);
   material = new THREE.MeshBasicNodeMaterial();
-  material.colorNode = vec4(gradientFn(), uProgress);
+  material.colorNode = vec4(gradientFn().add(causticColorFn()), uProgress);
   material.transparent = true;
   quad = new THREE.Mesh(geo, material);
   scene.add(quad);
