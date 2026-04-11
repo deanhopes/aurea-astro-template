@@ -1086,7 +1086,7 @@
     list-style: none;
     background: var(--color-background);
     border: 1px solid color-mix(in srgb, var(--color-black) 10%, transparent);
-    border-radius: 4px;
+    border-radius: var(--radius-cta);
     padding: 0.25rem 0;
     opacity: 0;
     visibility: hidden;
@@ -1134,7 +1134,6 @@
     }
 
     .enquiry__left {
-      min-height: unset;
       padding-right: 0;
       margin-bottom: var(--space-block);
     }
