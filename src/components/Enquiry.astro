@@ -3,7 +3,6 @@
  * Enquiry — "Schedule a Private Viewing" section.
  * Reusable between pages. Anchored as #enquire for nav CTAs.
  */
-import Button from '@components/Button.astro';
 ---
 
 <section class="enquiry" id="enquire">
@@ -169,7 +168,7 @@ import Button from '@components/Button.astro';
           </div>
         </div>
 
-        <Button type="submit" variant="primary" class="enquiry__submit">Request a Viewing</Button>
+        <button type="submit" class="btn btn--primary enquiry__submit">Request a Viewing</button>
       </form>
 
       <div class="enquiry__success" aria-live="polite">
