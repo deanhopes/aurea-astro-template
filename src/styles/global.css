@@ -194,7 +194,7 @@
     line-height: 1.5;
     text-transform: uppercase;
     letter-spacing: -0.01em;
-    border: 1px solid color-mix(in srgb, var(--color-black) 25%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-black) 14%, transparent);
     cursor: pointer;
     transition: opacity 0.3s var(--ease-premium);
   }
@@ -285,7 +285,7 @@
     background: color-mix(in srgb, var(--color-background) 90%, transparent);
     backdrop-filter: blur(12px);
     border-radius: 4px;
-    border: 1px solid color-mix(in srgb, var(--color-black) 25%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-black) 14%, transparent);
     height: clamp(400px, 60dvh, 600px);
     overflow: hidden;
     visibility: hidden;
@@ -335,7 +335,7 @@
     align-items: center;
     justify-content: center;
     background: var(--color-background);
-    border: 1px solid var(--color-mid-gray-1);
+    border: 1px solid color-mix(in srgb, var(--color-black) 14%, transparent);
     border-radius: 1px;
     font-family: var(--font-body);
     font-weight: 500;
@@ -402,30 +402,7 @@
   .menu-sidebar__divider {
     width: 100%;
     border: none;
-    border-top: 1px solid var(--color-mid-gray-2);
-  }
-
-  .menu-sidebar__cta {
-    height: 76px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--color-black);
-    color: var(--color-background);
-    border-radius: 2px;
-    font-family: var(--font-body);
-    font-weight: 400;
-    font-size: 1.125rem;
-    line-height: 1.5;
-    text-transform: uppercase;
-    letter-spacing: -0.01em;
-    transition: opacity 0.3s var(--ease-premium);
-  }
-
-  @media (hover: hover) {
-    .menu-sidebar__cta:hover {
-      opacity: 0.85;
-    }
+    border-top: 1px solid color-mix(in srgb, var(--color-black) 14%, transparent);
   }
 
   /* Mobile menu */
@@ -585,13 +562,6 @@
       border-bottom: none;
     }
 
-    /* Enquire CTA — full-width at bottom of menu */
-    .menu-sidebar__cta {
-      margin: 16px 16px;
-      height: 52px;
-      border-radius: var(--radius-cta);
-    }
-
     /* Short screens — tighten menu rows so all items fit */
     @media (max-height: 700px) {
       .menu-card__label {
@@ -613,11 +583,6 @@
 
       .menu-sidebar__divider {
         margin: 4px 24px;
-      }
-
-      .menu-sidebar__cta {
-        margin: 12px 16px;
-        height: 44px;
       }
     }
   }
