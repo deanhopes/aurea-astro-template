@@ -27,7 +27,6 @@ import {
   smoothstep,
   clamp,
   texture,
-  select,
 } from 'three/tsl';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -60,12 +59,11 @@ const uProgress = uniform(0);
 const uMouse = uniform(new THREE.Vector2(0.5, 0.5));
 const uTime = uniform(0);
 
-// uVideoReady gates texture sampling in the shader — avoids TSL's texture() node
-// being evaluated against a placeholder before a real texture is uploaded.
-// uVideoTex is only sampled in the shader when uVideoReady.value === true.
+// videoTexNode is a TextureNode bound to a 1×1 CanvasTexture placeholder at build.
+// When the video is ready, we swap `.value` to the real VideoTexture — TextureNode's
+// setter rebinds the sampler without rebuilding the shader graph.
 let placeholderTex: THREE.Texture | null = null;
-const uVideoReady = uniform(false);
-const uVideoTex = uniform(new THREE.Texture()); // populated in initRenderer before first use
+let videoTexNode: ReturnType<typeof texture> | null = null;
 
 /* ── TSL: Background gradient ── */
 const gradientFn = Fn(() => {
@@ -121,23 +119,16 @@ const THRESHOLD = 0.25;
 const SOFTNESS = 0.5;
 
 const shadowMaskFn = Fn(() => {
-  // Return zero (no shadow) until a real video texture is ready.
-  // select() is TSL's ternary — the texture() branch is only evaluated on GPU
-  // when uVideoReady is true, preventing shader errors on the placeholder.
-  return select(
-    uVideoReady,
-    float(1.0).sub(
-      smoothstep(
-        float(THRESHOLD - SOFTNESS),
-        float(THRESHOLD + SOFTNESS),
-        // Luminance (Rec. 709) of video texel, Y-flipped
-        dot(
-          texture(uVideoTex, vec2(uv().x, float(1.0).sub(uv().y))).rgb,
-          vec3(0.2126, 0.7152, 0.0722),
-        ),
-      ),
+  // Sample the live VideoTexture (or 1×1 placeholder before video is ready).
+  // Placeholder is transparent black → luminance ≈ 0 → smoothstep returns ~1 →
+  // 1 - smoothstep ≈ 0 → no shadow visible until the real video is bound.
+  return float(1.0).sub(
+    smoothstep(
+      float(THRESHOLD - SOFTNESS),
+      float(THRESHOLD + SOFTNESS),
+      // Luminance (Rec. 709) of video texel, Y-flipped
+      dot(videoTexNode!.rgb, vec3(0.2126, 0.7152, 0.0722)),
     ),
-    float(0.0),
   );
 });
 
@@ -226,8 +217,10 @@ async function initRenderer(): Promise<boolean> {
     c.height = 1;
     placeholderTex = new THREE.CanvasTexture(c);
   }
-  uVideoTex.value = placeholderTex;
-  uVideoReady.value = false;
+
+  // Build the TextureNode once, bound to the placeholder. Later we swap
+  // `videoTexNode.value` to the real VideoTexture — no graph rebuild needed.
+  videoTexNode = texture(placeholderTex, vec2(uv().x, float(1.0).sub(uv().y)));
 
   // Fullscreen quad — normalized to camera frustum
   const geo = new THREE.PlaneGeometry(2, 2);
@@ -279,14 +272,15 @@ function initVideo(): void {
   ioObserver.observe(footer);
 
   const onReady = () => {
-    if (!videoEl) return; // destroyed before event fired
+    if (!videoEl || !videoTexNode) return; // destroyed before event fired
     videoReady = true;
-    videoTexture = new THREE.VideoTexture(videoEl!);
+    videoTexture = new THREE.VideoTexture(videoEl);
     videoTexture.minFilter = THREE.LinearFilter;
     videoTexture.magFilter = THREE.LinearFilter;
     videoTexture.format = THREE.RGBAFormat;
-    uVideoTex.value = videoTexture;
-    uVideoReady.value = true; // enables texture sampling in shader
+    videoTexture.colorSpace = THREE.SRGBColorSpace; // WebGPU requires sRGB for video
+    // Swap the TextureNode's bound texture — sampler rebinds, graph stays intact.
+    videoTexNode.value = videoTexture;
     ensureLoop();
   };
 
@@ -388,8 +382,9 @@ export function destroyFooterShadows(): void {
   videoEl = null;
   videoTexture?.dispose();
   videoTexture = null;
-  if (placeholderTex) uVideoTex.value = placeholderTex;
-  uVideoReady.value = false;
+  // Rebind the TextureNode to the placeholder so a subsequent init won't sample a disposed texture.
+  if (videoTexNode && placeholderTex) videoTexNode.value = placeholderTex;
+  videoTexNode = null;
   videoReady = false;
   lastVideoUpdate = 0;
 

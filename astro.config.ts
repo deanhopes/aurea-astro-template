@@ -11,5 +11,10 @@ export default defineConfig({
   prefetch: false,
   vite: {
     plugins: [snoot()],
+    server: {
+      watch: {
+        ignored: ['**/.worktrees/**'],
+      },
+    },
   },
 });
