@@ -118,14 +118,16 @@ const gradientFn = Fn(() => {
 /* ── TSL: fBm caustics ── */
 
 // 2D pseudo-random hash — maps vec2 → vec2 of floats 0–1
-const hash2 = Fn(([p]: [any]) => {
+const hash2 = Fn(([pRaw]: [any]) => {
+  const p = vec2(pRaw); // re-materialise as TSL node so .x/.y/.mul() work
   const px = p.x.mul(127.1).add(p.y.mul(311.7));
   const py = p.x.mul(269.5).add(p.y.mul(183.3));
   return fract(vec2(sin(px), sin(py)).mul(43758.5453));
 });
 
 // Value noise — bilinear interpolation of hashed corners
-const valueNoise = Fn(([p]: [any]) => {
+const valueNoise = Fn(([pRaw]: [any]) => {
+  const p = vec2(pRaw); // re-materialise as TSL node
   const i = floor(p);
   const f = fract(p);
   // Quintic smoothstep for interpolation weight
@@ -138,7 +140,8 @@ const valueNoise = Fn(([p]: [any]) => {
 });
 
 // 4-octave fBm — accumulated value noise at increasing frequencies
-const fbm4 = Fn(([p]: [any]) => {
+const fbm4 = Fn(([pRaw]: [any]) => {
+  const p = vec2(pRaw); // re-materialise as TSL node
   const v1 = valueNoise([p]);
   const v2 = valueNoise([p.mul(2.0)]).mul(0.5);
   const v3 = valueNoise([p.mul(4.0)]).mul(0.25);
