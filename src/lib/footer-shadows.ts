@@ -26,6 +26,7 @@ import {
   dot,
   smoothstep,
   clamp,
+  texture,
 } from 'three/tsl';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -46,6 +47,8 @@ let ioObserver: IntersectionObserver | null = null;
 let rafId = 0;
 let lastTime = 0;
 let mouseHandler: ((e: MouseEvent) => void) | null = null;
+let videoReady = false;
+let lastVideoUpdate = 0;
 
 const state = { progress: 0, mouseX: 0.5, mouseY: 0.5 };
 let mouseQuickToX: gsap.QuickToFunc | null = null;
@@ -55,6 +58,11 @@ let mouseQuickToY: gsap.QuickToFunc | null = null;
 const uProgress = uniform(0);
 const uMouse = uniform(new THREE.Vector2(0.5, 0.5));
 const uTime = uniform(0);
+
+// Video texture uniform — placeholder 1×1 transparent until video loads
+const placeholderTex = new THREE.DataTexture(new Uint8Array([0, 0, 0, 0]), 1, 1, THREE.RGBAFormat);
+placeholderTex.needsUpdate = true;
+const uVideoTex = uniform(placeholderTex);
 
 /* ── TSL: Background gradient ── */
 const gradientFn = Fn(() => {
@@ -105,6 +113,22 @@ const causticColorFn = Fn(() => {
   return mix(warmWhite, warmGold, intensity).mul(intensity);
 });
 
+/* ── TSL: Shadow mask ── */
+const THRESHOLD = 0.25;
+const SOFTNESS = 0.5;
+
+const shadowMaskFn = Fn(() => {
+  // Flip Y — video top-down, UV bottom-up
+  const flippedUv = vec2(uv().x, float(1.0).sub(uv().y));
+  const texel = texture(uVideoTex, flippedUv);
+
+  // Luminance (Rec. 709)
+  const luma = dot(texel.rgb, vec3(0.2126, 0.7152, 0.0722));
+
+  // Soft threshold — dark areas become shadow (1), light areas become 0
+  return float(1.0).sub(smoothstep(float(THRESHOLD - SOFTNESS), float(THRESHOLD + SOFTNESS), luma));
+});
+
 /* ── Sizing ── */
 
 function resize(): void {
@@ -118,6 +142,8 @@ function resize(): void {
 
 /* ── Render loop ── */
 
+const VIDEO_UPDATE_INTERVAL = 1000 / 15;
+
 function tick(timestamp: number): void {
   if (!renderer || !scene || !camera) return;
 
@@ -125,9 +151,18 @@ function tick(timestamp: number): void {
   lastTime = timestamp;
   uTime.value += delta * 0.1; // slow clock — caustics animate at ~0.1 units/sec
 
+  // Upload video texture at capped rate (~15fps)
+  if (videoReady && videoEl && videoEl.readyState >= videoEl.HAVE_CURRENT_DATA) {
+    const now = performance.now();
+    if (now - lastVideoUpdate > VIDEO_UPDATE_INTERVAL) {
+      if (videoTexture) videoTexture.needsUpdate = true;
+      lastVideoUpdate = now;
+    }
+  }
+
   renderer.renderAsync(scene, camera);
 
-  if (state.progress <= 0) {
+  if (state.progress <= 0 && !videoReady) {
     rafId = 0;
     lastTime = 0;
     return;
@@ -174,12 +209,63 @@ async function initRenderer(): Promise<boolean> {
   // Fullscreen quad — normalized to camera frustum
   const geo = new THREE.PlaneGeometry(2, 2);
   material = new THREE.MeshBasicNodeMaterial();
-  material.colorNode = vec4(gradientFn().add(causticColorFn()), uProgress);
+
+  const shadowColor = color(0x2a1a0a);
+  const shadowAlpha = 0.32;
+
+  const finalColorFn = Fn(() => {
+    const bg = gradientFn();
+    const shadow = shadowMaskFn();
+    const caustic = causticColorFn().mul(float(1.0).sub(shadow)); // caustics suppressed by shadow
+    const shadowC = shadowColor.mul(shadow).mul(shadowAlpha);
+    return bg.add(caustic).add(shadowC);
+  });
+
+  material.colorNode = vec4(finalColorFn(), uProgress);
   material.transparent = true;
   quad = new THREE.Mesh(geo, material);
   scene.add(quad);
 
   return true;
+}
+
+/* ── Video loading ── */
+
+function initVideo(): void {
+  videoEl = document.querySelector<HTMLVideoElement>('[data-footer-shadows-video]');
+  if (!videoEl) return;
+
+  const footer = document.querySelector('[data-footer]');
+  if (!footer) return;
+
+  ioObserver = new IntersectionObserver(
+    (entries) => {
+      if (entries[0]?.isIntersecting) {
+        videoEl!.load();
+        videoEl!.play().catch(() => {
+          videoEl!.currentTime = 0;
+          videoReady = true;
+        });
+        ioObserver!.disconnect();
+        ioObserver = null;
+      }
+    },
+    { rootMargin: '200px 0px' },
+  );
+  ioObserver.observe(footer);
+
+  const onReady = () => {
+    videoReady = true;
+    videoTexture = new THREE.VideoTexture(videoEl!);
+    videoTexture.minFilter = THREE.LinearFilter;
+    videoTexture.magFilter = THREE.LinearFilter;
+    videoTexture.format = THREE.RGBAFormat;
+    uVideoTex.value = videoTexture;
+    ensureLoop();
+  };
+
+  videoEl.addEventListener('playing', onReady, { once: true });
+  videoEl.addEventListener('canplay', onReady, { once: true });
 }
 
 /* ── Public API ── */
@@ -193,6 +279,7 @@ export async function initFooterShadows(): Promise<void> {
 
   ro = new ResizeObserver(() => resize());
   ro.observe(canvas);
+  initVideo();
 
   const quickOpts = { duration: 0.4, ease: 'power2.out', onUpdate: ensureLoop };
   mouseQuickToX = gsap.quickTo(state, 'mouseX', quickOpts);
@@ -273,7 +360,10 @@ export function destroyFooterShadows(): void {
     videoEl.load();
   }
   videoEl = null;
+  videoTexture?.dispose();
   videoTexture = null;
+  videoReady = false;
+  lastVideoUpdate = 0;
 
   state.progress = 0;
   state.mouseX = 0.5;
