@@ -115,7 +115,7 @@ const hashF = (px: any, py: any) =>
   fract(sin(px.mul(127.1).add(py.mul(311.7))).mul(43758.5453));
 
 const causticFn = Fn(() => {
-  const p = uv().sub(uMouse.mul(uMouseInfluence)).mul(uCausticScale);
+  const p = uv().mul(uCausticScale);
 
   // Three noise layers at different scales and speeds — GPU Gems multiplicative pattern.
   // Multiplying layers together creates sharp bright focal points (caustic veins)
