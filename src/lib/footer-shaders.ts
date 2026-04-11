@@ -89,21 +89,23 @@ let videoTexNode: ReturnType<typeof texture> | null = null;
 
 /* ── TSL: Gradient reveal ── */
 const gradientFn = Fn(() => {
-  const cOrange    = color(0xef5d2a); // --color-orange   bottom
-  const cParchment = color(0xf9efe6); // --color-background top
+  const cDeep      = color(0xc94020); // deep burnt orange — bottom anchor
+  const cOrange    = color(0xef5d2a); // --color-orange
+  const cCoral     = color(0xf0a080); // warm coral mid
+  const cPeach     = color(0xf0c4a8); // --color-peach
+  const cParchment = color(0xf9efe6); // --color-background — top
 
-  // progress drives how much of the gradient is revealed from the bottom up.
-  // At progress=0: scaledY always >= 1, whole canvas maps to cOrange.
-  // At progress=1: full 0→1 gradient visible — parchment at top, orange at bottom.
-  // Like a blind being raised: warm light floods in from the bottom.
   const safeProgress = clamp(uProgress, float(0.001), float(1.0));
-
-  // Ripple: distort the reveal edge with a slow horizontal sine wave
-  // so it looks like the gradient is spreading like a disturbance in water
   const ripple = sin(uv().x.mul(6.0).add(uTime.mul(0.3))).mul(0.03);
-  const scaledY = clamp(uv().y.div(safeProgress).add(ripple), float(0.0), float(1.0));
+  const t = clamp(uv().y.div(safeProgress).add(ripple), float(0.0), float(1.0));
 
-  return mix(cOrange, cParchment, scaledY);
+  // 5-stop gradient: deep → orange → coral → peach → parchment
+  const c01 = mix(cDeep,   cOrange,    smoothstep(float(0.0),  float(0.25), t));
+  const c12 = mix(c01,     cCoral,     smoothstep(float(0.25), float(0.5),  t));
+  const c23 = mix(c12,     cPeach,     smoothstep(float(0.5),  float(0.75), t));
+  const c34 = mix(c23,     cParchment, smoothstep(float(0.75), float(1.0),  t));
+
+  return c34;
 });
 
 /* ── TSL: Water caustics ── */
@@ -278,15 +280,20 @@ async function initRenderer(): Promise<boolean> {
     const shadow = shadowMaskFn();
     const caustic = causticColorFn();
 
-    // Caustics modulate gradient brightness — multiply so they warm the lit areas
-    // suppressed by shadow: leaf silhouettes block caustic light just like real leaves
-    const litArea = float(1.0).sub(shadow);
-    const causticLight = bg.mul(float(1.0).add(caustic.mul(litArea).mul(uCausticBrightness.mul(2.0))));
+    // Caustics are brightest through leaf gaps (where shadow=0) and
+    // at leaf edges where light focuses. Suppressed under solid leaf (shadow=1).
+    // shadow edge sharpens caustic — multiply caustic by (1-shadow) so veins
+    // appear through gaps and fade under leaves, like sunlight through a canopy.
+    const causticThroughLeaves = caustic.mul(float(1.0).sub(shadow));
 
-    // Shadow darkens gradient where leaves block light
-    const withShadow = mix(causticLight, bg.mul(float(1.0).sub(uShadowAlpha)), shadow);
+    // Caustics brighten the gradient multiplicatively — warm shimmer on lit surface
+    const causticLight = bg.mul(float(1.0).add(causticThroughLeaves.mul(uCausticBrightness.mul(3.0))));
 
-    return withShadow;
+    // Leaf shadow darkens the gradient — cool slightly to feel like shade
+    const shadedBg = bg.mul(float(1.0).sub(shadow.mul(uShadowAlpha)));
+
+    // Blend: lit+caustics in open areas, shaded under leaves
+    return mix(causticLight, shadedBg, shadow);
   });
 
   material.colorNode = vec4(finalColorFn(), uProgress);
