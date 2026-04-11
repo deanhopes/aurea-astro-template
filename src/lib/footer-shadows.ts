@@ -21,6 +21,7 @@ let renderer: THREE.WebGPURenderer | null = null;
 let scene: THREE.Scene | null = null;
 let camera: THREE.OrthographicCamera | null = null;
 let material: THREE.MeshBasicNodeMaterial | null = null;
+let quad: THREE.Mesh | null = null;
 let canvas: HTMLCanvasElement | null = null;
 let videoEl: HTMLVideoElement | null = null;
 let videoTexture: THREE.VideoTexture | null = null;
@@ -37,17 +38,12 @@ let mouseQuickToY: gsap.QuickToFunc | null = null;
 /* ── Sizing ── */
 
 function resize(): void {
-  if (!canvas || !renderer || !camera) return;
+  if (!canvas || !renderer) return;
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
   const w = canvas.clientWidth;
   const h = canvas.clientHeight;
   renderer.setPixelRatio(dpr);
   renderer.setSize(w, h, false);
-  camera.left = -w / 2;
-  camera.right = w / 2;
-  camera.top = h / 2;
-  camera.bottom = -h / 2;
-  camera.updateProjectionMatrix();
 }
 
 /* ── Render loop ── */
@@ -94,15 +90,15 @@ async function initRenderer(): Promise<boolean> {
 
   scene = new THREE.Scene();
 
-  camera = new THREE.OrthographicCamera(-w / 2, w / 2, h / 2, -h / 2, 0.1, 10);
+  camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 10);
   camera.position.z = 1;
 
-  // Fullscreen quad — sized in world units matching camera frustum
-  const geo = new THREE.PlaneGeometry(w, h);
+  // Fullscreen quad — normalized to camera frustum
+  const geo = new THREE.PlaneGeometry(2, 2);
   material = new THREE.MeshBasicNodeMaterial();
   // colorNode wired in Task 5
-  const mesh = new THREE.Mesh(geo, material);
-  scene.add(mesh);
+  quad = new THREE.Mesh(geo, material);
+  scene.add(quad);
 
   return true;
 }
@@ -182,10 +178,13 @@ export function destroyFooterShadows(): void {
   mouseQuickToY = null;
 
   renderer?.dispose();
+  quad?.geometry.dispose();
+  material?.dispose();
   renderer = null;
   scene = null;
   camera = null;
   material = null;
+  quad = null;
   canvas = null;
 
   if (videoEl) {
