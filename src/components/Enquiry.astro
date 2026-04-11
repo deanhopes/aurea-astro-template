@@ -10,19 +10,21 @@ import Button from '@components/Button.astro';
   <div class="enquiry__inner">
     <div class="enquiry__left">
       <div class="enquiry__left-top">
+        <p class="enquiry__eyebrow">Private Viewings</p>
         <h2 class="enquiry__heading">Schedule a<br />Private Viewing</h2>
         <p class="enquiry__editorial">
-          Residences available from the 12th floor.<br />Sales office open by appointment.
+          Every residence is shown by personal appointment.<br />Our team will be in touch within
+          one business day.
         </p>
       </div>
       <address class="enquiry__address">
-        Aurea Residences<br />
+        <span class="enquiry__address-name">Aurea Residences</span>
         3900 Biscayne Blvd<br />
         Edgewater, Miami FL
       </address>
     </div>
 
-    <div class="enquiry__form-wrap">
+    <div class="enquiry__form-wrap enquiry__card">
       <form class="enquiry__form" action="#" method="post" novalidate>
         <div class="enquiry__fields">
           <div class="enquiry__field">
@@ -164,7 +166,7 @@ import Button from '@components/Button.astro';
           </div>
         </div>
 
-        <Button type="submit" class="enquiry__submit">Request a Viewing</Button>
+        <Button type="submit" variant="primary" class="enquiry__submit">Request a Viewing</Button>
       </form>
 
       <div class="enquiry__success" aria-live="polite">

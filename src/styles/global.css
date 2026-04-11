@@ -981,23 +981,31 @@
 
   .enquiry__inner {
     display: grid;
-    grid-template-columns: 55fr 45fr;
-    gap: var(--space-gap);
-    align-items: stretch;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(2rem, 4vw, 4rem);
+    align-items: start;
     padding: var(--space-block);
   }
 
   .enquiry__left {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    padding-right: var(--space-element);
+    gap: var(--space-block);
+    padding-top: clamp(1rem, 2vw, 2rem);
   }
 
   .enquiry__left-top {
     display: flex;
     flex-direction: column;
-    gap: var(--space-element);
+    gap: 1.25rem;
+  }
+
+  .enquiry__eyebrow {
+    font-family: var(--font-body);
+    font-size: var(--text-ui);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--color-black) 35%, transparent);
   }
 
   .enquiry__heading {
@@ -1013,17 +1021,34 @@
     font-family: var(--font-body);
     font-size: var(--text-body);
     line-height: var(--leading-body);
-    color: color-mix(in srgb, var(--color-black) 60%, transparent);
+    color: color-mix(in srgb, var(--color-black) 55%, transparent);
   }
 
   .enquiry__address {
     font-family: var(--font-body);
     font-style: normal;
     font-size: var(--text-ui);
-    line-height: 1.8;
-    letter-spacing: var(--tracking-ui);
-    color: color-mix(in srgb, var(--color-black) 45%, transparent);
-    margin-top: var(--space-block);
+    line-height: 1.9;
+    letter-spacing: 0.01em;
+    color: color-mix(in srgb, var(--color-black) 40%, transparent);
+    padding-top: var(--space-element);
+    border-top: 1px solid color-mix(in srgb, var(--color-black) 8%, transparent);
+  }
+
+  .enquiry__address-name {
+    display: block;
+    color: color-mix(in srgb, var(--color-black) 60%, transparent);
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    margin-bottom: 0.25rem;
+  }
+
+  /* Card surface for the form */
+  .enquiry__card {
+    background: color-mix(in srgb, var(--color-black) 2.5%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-black) 8%, transparent);
+    border-radius: 12px;
+    padding: clamp(1.5rem, 3vw, 2.5rem);
   }
 
   .enquiry__form {
