@@ -29,6 +29,8 @@ src/
 
 ## Code Conventions
 
+**CSS architecture:** All styles live in `src/styles/global.css`. No `<style>` blocks in `.astro` files — ever. Scoped styles cause split-brain: the same class can be defined in two places with different rules, and the browser merges them silently. One file means one place to read, one place to edit, no surprises for humans or LLMs.
+
 **CSS:** Design tokens defined in `global.css` via CSS custom properties. Use semantic class names (`.text-hero`, `.section`, `.nav-link`, `.link-underline`) not inline styles. Accent colours are gradient/atmospheric only, never solid fills. No utility framework. Lightning CSS (bundled with Astro) handles nesting, `color-mix()`, and minification.
 
 **Border radius:** 4px standard (`border-radius: 4px`). Nested elements must use concentric radii — inner radius = outer radius minus the gap between them. If padding ≥ outer radius, inner element gets `0`.

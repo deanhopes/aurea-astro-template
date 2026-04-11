@@ -10,17 +10,22 @@ import { nav } from '@data/site';
       aria-expanded="false"
       aria-controls="menu-panel"
     >
-      <svg class="nav-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-        <rect data-bar="top" x="3" y="5" width="18" height="2" rx="0.5" />
-        <rect data-bar="mid" x="3" y="11" width="18" height="2" rx="0.5" />
-        <rect data-bar="bot" x="3" y="17" width="18" height="2" rx="0.5" />
+      <svg
+        class="nav-icon"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        aria-hidden="true"
+      >
+        <rect data-bar="top" x="3" y="5" width="18" height="2" rx="0.5"></rect>
+        <rect data-bar="mid" x="3" y="11" width="18" height="2" rx="0.5"></rect>
+        <rect data-bar="bot" x="3" y="17" width="18" height="2" rx="0.5"></rect>
       </svg>
       <span>Menu</span>
     </button>
 
-    <a href="/" class="nav-pill nav-pill--wordmark">
-      AUREA
-    </a>
+    <a href="/" class="nav-pill nav-pill--wordmark"> AUREA </a>
 
     <a href={nav.cta.href} class="nav-pill nav-pill--cta">
       {nav.cta.label}
@@ -29,35 +34,42 @@ import { nav } from '@data/site';
 
   <div class="menu-panel" id="menu-panel" data-menu-panel aria-hidden="true">
     <div class="menu-cards">
-      {nav.menu.cards.map(({ label, href }) => (
-        <a href={href} class="menu-card">
-          <div class="menu-card__image" />
-          <div class="menu-card__label">
-            <span>{label}</span>
-          </div>
-        </a>
-      ))}
+      {
+        nav.menu.cards.map(({ label, href }) => (
+          <a href={href} class="menu-card">
+            <div class="menu-card__image" />
+            <div class="menu-card__label">
+              <span>{label}</span>
+            </div>
+          </a>
+        ))
+      }
     </div>
 
     <div class="menu-sidebar">
       <div class="menu-sidebar__inner">
         <div class="menu-sidebar__links">
-          {nav.menu.links.map(({ label, href }) => (
-            <a href={href} class="menu-sidebar__link">{label}</a>
-          ))}
+          {
+            nav.menu.links.map(({ label, href }) => (
+              <a href={href} class="menu-sidebar__link">
+                {label}
+              </a>
+            ))
+          }
         </div>
 
         <hr class="menu-sidebar__divider" />
 
         <div class="menu-sidebar__links">
-          {nav.menu.secondaryLinks.map(({ label, href }) => (
-            <a href={href} class="menu-sidebar__link">{label}</a>
-          ))}
+          {
+            nav.menu.secondaryLinks.map(({ label, href }) => (
+              <a href={href} class="menu-sidebar__link">
+                {label}
+              </a>
+            ))
+          }
         </div>
-
-        <a href={nav.cta.href} class="menu-sidebar__cta">{nav.cta.label}</a>
       </div>
-
     </div>
   </div>
 </header>
