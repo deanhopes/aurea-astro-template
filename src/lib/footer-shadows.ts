@@ -27,6 +27,7 @@ import {
   smoothstep,
   clamp,
   texture,
+  select,
 } from 'three/tsl';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -59,11 +60,12 @@ const uProgress = uniform(0);
 const uMouse = uniform(new THREE.Vector2(0.5, 0.5));
 const uTime = uniform(0);
 
-// Video texture uniform — initialised with a valid placeholder in initRenderer().
-// Must be a THREE.Texture (not DataTexture) for TSL's texture() node to accept it
-// at shader-build time. Swapped for a live VideoTexture when video is ready.
+// uVideoReady gates texture sampling in the shader — avoids TSL's texture() node
+// being evaluated against a placeholder before a real texture is uploaded.
+// uVideoTex is only sampled in the shader when uVideoReady.value === true.
 let placeholderTex: THREE.Texture | null = null;
-const uVideoTex = uniform(new THREE.Texture()); // temp value — overwritten before first render
+const uVideoReady = uniform(false);
+const uVideoTex = uniform(new THREE.Texture()); // populated in initRenderer before first use
 
 /* ── TSL: Background gradient ── */
 const gradientFn = Fn(() => {
@@ -119,15 +121,24 @@ const THRESHOLD = 0.25;
 const SOFTNESS = 0.5;
 
 const shadowMaskFn = Fn(() => {
-  // Flip Y — video top-down, UV bottom-up
-  const flippedUv = vec2(uv().x, float(1.0).sub(uv().y));
-  const texel = texture(uVideoTex, flippedUv);
-
-  // Luminance (Rec. 709)
-  const luma = dot(texel.rgb, vec3(0.2126, 0.7152, 0.0722));
-
-  // Soft threshold — dark areas become shadow (1), light areas become 0
-  return float(1.0).sub(smoothstep(float(THRESHOLD - SOFTNESS), float(THRESHOLD + SOFTNESS), luma));
+  // Return zero (no shadow) until a real video texture is ready.
+  // select() is TSL's ternary — the texture() branch is only evaluated on GPU
+  // when uVideoReady is true, preventing shader errors on the placeholder.
+  return select(
+    uVideoReady,
+    float(1.0).sub(
+      smoothstep(
+        float(THRESHOLD - SOFTNESS),
+        float(THRESHOLD + SOFTNESS),
+        // Luminance (Rec. 709) of video texel, Y-flipped
+        dot(
+          texture(uVideoTex, vec2(uv().x, float(1.0).sub(uv().y))).rgb,
+          vec3(0.2126, 0.7152, 0.0722),
+        ),
+      ),
+    ),
+    float(0.0),
+  );
 });
 
 /* ── Sizing ── */
@@ -216,6 +227,7 @@ async function initRenderer(): Promise<boolean> {
     placeholderTex = new THREE.CanvasTexture(c);
   }
   uVideoTex.value = placeholderTex;
+  uVideoReady.value = false;
 
   // Fullscreen quad — normalized to camera frustum
   const geo = new THREE.PlaneGeometry(2, 2);
@@ -274,6 +286,7 @@ function initVideo(): void {
     videoTexture.magFilter = THREE.LinearFilter;
     videoTexture.format = THREE.RGBAFormat;
     uVideoTex.value = videoTexture;
+    uVideoReady.value = true; // enables texture sampling in shader
     ensureLoop();
   };
 
@@ -376,6 +389,7 @@ export function destroyFooterShadows(): void {
   videoTexture?.dispose();
   videoTexture = null;
   if (placeholderTex) uVideoTex.value = placeholderTex;
+  uVideoReady.value = false;
   videoReady = false;
   lastVideoUpdate = 0;
 
