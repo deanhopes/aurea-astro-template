@@ -57,62 +57,46 @@ const slides = [
 ---
 
 <section class="lifestyle" data-reveal>
-  <p class="lifestyle__label">The Lifestyle</p>
-  <h2 class="lifestyle__heading">A sanctuary calibrated to your body</h2>
-
-  <div class="lifestyle__grid">
-    <div class="lifestyle__slider">
-      <div class="lifestyle__slider-container">
-        <div class="lifestyle__track">
-          {
-            slides.map((slide) => (
-              <div class="lifestyle__slide">
-                <img src={slide.image} alt={slide.alt} loading="lazy" decoding="async" />
-                <div class="lifestyle__slide-overlay" />
-                <span class="lifestyle__slide-caption lifestyle__slide-caption--top">
-                  {slide.top}
-                </span>
-                <span class="lifestyle__slide-caption lifestyle__slide-caption--bottom">
-                  {slide.bottom}
-                </span>
-              </div>
-            ))
-          }
-        </div>
-        <div class="lifestyle__marker"></div>
-      </div>
+  <div class="lifestyle__header">
+    <div class="lifestyle__header-left">
+      <p class="lifestyle__label">The Lifestyle</p>
+      <h2 class="lifestyle__heading">A sanctuary calibrated<br />to your body</h2>
     </div>
-
-    <div class="lifestyle__copy">
-      <p>
-        A cold plunge at dawn to reset your cortisol. Infrared before the sun is up. Laps in water
-        that holds the same temperature as the bay beneath it. Every space shaped around what your
-        body actually needs, at the hour it needs it.
-      </p>
-      <p>
-        The wellness floor. The breathwork terrace. Cold and warm circuits that follow the rhythm of
-        the morning. A sanctuary by the sea where switching off is the entire point.
-      </p>
-      <a href="/lifestyle" class="lifestyle__cta">Explore the Lifestyle</a>
+    <div class="lifestyle__header-right">
+      <div class="lifestyle__copy">
+        <p>
+          A cold plunge at dawn to reset your cortisol. Infrared before the sun is up. Laps in water
+          that holds the same temperature as the bay beneath it. Every space shaped around what your
+          body actually needs, at the hour it needs it.
+        </p>
+        <p>
+          The wellness floor. The breathwork terrace. Cold and warm circuits that follow the rhythm
+          of the morning. A sanctuary by the sea where switching off is the entire point.
+        </p>
+        <a href="/lifestyle" class="btn btn--ghost lifestyle__cta">Explore the Lifestyle</a>
+      </div>
     </div>
   </div>
 
-  <div class="lifestyle__pair">
-    <div class="lifestyle__pair-image">
-      <img
-        src="/images/lifestyle-yoga.jpg"
-        alt="Morning yoga on a wooden terrace, aerial view"
-        loading="lazy"
-        data-parallax
-      />
-    </div>
-    <div class="lifestyle__pair-image">
-      <img
-        src="/images/lifestyle-plunge.jpg"
-        alt="Cold plunge pool in warm ambient light"
-        loading="lazy"
-        data-parallax
-      />
+  <div class="lifestyle__slider">
+    <div class="lifestyle__slider-container">
+      <div class="lifestyle__track">
+        {
+          slides.map((slide) => (
+            <div class="lifestyle__slide">
+              <img src={slide.image} alt={slide.alt} loading="lazy" decoding="async" />
+              <div class="lifestyle__slide-overlay" />
+              <span class="lifestyle__slide-caption lifestyle__slide-caption--top">
+                {slide.top}
+              </span>
+              <span class="lifestyle__slide-caption lifestyle__slide-caption--bottom">
+                {slide.bottom}
+              </span>
+            </div>
+          ))
+        }
+      </div>
+      <div class="lifestyle__marker"></div>
     </div>
   </div>
 </section>
