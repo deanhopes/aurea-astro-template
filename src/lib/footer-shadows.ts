@@ -59,7 +59,9 @@ const uProgress = uniform(0);
 const uMouse = uniform(new THREE.Vector2(0.5, 0.5));
 const uTime = uniform(0);
 
-// Video texture uniform — placeholder 1×1 transparent until video loads
+// Video texture uniform — placeholder 1×1 transparent until video loads.
+// placeholderTex is intentionally module-lifetime: it must survive across
+// init/destroy cycles as the safe fallback when video is unavailable.
 const placeholderTex = new THREE.DataTexture(new Uint8Array([0, 0, 0, 0]), 1, 1, THREE.RGBAFormat);
 placeholderTex.needsUpdate = true;
 const uVideoTex = uniform(placeholderTex);

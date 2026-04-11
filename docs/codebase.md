@@ -65,15 +65,17 @@ src/
 
 ## Footer Rendering Pipeline
 
-The footer uses a fixed-reveal pattern (`z-index: -1`, `margin-bottom: 100dvh` on `#main-content`). It has three visual layers composited via DOM order inside `.site-footer__inner`:
+The footer uses a fixed-reveal pattern (`z-index: -1`, `margin-bottom: 100dvh` on `#main-content`). It has two visual layers inside `.site-footer__inner`:
 
-1. **Haze canvas** (`footer-haze.ts`) — Canvas2D, 7 concentric sunset gradient rings with noise dithering
-2. **Shadow canvas** (`footer-shadows.ts`) — WebGL, video-sourced palm leaf silhouettes through a luminance threshold shader, `mix-blend-mode: multiply`
-3. **Content** — enquiry form (two-column card), nav links, AUREA wordmark (z-index: 1, above both canvases)
+1. **WebGPU canvas** (`footer-shadows.ts`) — Three.js WebGPU + TSL. Single opaque canvas that IS the footer background. Three TSL layers composited in one pass:
+   - Vertical gradient (warm parchment `#f9efe6` → sunset orange `#d95f2a`) driven by `uv.y`
+   - Three-octave caustic light interference pattern (interior light through water glass)
+   - Video shadow mask: palm leaf silhouettes via luminance threshold shader
+2. **Content** — enquiry form (two-column card), nav links, AUREA wordmark (`z-index: 1`, above canvas)
 
-Both canvases share the same scroll-driven `state.progress` (0→1) via independent GSAP ScrollTriggers on `[data-footer-trigger]`. The shadow shader has mouse interactivity (threshold shifts with cursor position via GSAP quickTo) and scroll-driven shadow growth. Planned refactor: merge haze + shadow into a single WebGL pipeline (see `tasks/todo.md`).
+Scroll progress (`uProgress`) and mouse position (`uMouse`) driven by GSAP ScrollTrigger + `quickTo` on `[data-footer-trigger]`. Mouse shifts the caustic UV origin subtly. No `mix-blend-mode` — canvas is opaque background.
 
-**Shadow video requirements:** `public/video/leaf-shadows.webm` + `.mp4` fallback. Palm/monstera leaf shadows on a warm wall. 360p, 6-8s seamless loop, <500KB WebM. Lazy-loaded via IntersectionObserver (200px rootMargin). Texture upload capped at 15fps. System works without the video (renders transparently, no errors).
+**Shadow video requirements:** `public/video/leaf-shadows.webm` + `.mp4` fallback. Palm/monstera leaf shadows on a warm wall. 360p, 6-8s seamless loop, <500KB WebM. Lazy-loaded via IntersectionObserver (200px rootMargin). Texture upload capped at 15fps. System works without the video — shadow mask is transparent, gradient + caustics still render.
 
 ---
 
