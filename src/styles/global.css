@@ -1028,19 +1028,30 @@
     font-family: var(--font-body);
     font-style: normal;
     font-size: var(--text-ui);
-    line-height: 1.9;
     letter-spacing: 0.01em;
     color: color-mix(in srgb, var(--color-black) 40%, transparent);
     padding-top: var(--space-element);
     border-top: 1px solid color-mix(in srgb, var(--color-black) 8%, transparent);
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
   }
 
   .enquiry__address-name {
-    display: block;
     color: color-mix(in srgb, var(--color-black) 60%, transparent);
     font-weight: 500;
     letter-spacing: 0.02em;
-    margin-bottom: 0.25rem;
+  }
+
+  .enquiry__address-street {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.4rem;
+  }
+
+  .enquiry__address-sep {
+    color: color-mix(in srgb, var(--color-black) 20%, transparent);
   }
 
   /* Card surface for the form */
