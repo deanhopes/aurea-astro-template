@@ -59,12 +59,11 @@ const uProgress = uniform(0);
 const uMouse = uniform(new THREE.Vector2(0.5, 0.5));
 const uTime = uniform(0);
 
-// Video texture uniform — placeholder 1×1 transparent until video loads.
-// placeholderTex is intentionally module-lifetime: it must survive across
-// init/destroy cycles as the safe fallback when video is unavailable.
-const placeholderTex = new THREE.DataTexture(new Uint8Array([0, 0, 0, 0]), 1, 1, THREE.RGBAFormat);
-placeholderTex.needsUpdate = true;
-const uVideoTex = uniform(placeholderTex);
+// Video texture uniform — initialised with a valid placeholder in initRenderer().
+// Must be a THREE.Texture (not DataTexture) for TSL's texture() node to accept it
+// at shader-build time. Swapped for a live VideoTexture when video is ready.
+let placeholderTex: THREE.Texture | null = null;
+const uVideoTex = uniform(new THREE.Texture()); // temp value — overwritten before first render
 
 /* ── TSL: Background gradient ── */
 const gradientFn = Fn(() => {
@@ -162,7 +161,7 @@ function tick(timestamp: number): void {
     }
   }
 
-  renderer.renderAsync(scene, camera);
+  renderer.render(scene, camera);
 
   if (state.progress <= 0 && !videoReady) {
     rafId = 0;
@@ -207,6 +206,16 @@ async function initRenderer(): Promise<boolean> {
 
   camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 10);
   camera.position.z = 1;
+
+  // Initialise video placeholder here (not at module scope) so document is available.
+  // A 1×1 CanvasTexture is the minimal valid THREE.Texture for TSL's texture() node.
+  if (!placeholderTex) {
+    const c = document.createElement('canvas');
+    c.width = 1;
+    c.height = 1;
+    placeholderTex = new THREE.CanvasTexture(c);
+  }
+  uVideoTex.value = placeholderTex;
 
   // Fullscreen quad — normalized to camera frustum
   const geo = new THREE.PlaneGeometry(2, 2);
@@ -366,7 +375,7 @@ export function destroyFooterShadows(): void {
   videoEl = null;
   videoTexture?.dispose();
   videoTexture = null;
-  uVideoTex.value = placeholderTex;
+  if (placeholderTex) uVideoTex.value = placeholderTex;
   videoReady = false;
   lastVideoUpdate = 0;
 
