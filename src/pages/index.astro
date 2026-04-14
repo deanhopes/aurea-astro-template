@@ -15,11 +15,4 @@ import Enquiry from '@components/Enquiry.astro';
   <Lifestyle />
   <Neighbourhood />
   <Enquiry />
-
-  <script>
-    import { initVisionScroll, destroyVisionScroll } from '@lib/vision-scroll';
-
-    document.addEventListener('astro:page-load', initVisionScroll);
-    document.addEventListener('astro:before-swap', destroyVisionScroll);
-  </script>
 </BaseLayout>

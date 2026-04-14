@@ -18,9 +18,16 @@ import '@styles/global.css';
     <title>Footer — dev</title>
     <style>
       /* Minimal reset — BaseLayout normally sets these */
-      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-      html, body {
+      html,
+      body {
         width: 100%;
         height: 100%;
         overflow: hidden; /* footer fills viewport, no scroll needed */
@@ -36,7 +43,8 @@ import '@styles/global.css';
       }
 
       /* body bg would cover z-index:-1 footer — remove it */
-      html, body {
+      html,
+      body {
         background: transparent !important;
       }
 
@@ -64,20 +72,20 @@ import '@styles/global.css';
         setProgress,
         uCausticScale,
         uCausticSpeed,
-        uCausticPower,
-        uCausticBrightness,
-        uMouseInfluence,
-        uCausticWarp,
-        uGradientWidth,
+        uCausticSharpness,
+        uCausticHeight,
         uShadowThreshold,
         uShadowSoftness,
         uShadowAlpha,
+        uRefraction,
+        uSpecStrength,
+        uSpecSharp,
       } from '@lib/footer-shaders';
 
       // Boot shaders at full reveal — staticProgress bypasses ScrollTrigger entirely
       await initFooterShaders({ staticProgress: 1 });
 
-      const pane = new Pane({ container: document.getElementById('tp-root')! });
+      const pane = new Pane({ container: document.getElementById('tp-root')! }) as any;
 
       // ── Caustics ────────────────────────────────────────────
       const caustics = pane.addFolder({ title: 'Caustics', expanded: true });
@@ -85,33 +93,40 @@ import '@styles/global.css';
       const cState = {
         scale: uCausticScale.value as number,
         speed: uCausticSpeed.value as number,
-        power: uCausticPower.value as number,
-        brightness: uCausticBrightness.value as number,
-        mouseInfluence: uMouseInfluence.value as number,
-        warp: uCausticWarp.value as number,
+        sharpness: uCausticSharpness.value as number,
+        height: uCausticHeight.value as number,
         progress: 1,
       };
 
-      caustics.addBinding(cState, 'scale', { min: 1, max: 20, step: 0.1, label: 'Scale' })
-        .on('change', ({ value }) => { uCausticScale.value = value; });
+      caustics
+        .addBinding(cState, 'scale', { min: 1, max: 20, step: 0.1, label: 'Scale' })
+        .on('change', ({ value }: { value: number }) => {
+          uCausticScale.value = value;
+        });
 
-      caustics.addBinding(cState, 'speed', { min: 0, max: 0.5, step: 0.005, label: 'Speed' })
-        .on('change', ({ value }) => { uCausticSpeed.value = value; });
+      caustics
+        .addBinding(cState, 'speed', { min: 0, max: 0.5, step: 0.005, label: 'Speed' })
+        .on('change', ({ value }: { value: number }) => {
+          uCausticSpeed.value = value;
+        });
 
-      caustics.addBinding(cState, 'power', { min: 0.5, max: 6, step: 0.1, label: 'Sharpness' })
-        .on('change', ({ value }) => { uCausticPower.value = value; });
+      caustics
+        .addBinding(cState, 'sharpness', { min: 0.5, max: 6, step: 0.1, label: 'Sharpness' })
+        .on('change', ({ value }: { value: number }) => {
+          uCausticSharpness.value = value;
+        });
 
-      caustics.addBinding(cState, 'brightness', { min: 0, max: 1, step: 0.01, label: 'Brightness' })
-        .on('change', ({ value }) => { uCausticBrightness.value = value; });
+      caustics
+        .addBinding(cState, 'height', { min: 0, max: 6, step: 0.1, label: 'Height' })
+        .on('change', ({ value }: { value: number }) => {
+          uCausticHeight.value = value;
+        });
 
-      caustics.addBinding(cState, 'mouseInfluence', { min: 0, max: 0.2, step: 0.005, label: 'Mouse Shift' })
-        .on('change', ({ value }) => { uMouseInfluence.value = value; });
-
-      caustics.addBinding(cState, 'warp', { min: 0, max: 1, step: 0.01, label: 'Warp' })
-        .on('change', ({ value }) => { uCausticWarp.value = value; });
-
-      caustics.addBinding(cState, 'progress', { min: 0, max: 1, step: 0.01, label: 'Progress' })
-        .on('change', ({ value }) => { setProgress(value); });
+      caustics
+        .addBinding(cState, 'progress', { min: 0, max: 1, step: 0.01, label: 'Progress' })
+        .on('change', ({ value }: { value: number }) => {
+          setProgress(value);
+        });
 
       // ── Shadow mask ──────────────────────────────────────────
       const shadows = pane.addFolder({ title: 'Shadow Mask', expanded: false });
@@ -122,24 +137,50 @@ import '@styles/global.css';
         alpha: uShadowAlpha.value as number,
       };
 
-      shadows.addBinding(sState, 'threshold', { min: 0, max: 1, step: 0.01, label: 'Threshold' })
-        .on('change', ({ value }) => { uShadowThreshold.value = value; });
+      shadows
+        .addBinding(sState, 'threshold', { min: -1, max: 1, step: 0.01, label: 'Threshold' })
+        .on('change', ({ value }: { value: number }) => {
+          uShadowThreshold.value = value;
+        });
 
-      shadows.addBinding(sState, 'softness', { min: 0, max: 1, step: 0.01, label: 'Softness' })
-        .on('change', ({ value }) => { uShadowSoftness.value = value; });
+      shadows
+        .addBinding(sState, 'softness', { min: 0, max: 4, step: 0.01, label: 'Softness' })
+        .on('change', ({ value }: { value: number }) => {
+          uShadowSoftness.value = value;
+        });
 
-      shadows.addBinding(sState, 'alpha', { min: 0, max: 1, step: 0.01, label: 'Opacity' })
-        .on('change', ({ value }) => { uShadowAlpha.value = value; });
+      shadows
+        .addBinding(sState, 'alpha', { min: 0, max: 1, step: 0.01, label: 'Opacity' })
+        .on('change', ({ value }: { value: number }) => {
+          uShadowAlpha.value = value;
+        });
 
-      // ── Gradient ─────────────────────────────────────────
-      const gradient = pane.addFolder({ title: 'Gradient', expanded: false });
+      // ── Lighting ─────────────────────────────────────────
+      const lighting = pane.addFolder({ title: 'Lighting', expanded: false });
 
-      const gState = {
-        width: uGradientWidth.value as number,
+      const lState = {
+        refraction: uRefraction.value as number,
+        specStrength: uSpecStrength.value as number,
+        specSharp: uSpecSharp.value as number,
       };
 
-      gradient.addBinding(gState, 'width', { min: 0.5, max: 4, step: 0.1, label: 'Width' })
-        .on('change', ({ value }) => { uGradientWidth.value = value; });
+      lighting
+        .addBinding(lState, 'refraction', { min: 0, max: 0.1, step: 0.001, label: 'Refraction' })
+        .on('change', ({ value }: { value: number }) => {
+          uRefraction.value = value;
+        });
+
+      lighting
+        .addBinding(lState, 'specStrength', { min: 0, max: 4, step: 0.01, label: 'Spec Strength' })
+        .on('change', ({ value }: { value: number }) => {
+          uSpecStrength.value = value;
+        });
+
+      lighting
+        .addBinding(lState, 'specSharp', { min: 8, max: 256, step: 1, label: 'Spec Sharpness' })
+        .on('change', ({ value }: { value: number }) => {
+          uSpecSharp.value = value;
+        });
     </script>
   </body>
 </html>

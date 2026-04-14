@@ -5,24 +5,22 @@
  * Track translates left as user scrolls vertically.
  */
 import { Image } from 'astro:assets';
-import visionTower from '../assets/images/vision-tower.jpg';
-import visionInterior from '../assets/images/vision-interior.jpg';
-import visionSunset from '../assets/images/vision-sunset.jpg';
-import visionTerrace from '../assets/images/vision-terrace.jpg';
+import visionTower from '../assets/images/vision-tower.png';
+import visionInterior from '../assets/images/vision-interior.png';
+import visionSunset from '../assets/images/vision-sunset.png';
+import visionTerrace from '../assets/images/vision-terrace.png';
 ---
 
 <section class="vision" data-vision>
   <div class="vision__sticky">
     <div class="vision__track" data-vision-track>
-
       <!-- Panel 1: The Vision + The Tower text -->
       <div class="vision__panel vision__panel--intro">
         <p class="vision__label">The Vision</p>
         <div class="vision__tower">
           <p class="vision__tower-body">
-            A tower that belongs to its shoreline. 52 storeys shaped by the bay,
-            the morning light, and the idea that a building should feel as calm
-            as the water it overlooks.
+            A tower that belongs to its shoreline. 52 storeys shaped by the bay, the morning light,
+            and the idea that a building should feel as calm as the water it overlooks.
           </p>
         </div>
       </div>
@@ -30,11 +28,19 @@ import visionTerrace from '../assets/images/vision-terrace.jpg';
       <!-- Panel 2: Editorial card -->
       <div class="vision__panel vision__panel--card">
         <div class="vision__card">
-
           <!-- Left: large image + numbered caption -->
           <div class="vision__card-left">
             <div class="vision__card-image vision__card-image--tower">
-              <Image src={visionTower} alt="Aurea tower facade, golden light on curved balconies" widths={[400, 600, 800]} sizes="(max-width: 1024px) 90vw, 35vw" format="webp" quality={80} loading="lazy" decoding="async" />
+              <Image
+                src={visionTower}
+                alt="Aurea tower facade, golden light on curved balconies"
+                widths={[400, 600, 800]}
+                sizes="(max-width: 1024px) 90vw, 35vw"
+                format="webp"
+                quality={80}
+                loading="lazy"
+                decoding="async"
+              />
             </div>
             <p class="vision__caption vision__caption--number">(1)</p>
           </div>
@@ -43,21 +49,19 @@ import visionTerrace from '../assets/images/vision-terrace.jpg';
           <div class="vision__card-centre">
             <div class="vision__card-copy">
               <p>
-                Aurea is a waterfront residence for the life you keep coming
-                back to. Morning light on the bay from a deep terrace. Cold
-                water and warm stone before the day starts. An evening where
-                the pool sits level with the horizon and you stop counting the hours.
+                Aurea is a waterfront residence for the life you keep coming back to. Morning light
+                on the bay from a deep terrace. Cold water and warm stone before the day starts. An
+                evening where the pool sits level with the horizon and you stop counting the hours.
               </p>
               <p>
-                These are quiet rooms shaped by the water outside them.
-                Designed around sunrise, open to the breeze, finished
-                in materials that feel warm underfoot and cool to the touch.
+                These are quiet rooms shaped by the water outside them. Designed around sunrise,
+                open to the breeze, finished in materials that feel warm underfoot and cool to the
+                touch.
               </p>
               <p>
-                You settle into them slowly, then all at once. The terrace
-                becomes where you think. The view becomes how you tell the
-                time. A home designed to become, over time, the place that
-                makes everything else work.
+                You settle into them slowly, then all at once. The terrace becomes where you think.
+                The view becomes how you tell the time. A home designed to become, over time, the
+                place that makes everything else work.
               </p>
               <a href="#enquire" class="vision__cta">Schedule a Private Viewing</a>
             </div>
@@ -66,14 +70,22 @@ import visionTerrace from '../assets/images/vision-terrace.jpg';
           <!-- Right: small image + caption -->
           <div class="vision__card-right">
             <div class="vision__card-image vision__card-image--interior">
-              <Image src={visionInterior} alt="Warm interior with bay view" widths={[400, 600, 800]} sizes="(max-width: 1024px) 90vw, 25vw" format="webp" quality={80} loading="lazy" decoding="async" />
+              <Image
+                src={visionInterior}
+                alt="Warm interior with bay view"
+                widths={[400, 600, 800]}
+                sizes="(max-width: 1024px) 90vw, 25vw"
+                format="webp"
+                quality={80}
+                loading="lazy"
+                decoding="async"
+              />
             </div>
             <div class="vision__caption-group">
               <p class="vision__caption vision__caption--muted">Hospitality, not housing.</p>
               <p class="vision__caption">(3)</p>
             </div>
           </div>
-
         </div>
       </div>
 
@@ -81,14 +93,31 @@ import visionTerrace from '../assets/images/vision-terrace.jpg';
       <div class="vision__panel vision__panel--images">
         <div class="vision__image-pair">
           <div class="vision__card-image vision__card-image--sunset">
-            <Image src={visionSunset} alt="Sunset through palm trees from terrace" widths={[400, 600, 800]} sizes="(max-width: 1024px) 90vw, 45vw" format="webp" quality={80} loading="lazy" decoding="async" />
+            <Image
+              src={visionSunset}
+              alt="Sunset through palm trees from terrace"
+              widths={[400, 600, 800]}
+              sizes="(max-width: 1024px) 90vw, 45vw"
+              format="webp"
+              quality={80}
+              loading="lazy"
+              decoding="async"
+            />
           </div>
           <div class="vision__card-image vision__card-image--terrace">
-            <Image src={visionTerrace} alt="Morning light on private terrace with bay view" widths={[400, 600, 800]} sizes="(max-width: 1024px) 90vw, 45vw" format="webp" quality={80} loading="lazy" decoding="async" />
+            <Image
+              src={visionTerrace}
+              alt="Morning light on private terrace with bay view"
+              widths={[400, 600, 800]}
+              sizes="(max-width: 1024px) 90vw, 45vw"
+              format="webp"
+              quality={80}
+              loading="lazy"
+              decoding="async"
+            />
           </div>
         </div>
       </div>
-
     </div>
   </div>
 </section>

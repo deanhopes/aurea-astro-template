@@ -20,12 +20,42 @@ const { title, description = 'Aurea Residences — Waterfront living in Edgewate
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Mark document as booting before curtain renders. CSS uses this to
+         pin the curtain panels over the viewport on first load so the
+         ~1500ms TSL shader compile is masked behind a brand-consistent
+         wipe instead of surfacing as a mid-scroll hitch. -->
+    <script is:inline>
+      document.documentElement.dataset.booting = '';
+    </script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link
+      rel="preload"
+      href="/fonts/TestSohne-Leicht.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/AktivGrotesk-Regular.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
     <link rel="preconnect" href="https://www.google.com" />
     <link rel="sitemap" href="/sitemap-index.xml" />
     <SEO title={title} description={description} />
     <slot name="head" />
     <ClientRouter />
+
+    <!-- Early Lenis init — runs as soon as the parser hits this <script>,
+         well before astro:page-load. Closes the "scroll feels locked on
+         reload" gap. initLenis() is idempotent so the bootstrap call later
+         no-ops cleanly. -->
+    <script>
+      import { initLenis } from '@lib/lenis';
+      initLenis();
+    </script>
   </head>
   <body>
     <!-- Lenis scrollend workaround (known Astro ClientRouter conflict) -->
@@ -51,82 +81,12 @@ const { title, description = 'Aurea Residences — Waterfront living in Edgewate
     </main>
     <Footer />
 
-    <!-- Lenis smooth scroll -->
+    <!-- Single bootstrap entry — one page-load handler, one before-swap,
+         one after-swap. Heavy modules (footer shader / three/webgpu) are
+         dynamically imported and gated on idle + IO inside bootstrap. -->
     <script>
-      import { initLenis, destroyLenis } from '@lib/lenis';
-
-      document.addEventListener('astro:page-load', initLenis);
-      document.addEventListener('astro:before-swap', destroyLenis);
-    </script>
-
-    <!-- Nav menu toggle -->
-    <script>
-      import { initNav, destroyNav } from '@lib/nav';
-
-      document.addEventListener('astro:page-load', initNav);
-      document.addEventListener('astro:before-swap', destroyNav);
-    </script>
-
-    <!-- GSAP context lifecycle -->
-    <script>
-      import { initAnimations, cleanupAnimations } from '@lib/animations';
-
-      document.addEventListener('astro:page-load', initAnimations);
-      document.addEventListener('astro:after-swap', cleanupAnimations);
-    </script>
-
-    <!-- Lifestyle draggable slider -->
-    <script>
-      import { initLifestyleSlider, destroyLifestyleSlider } from '@lib/lifestyle-slider';
-
-      document.addEventListener('astro:page-load', initLifestyleSlider);
-      document.addEventListener('astro:before-swap', destroyLifestyleSlider);
-    </script>
-
-    <!-- Footer shadow silhouettes -->
-    <script>
-      import { initFooterShadows, destroyFooterShadows } from '@lib/footer-shaders';
-
-      document.addEventListener('astro:page-load', () => initFooterShadows());
-      document.addEventListener('astro:before-swap', destroyFooterShadows);
-    </script>
-
-    <!-- Neighbourhood tabbed interaction -->
-    <script>
-      import { initNeighbourhood, destroyNeighbourhood } from '@lib/neighbourhood';
-
-      document.addEventListener('astro:page-load', initNeighbourhood);
-      document.addEventListener('astro:before-swap', destroyNeighbourhood);
-    </script>
-
-    <!-- Scroll reveal observer -->
-    <script>
-      function initReveal() {
-        const elements = document.querySelectorAll('[data-reveal]');
-        if (!elements.length) return;
-
-        const observer = new IntersectionObserver(
-          (entries) => {
-            entries.forEach((entry) => {
-              if (entry.isIntersecting) {
-                entry.target.classList.add('revealed');
-                observer.unobserve(entry.target);
-              }
-            });
-          },
-          { threshold: 0.1, rootMargin: '0px 0px -50px 0px' },
-        );
-
-        elements.forEach((el) => observer.observe(el));
-      }
-
-      document.addEventListener('astro:page-load', initReveal);
-    </script>
-
-    <!-- Page transitions (curtain wipe) -->
-    <script>
-      import { initPageTransition } from '@lib/page-transition';
-      initPageTransition();
+      import { bootstrap } from '@lib/bootstrap';
+      bootstrap();
     </script>
   </body>
 </html>

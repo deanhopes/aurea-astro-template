@@ -31,7 +31,10 @@ function prefersReducedMotion(): boolean {
 /* ── Curtain Close (cover the viewport) ── */
 function curtainClose(): Promise<void> {
   return new Promise((resolve) => {
-    if (!resolvePanels()) { resolve(); return; }
+    if (!resolvePanels()) {
+      resolve();
+      return;
+    }
 
     const mobile = isMobile();
     const axis = mobile ? 'y' : 'x';
@@ -40,26 +43,40 @@ function curtainClose(): Promise<void> {
     // Reset the unused axis in case viewport changed since last navigation
     gsap.set([panelLeft, panelRight], { [resetAxis]: 0 });
 
-    gsap.timeline({ onComplete: resolve })
+    gsap
+      .timeline({ onComplete: resolve })
       .to(panelLeft!, { [axis]: 0, duration: DURATION, ease: EASE }, 0)
       .to(panelRight!, { [axis]: 0, duration: DURATION, ease: EASE }, 0);
   });
 }
 
+/* ── Curtain Snap Closed (no animation, for first load) ── */
+function curtainSnapClosed(): void {
+  if (!resolvePanels()) return;
+  const mobile = isMobile();
+  const axis = mobile ? 'y' : 'x';
+  const resetAxis = mobile ? 'x' : 'y';
+  gsap.set([panelLeft, panelRight], { [axis]: 0, [resetAxis]: 0 });
+}
+
 /* ── Curtain Open (reveal the page) ── */
 function curtainOpen(): Promise<void> {
   return new Promise((resolve) => {
-    if (!resolvePanels()) { resolve(); return; }
+    if (!resolvePanels()) {
+      resolve();
+      return;
+    }
 
     const mobile = isMobile();
     const axis = mobile ? 'y' : 'x';
 
-    gsap.timeline({
-      onComplete: () => {
-        isAnimating = false;
-        resolve();
-      },
-    })
+    gsap
+      .timeline({
+        onComplete: () => {
+          isAnimating = false;
+          resolve();
+        },
+      })
       .to(panelLeft!, { [axis]: mobile ? '-101%' : '-101%', duration: DURATION, ease: EASE }, 0)
       .to(panelRight!, { [axis]: mobile ? '101%' : '101%', duration: DURATION, ease: EASE }, 0);
   });
@@ -105,6 +122,48 @@ function onPageLoad() {
   if (isAnimating) {
     curtainOpen();
   }
+}
+
+/* ── First-load curtain ──────────────────────────────────────────────────
+ * On hard reload the curtain panels are off-screen by default (CSS).
+ * This pulls them back over the viewport, freezes scroll, and waits
+ * for `ready` to resolve (or a hard timeout) before animating open.
+ * Used to mask the ~1500ms TSL shader compile on first paint.
+ * ──────────────────────────────────────────────────────────────────────── */
+export async function firstLoadCurtain(ready: Promise<void>, timeoutMs: number): Promise<void> {
+  const root = document.documentElement;
+  const wasBooting = root.hasAttribute('data-booting');
+
+  // Reduced motion: reveal immediately, no wait.
+  if (prefersReducedMotion()) {
+    if (wasBooting) root.removeAttribute('data-booting');
+    return;
+  }
+
+  if (!resolvePanels()) {
+    if (wasBooting) root.removeAttribute('data-booting');
+    return;
+  }
+
+  getLenis()?.stop();
+  isAnimating = true;
+
+  let timer: number | undefined;
+  const timeout = new Promise<void>((resolve) => {
+    timer = window.setTimeout(resolve, timeoutMs);
+  });
+
+  await Promise.race([ready, timeout]);
+  if (timer !== undefined) window.clearTimeout(timer);
+
+  // Hand control from CSS (pinned via data-booting) to GSAP. Snap-set
+  // the panels to the same closed position, then drop data-booting so
+  // the curtainOpen() tween can actually move them.
+  curtainSnapClosed();
+  if (wasBooting) root.removeAttribute('data-booting');
+
+  await curtainOpen();
+  getLenis()?.start();
 }
 
 /* ── Init (called once, listeners persist across navigations) ── */

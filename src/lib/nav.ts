@@ -25,8 +25,11 @@ function createPanelTimeline(panel: HTMLElement): gsap.core.Timeline {
 
   if (isMobile) {
     // Mobile: all items are flat text links — stagger as one sequence
-    const allItems = panel.querySelectorAll('.menu-card__label, .menu-sidebar__link, .menu-sidebar__cta');
-    tl.fromTo(allItems,
+    const allItems = panel.querySelectorAll(
+      '.menu-card__label, .menu-sidebar__link, .menu-sidebar__cta',
+    );
+    tl.fromTo(
+      allItems,
       { autoAlpha: 0, y: 12 },
       { autoAlpha: 1, y: 0, duration: 0.35, ease: 'expo.out', stagger: 0.03 },
       0.1,
@@ -37,8 +40,17 @@ function createPanelTimeline(panel: HTMLElement): gsap.core.Timeline {
     const links = panel.querySelectorAll('.menu-sidebar__link');
     const cta = panel.querySelector('.menu-sidebar__cta');
 
-    tl.fromTo(cards, { autoAlpha: 0, y: 8 }, { autoAlpha: 1, y: 0, duration: 0.25, ease: 'expo.out', stagger: 0.05 }, 0.1)
-      .fromTo(links, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.2, ease: 'expo.out', stagger: 0.04 }, 0.15);
+    tl.fromTo(
+      cards,
+      { autoAlpha: 0, y: 8 },
+      { autoAlpha: 1, y: 0, duration: 0.25, ease: 'expo.out', stagger: 0.05 },
+      0.1,
+    ).fromTo(
+      links,
+      { autoAlpha: 0 },
+      { autoAlpha: 1, duration: 0.2, ease: 'expo.out', stagger: 0.04 },
+      0.15,
+    );
 
     if (cta) {
       tl.fromTo(cta, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.2, ease: 'expo.out' }, 0.25);
@@ -79,6 +91,7 @@ function setupHoverBehavior(
   toggle: HTMLButtonElement,
   open: () => void,
   close: () => void,
+  onHoverOpen: () => void,
 ): () => void {
   // Only attach hover-to-open on devices with real hover (not touch)
   if (!window.matchMedia('(hover: hover)').matches) return () => {};
@@ -86,8 +99,14 @@ function setupHoverBehavior(
   let hoverCloseTimer: ReturnType<typeof setTimeout> | null = null;
 
   function handleToggleEnter() {
-    if (hoverCloseTimer) { clearTimeout(hoverCloseTimer); hoverCloseTimer = null; }
-    if (!isMenuOpen(toggle)) open();
+    if (hoverCloseTimer) {
+      clearTimeout(hoverCloseTimer);
+      hoverCloseTimer = null;
+    }
+    if (!isMenuOpen(toggle)) {
+      onHoverOpen();
+      open();
+    }
   }
 
   function handleHeaderLeave(e: MouseEvent) {
@@ -98,7 +117,10 @@ function setupHoverBehavior(
   }
 
   function handleHeaderEnter() {
-    if (hoverCloseTimer) { clearTimeout(hoverCloseTimer); hoverCloseTimer = null; }
+    if (hoverCloseTimer) {
+      clearTimeout(hoverCloseTimer);
+      hoverCloseTimer = null;
+    }
   }
 
   toggle.addEventListener('mouseenter', handleToggleEnter);
@@ -151,11 +173,21 @@ export function initNav() {
   }
 
   let toggleClicked = false;
+  // When the menu opens via hover, ignore close-clicks for this long — a user
+  // who naturally hovers-then-clicks shouldn't accidentally close what they
+  // just opened.
+  const HOVER_OPEN_CLICK_GRACE_MS = 350;
+  let hoverOpenAt = 0;
 
   function handleToggle(e: MouseEvent) {
     e.stopPropagation();
     toggleClicked = true;
-    isMenuOpen(toggle) ? close() : open();
+    if (isMenuOpen(toggle)) {
+      if (performance.now() - hoverOpenAt < HOVER_OPEN_CLICK_GRACE_MS) return;
+      close();
+    } else {
+      open();
+    }
   }
 
   function handleKeydown(e: KeyboardEvent) {
@@ -170,13 +202,18 @@ export function initNav() {
   }
 
   function handleClickOutside(e: MouseEvent) {
-    if (toggleClicked) { toggleClicked = false; return; }
+    if (toggleClicked) {
+      toggleClicked = false;
+      return;
+    }
     if (!isMenuOpen(toggle)) return;
     if (!header.contains(e.target as Node)) close();
   }
 
   const teardownScroll = setupScrollHide(header, toggle);
-  const teardownHover = setupHoverBehavior(header, toggle, open, close);
+  const teardownHover = setupHoverBehavior(header, toggle, open, close, () => {
+    hoverOpenAt = performance.now();
+  });
 
   toggle.addEventListener('click', handleToggle);
   document.addEventListener('keydown', handleKeydown);
