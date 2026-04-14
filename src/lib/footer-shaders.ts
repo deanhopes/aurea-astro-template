@@ -52,6 +52,11 @@ import {
 
 gsap.registerPlugin(ScrollTrigger);
 
+// Local alias for vec2-shaped TSL nodes — every Fn in this file takes a UV/vec2
+// as its single parameter. The TSL types don't re-export the Node<"vec2"> type
+// directly, so we recover it from the constructor's return type.
+type Vec2Node = ReturnType<typeof vec2>;
+
 /* ── State ── */
 
 let renderer: THREE.WebGPURenderer | null = null;
@@ -107,7 +112,7 @@ let videoTexNode: ReturnType<typeof texture> | null = null;
  *
  * Parameterized by UV so the fragment can sample it at a refracted position.
  * ───────────────────────────────────────────────────────────────────────────*/
-const gradientFn = Fn(([sampleUV]: [any]) => {
+const gradientFn = Fn(([sampleUV]: [Vec2Node]) => {
   const cDeep = color(0xc94020);
   const cOrange = color(0xef5d2a);
   const cCoral = color(0xf0a080);
@@ -141,12 +146,12 @@ const gradientFn = Fn(([sampleUV]: [any]) => {
  * concentrates on slope changes). Same field provides (a) a smooth normal
  * for lighting + refraction and (b) caustic brightness from the gradient.
  * ───────────────────────────────────────────────────────────────────────────*/
-const hash2 = Fn(([p]: [any]) => {
+const hash2 = Fn(([p]: [Vec2Node]) => {
   return fract(sin(p.x.mul(127.1).add(p.y.mul(311.7))).mul(43758.5453));
 });
 
 // Smooth value noise — bilinear interp of 4 hashed corners, quintic smooth
-const valueNoise = Fn(([p]: [any]) => {
+const valueNoise = Fn(([p]: [Vec2Node]) => {
   const i = floor(p);
   const f = fract(p);
 
@@ -165,7 +170,7 @@ const valueNoise = Fn(([p]: [any]) => {
 });
 
 // 3-octave fBm — sum of value noise at doubling frequencies, halving amplitudes
-const fbm = Fn(([p]: [any]) => {
+const fbm = Fn(([p]: [Vec2Node]) => {
   const n1 = valueNoise(p);
   const n2 = valueNoise(p.mul(2.0)).mul(0.5);
   const n3 = valueNoise(p.mul(4.0)).mul(0.25);
@@ -173,7 +178,7 @@ const fbm = Fn(([p]: [any]) => {
 });
 
 // The scalar height field. Domain-warped so it flows rather than obviously tiles.
-const causticHeightFn = Fn(([sampleUV]: [any]) => {
+const causticHeightFn = Fn(([sampleUV]: [Vec2Node]) => {
   const t = time.mul(uCausticSpeed);
   const p = sampleUV.mul(uCausticScale);
 
@@ -192,7 +197,7 @@ const causticHeightFn = Fn(([sampleUV]: [any]) => {
  * Bright video pixels (lit sky between leaves) → shadow = 0.
  * Sampled at an arbitrary UV so the refraction pass can displace it.
  * ───────────────────────────────────────────────────────────────────────────*/
-const shadowMaskFn = Fn(([sampleUV]: [any]) => {
+const shadowMaskFn = Fn(([sampleUV]: [Vec2Node]) => {
   // Video texture is Y-flipped relative to canvas UV convention
   const flipped = vec2(sampleUV.x, float(1.0).sub(sampleUV.y));
   // Sample the same videoTexNode at a new UV — TSL clones with referenceNode
