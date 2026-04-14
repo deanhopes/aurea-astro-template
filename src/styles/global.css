@@ -64,8 +64,16 @@
     --color-surface-subtle: color-mix(in srgb, var(--color-black) 3%, transparent);
     --color-surface-muted: color-mix(in srgb, var(--color-black) 5%, transparent);
 
+    /* Ink tonal scale — black at fixed alphas, named once, used everywhere */
+    --ink-08: color-mix(in srgb, var(--color-black) 8%, transparent);
+    --ink-20: color-mix(in srgb, var(--color-black) 20%, transparent);
+    --ink-35: color-mix(in srgb, var(--color-black) 35%, transparent);
+    --ink-55: color-mix(in srgb, var(--color-black) 55%, transparent);
+    --ink-60: color-mix(in srgb, var(--color-black) 60%, transparent);
+
     /* Radii */
     --radius-cta: 4px;
+    --radius-lg: 6px;
 
     /* The easing */
     --ease-premium: cubic-bezier(0.19, 1, 0.22, 1);
@@ -206,6 +214,7 @@
 
     .nav-pill--wordmark:hover {
       opacity: 1;
+      letter-spacing: 0;
     }
   }
 
@@ -224,6 +233,9 @@
     font-weight: 300;
     font-size: clamp(1.5rem, 1.5vw + 0.75rem, 2.125rem);
     letter-spacing: 0.2em;
+    transition:
+      opacity 0.3s var(--ease-premium),
+      letter-spacing 0.6s var(--ease-premium);
   }
 
   .nav-pill--cta {
@@ -1549,7 +1561,8 @@
     overflow: hidden;
   }
 
-  .hero__image img {
+  .hero__image img,
+  .hero__image video {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -2226,6 +2239,7 @@
     grid-template-columns: 1fr 1fr;
     gap: clamp(2rem, 4vw, 4rem);
     align-items: end;
+    padding: var(--space-block);
     margin-bottom: var(--space-block);
   }
 
@@ -2462,25 +2476,23 @@
   .residences__card {
     display: flex;
     flex-direction: column;
+    gap: 1.25rem;
     text-decoration: none;
     color: var(--color-black);
-    background: var(--color-surface-subtle);
-    border: 1px solid color-mix(in srgb, var(--color-black) 8%, transparent);
-    border-radius: 4px;
-    overflow: hidden;
-    transition: border-color 400ms var(--ease-premium);
   }
 
-  @media (hover: hover) {
-    .residences__card:hover {
-      border-color: color-mix(in srgb, var(--color-black) 20%, transparent);
-    }
+  .residences__card:focus-visible {
+    outline: 2px solid var(--color-black);
+    outline-offset: 4px;
   }
 
   .residences__card-image {
-    aspect-ratio: 3 / 4;
+    aspect-ratio: 4 / 5;
     overflow: hidden;
-    border-radius: 3px 3px 0 0;
+    border-radius: 2px;
+    outline: 1px solid var(--ink-08);
+    outline-offset: -1px;
+    background: var(--color-surface-subtle);
   }
 
   .residences__card-image img {
@@ -2498,86 +2510,73 @@
   }
 
   .residences__card-info {
-    padding: 1.25rem 1.5rem;
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    padding-inline: 8px;
   }
 
   .residences__card-name {
     font-family: var(--font-display);
-    font-weight: 500;
-    font-size: 1.25rem;
+    font-weight: 300;
+    font-size: 1.75rem;
     letter-spacing: -0.02em;
-    line-height: 1.3;
+    line-height: 1.05;
   }
 
   .residences__card-detail {
     font-family: var(--font-body);
     font-weight: 400;
-    font-size: 0.875rem;
-    line-height: 1.4;
-    color: color-mix(in srgb, var(--color-black) 60%, transparent);
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--ink-60);
+    margin-top: 0.5rem;
+    max-width: 32ch;
   }
 
   .residences__card-specs {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    margin-top: 0.75rem;
-    padding-top: 0.75rem;
-    border-top: 1px solid color-mix(in srgb, var(--color-black) 10%, transparent);
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0;
+    margin-top: 1.5rem;
   }
 
   .residences__spec {
     display: flex;
-    align-items: center;
-    gap: 0.5rem;
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+
+  .residences__spec-label {
     font-family: var(--font-body);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-35);
+  }
+
+  .residences__spec-value {
+    font-family: var(--font-body);
+    font-size: 0.9375rem;
     font-weight: 400;
-    font-size: 0.8125rem;
-    line-height: 1.3;
-    color: color-mix(in srgb, var(--color-black) 55%, transparent);
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid color-mix(in srgb, var(--color-black) 8%, transparent);
-  }
-
-  .residences__spec:last-child {
-    border-bottom: none;
-    padding-bottom: 0;
-  }
-
-  .residences__spec svg {
-    flex-shrink: 0;
-    color: color-mix(in srgb, var(--color-black) 35%, transparent);
+    line-height: 1.2;
+    color: var(--color-black);
+    font-variant-numeric: tabular-nums;
   }
 
   .residences__footer {
-    margin-top: 2rem;
+    margin-top: var(--space-block);
     text-align: center;
-  }
-
-  .residences__cta {
-    display: inline-block;
-    font-family: var(--font-body);
-    font-weight: 500;
-    font-size: 0.875rem;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--color-black);
-    text-decoration: none;
-    position: relative;
   }
 
   @media (max-width: 1023px) {
     .residences__grid {
       grid-template-columns: 1fr;
-      gap: 2rem;
+      gap: 3rem;
     }
 
     .residences__card-image {
-      aspect-ratio: 16 / 9;
+      aspect-ratio: 4 / 5;
     }
   }
 
@@ -2831,106 +2830,6 @@
     grid-row: 1 / 2;
   }
 
-  /* Restaurant grid — dining tab (hidden by default, shown via JS) */
-  .neighbourhood__restaurants {
-    grid-column: 1 / 13;
-    grid-row: 2 / 3;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1px;
-    position: relative;
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-    background: color-mix(in srgb, var(--color-black) 8%, transparent);
-    border-radius: 4px;
-    overflow: hidden;
-  }
-
-  .neighbourhood__restaurants.is-active {
-    visibility: visible;
-    pointer-events: auto;
-  }
-
-  .neighbourhood__restaurant {
-    display: flex;
-    gap: 1rem;
-    padding: 1rem;
-    background: var(--color-background);
-  }
-
-  .neighbourhood__restaurant-thumb {
-    width: 56px;
-    height: 56px;
-    flex-shrink: 0;
-    overflow: hidden;
-    border-radius: 4px;
-  }
-
-  .neighbourhood__restaurant-thumb img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-
-  .neighbourhood__restaurant-info {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 0.125rem;
-    min-width: 0;
-  }
-
-  .neighbourhood__restaurant-name {
-    font-family: var(--font-display);
-    font-weight: 400;
-    font-size: 1.125rem;
-    line-height: 1.3;
-    color: var(--color-black);
-  }
-
-  .neighbourhood__restaurant-cuisine {
-    font-family: var(--font-body);
-    font-weight: 500;
-    font-size: 0.75rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: color-mix(in srgb, var(--color-black) 45%, transparent);
-    line-height: 1.2;
-  }
-
-  .neighbourhood__restaurant-desc {
-    font-family: var(--font-body);
-    font-weight: 400;
-    font-size: 0.875rem;
-    line-height: 1.5;
-    color: color-mix(in srgb, var(--color-black) 70%, transparent);
-    margin-top: 0.25rem;
-  }
-
-  /* Restaurant hover — dimming + indicator (desktop only, driven by JS) */
-  .neighbourhood__restaurant {
-    transition: opacity 400ms var(--ease-premium);
-  }
-
-  /* When dining is active — image full width row 1, restaurants row 2 */
-  .neighbourhood__content.is-dining .neighbourhood__map,
-  .neighbourhood__content.is-dining .neighbourhood__text {
-    display: none;
-  }
-
-  .neighbourhood__content.is-dining .neighbourhood__media {
-    grid-column: 1 / 13;
-    grid-row: 1 / 2;
-    aspect-ratio: 21 / 9;
-  }
-
-  .neighbourhood__content.is-dining .neighbourhood__restaurants {
-    grid-column: 1 / 13;
-    grid-row: 2 / 3;
-  }
-
   /* Accordion — hidden on desktop */
   .neighbourhood__accordion {
     display: none;
@@ -2999,15 +2898,6 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-    }
-
-    /* Tablet dining — single-column restaurant grid */
-    .neighbourhood__restaurants {
-      grid-template-columns: 1fr;
-    }
-
-    .neighbourhood__content.is-dining .neighbourhood__media {
-      aspect-ratio: 16 / 9;
     }
   }
 
@@ -3100,42 +2990,6 @@
       color: var(--color-black);
       padding: 0.75rem 0 1rem;
     }
-
-    .neighbourhood__inline-restaurants {
-      display: flex;
-      flex-direction: column;
-      padding: 0.75rem 0 1rem;
-    }
-
-    .neighbourhood__inline-restaurant {
-      display: flex;
-      gap: 0.75rem;
-      padding: 0.75rem 0;
-      border-bottom: 1px solid color-mix(in srgb, var(--color-black) 8%, transparent);
-    }
-
-    .neighbourhood__inline-restaurant:first-child {
-      padding-top: 0;
-    }
-
-    .neighbourhood__inline-restaurant:last-child {
-      border-bottom: none;
-    }
-
-    .neighbourhood__inline-restaurant-thumb {
-      width: 56px;
-      height: 56px;
-      flex-shrink: 0;
-      overflow: hidden;
-      border-radius: 4px;
-    }
-
-    .neighbourhood__inline-restaurant-thumb img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
   }
 
   /* Neighbourhood — reduced motion */
@@ -3143,7 +2997,6 @@
     .neighbourhood__tab,
     .neighbourhood__line,
     .neighbourhood__line-chevron,
-    .neighbourhood__restaurant,
     .neighbourhood__cta::after {
       transition-duration: 0.01ms !important;
     }
@@ -3200,6 +3053,14 @@
     transform: translateX(101%);
   }
 
+  /* First-load mask: pin panels over the viewport until firstLoadCurtain()
+     takes control and animates them open. Prevents a flash of content
+     during the TSL shader compile gap. */
+  html[data-booting] .curtain__panel--left,
+  html[data-booting] .curtain__panel--right {
+    transform: translateX(0) !important;
+  }
+
   @media (max-width: 991px) {
     #page-curtain {
       flex-direction: column;
@@ -3211,6 +3072,11 @@
 
     .curtain__panel--right {
       transform: translateY(101%);
+    }
+
+    html[data-booting] .curtain__panel--left,
+    html[data-booting] .curtain__panel--right {
+      transform: translateY(0) !important;
     }
   }
 } /* end @layer components */

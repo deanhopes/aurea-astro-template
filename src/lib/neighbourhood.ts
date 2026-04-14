@@ -11,7 +11,6 @@ interface NeighbourhoodState {
   items: NodeListOf<HTMLElement>;
   lines: NodeListOf<HTMLElement>;
   content: HTMLElement | null;
-  restaurants: HTMLElement | null;
   indicator: HTMLElement | null;
   tabIds: string[];
   layoutMap: Record<string, string>;
@@ -267,43 +266,10 @@ function measureTextPanels(texts: NodeListOf<HTMLElement>, textWrap: HTMLElement
   textWrap.style.minHeight = `${maxH}px`;
 }
 
-function crossfadeRestaurants(state: NeighbourhoodState, isDining: boolean, instant: boolean) {
-  const { content, restaurants } = state;
-  if (!content || !restaurants) return;
-
-  content.classList.toggle('is-dining', isDining);
-
-  if (isDining) {
-    restaurants.classList.add('is-active');
-    if (instant) {
-      gsap.set(restaurants, { opacity: 1 });
-    } else {
-      gsap.fromTo(
-        restaurants,
-        { opacity: 0 },
-        { opacity: 1, duration: 0.6, ease: 'expo.out', overwrite: true },
-      );
-    }
-  } else {
-    if (instant) {
-      gsap.set(restaurants, { opacity: 0 });
-      restaurants.classList.remove('is-active');
-    } else {
-      gsap.to(restaurants, {
-        opacity: 0,
-        duration: 0.3,
-        overwrite: true,
-        onComplete: () => restaurants.classList.remove('is-active'),
-      });
-    }
-  }
-}
-
 function setActive(state: NeighbourhoodState, id: string, instant = false) {
   if (id === state.activeId && !instant) return;
 
   const newIndex = state.tabIds.indexOf(id);
-  const isDining = id === 'dining';
 
   if (state.isMobile) {
     state.items.forEach((item) => {
@@ -315,12 +281,8 @@ function setActive(state: NeighbourhoodState, id: string, instant = false) {
     setActiveTabs(state, id);
     moveIndicator(state, id, instant);
     crossfadeImages(state, id, instant);
-    crossfadeRestaurants(state, isDining, instant);
-    if (!isDining) {
-      crossfadeMaps(state, id, instant);
-      crossfadeText(state, id, instant, newIndex);
-    }
-    // Update grid layout variant
+    crossfadeMaps(state, id, instant);
+    crossfadeText(state, id, instant, newIndex);
     if (state.content) {
       state.content.dataset.layout = state.layoutMap[id] ?? 'a';
     }
@@ -344,7 +306,6 @@ export function initNeighbourhood() {
   const lines = section.querySelectorAll<HTMLElement>('.neighbourhood__line');
 
   const content = section.querySelector<HTMLElement>('.neighbourhood__content');
-  const restaurants = section.querySelector<HTMLElement>('[data-neighbourhood-restaurants]');
   const indicator = section.querySelector<HTMLElement>('[data-neighbourhood-indicator]');
 
   const tabIds = Array.from(tabs).map((el) => el.dataset.neighbourhoodTab!);
@@ -371,7 +332,6 @@ export function initNeighbourhood() {
     items,
     lines,
     content,
-    restaurants,
     indicator,
     tabIds,
     layoutMap,
@@ -393,7 +353,44 @@ export function initNeighbourhood() {
     measureIfDesktop();
   }
 
+  // Stash all map data-src values so the initial setActive() call can't
+  // eagerly load Google Maps (~500KB of JS). Loading the maps mid-scroll
+  // stalls the main thread and locks Lenis. Restored on first IO hit.
+  const stashedMapSrcs = new Map<HTMLIFrameElement, string>();
+  state.maps.forEach((panel) => {
+    const iframe = panel.querySelector<HTMLIFrameElement>('iframe');
+    if (iframe?.dataset.src) {
+      stashedMapSrcs.set(iframe, iframe.dataset.src);
+      delete iframe.dataset.src;
+    }
+  });
+
+  // Set initial visual tab state — runs against the stashed iframes, so
+  // crossfadeMaps's "lazy-load on activation" path is a no-op for the
+  // first run. Tab classes / images / text still set correctly.
   setActive(state, state.activeId, true);
+
+  // Restore data-src + activate the current tab's map only when the
+  // neighbourhood section approaches viewport. From there, normal
+  // tab-click + tab-hover preload behaviour takes over.
+  const sectionLoadObserver = new IntersectionObserver(
+    (entries) => {
+      if (!entries[0]?.isIntersecting) return;
+      sectionLoadObserver.disconnect();
+      stashedMapSrcs.forEach((src, iframe) => {
+        iframe.dataset.src = src;
+      });
+      const currentPanel = Array.from(state.maps).find(
+        (m) => m.dataset.neighbourhoodMap === state.activeId,
+      );
+      const iframe = currentPanel?.querySelector<HTMLIFrameElement>('iframe');
+      if (iframe && !iframe.src && iframe.dataset.src) {
+        iframe.src = iframe.dataset.src;
+      }
+    },
+    { rootMargin: '600px 0px' },
+  );
+  sectionLoadObserver.observe(section);
 
   // Desktop: preload map iframe on tab hover so it's ready by click
   function onTabHover(e: Event) {
@@ -449,65 +446,13 @@ export function initNeighbourhood() {
   }
   document.addEventListener('visibilitychange', onVisibility);
 
-  // Restaurant hover — dimming + image crossfade (desktop only)
-  const restaurantRows = restaurants
-    ? Array.from(restaurants.querySelectorAll<HTMLElement>('.neighbourhood__restaurant'))
-    : [];
-  const diningImage = section.querySelector<HTMLElement>('[data-neighbourhood-image="dining"] img');
-  const diningImageSrc = diningImage?.getAttribute('src') ?? '';
-  const hoverQuery = window.matchMedia('(hover: hover)');
-  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-
-  function onRestaurantEnter(this: HTMLElement) {
-    if (state.isMobile || state.activeId !== 'dining' || !hoverQuery.matches) return;
-
-    // Dim non-hovered rows
-    restaurantRows.forEach((row) => {
-      gsap.to(row, {
-        opacity: row === this ? 1 : 0.35,
-        duration: reducedMotion.matches ? 0 : 0.3,
-        ease: 'expo.out',
-        overwrite: true,
-      });
-    });
-
-    // Crossfade image
-    const imgSrc = this.dataset.restaurantImage;
-    if (diningImage && imgSrc) {
-      diningImage.setAttribute('src', imgSrc);
-    }
-  }
-
-  function onRestaurantsLeave() {
-    if (state.isMobile || state.activeId !== 'dining') return;
-
-    // Reset all rows
-    restaurantRows.forEach((row) => {
-      gsap.to(row, {
-        opacity: 1,
-        duration: reducedMotion.matches ? 0 : 0.3,
-        ease: 'expo.out',
-        overwrite: true,
-      });
-    });
-
-    // Restore original image
-    if (diningImage && diningImageSrc) {
-      diningImage.setAttribute('src', diningImageSrc);
-    }
-  }
-
-  restaurantRows.forEach((row) => row.addEventListener('mouseenter', onRestaurantEnter));
-  restaurants?.addEventListener('mouseleave', onRestaurantsLeave);
-
   cleanup = () => {
+    sectionLoadObserver.disconnect();
     tabs.forEach((tab) => {
       tab.removeEventListener('mouseenter', onTabHover);
       tab.removeEventListener('click', onTabClick);
     });
     lines.forEach((line) => line.removeEventListener('click', onLineClick));
-    restaurantRows.forEach((row) => row.removeEventListener('mouseenter', onRestaurantEnter));
-    restaurants?.removeEventListener('mouseleave', onRestaurantsLeave);
     mobileQuery.removeEventListener('change', onBreakpoint);
     window.removeEventListener('resize', onResize);
     document.removeEventListener('visibilitychange', onVisibility);
