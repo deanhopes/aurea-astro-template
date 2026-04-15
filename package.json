@@ -15,7 +15,6 @@
     "@astrojs/check": "^0.9.4",
     "@astrojs/sitemap": "^3.6.0",
     "@astrojs/ts-plugin": "^1.10.4",
-    "@lucide/astro": "^1.7.0",
     "astro": "^5.10.2",
     "gsap": "^3.14.2",
     "lenis": "^1.2.3",

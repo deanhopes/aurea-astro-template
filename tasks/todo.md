@@ -153,9 +153,9 @@ The one substantial behavioural fix. Matches the "parent + children double-fade"
 
 ## 10. Remove `@lucide/astro` dep
 
-- [ ] Confirm zero usage with a final grep for `lucide`
-- [ ] `npm uninstall @lucide/astro`
-- [ ] `npm run build`
+- [x] Confirm zero usage with a final grep for `lucide`
+- [x] `npm uninstall @lucide/astro`
+- [x] `npm run build`
 
 ---
 
@@ -216,6 +216,6 @@ These are out of scope for this cleanup pass — user will handle later:
 - Section 7 — nav/footer link consolidation: NavLink type + footerLinkGroups exported from site.ts. Footer.astro imports, deletes local hard-code (+ drops JSDoc banner). Neighbourhood.astro `items` flatten — now sorted `CollectionEntry<'neighbourhood'>[]`, all downstream accesses via `item.id`/`item.data.*`. Build + check clean.
 - Section 8 — double-reveal untangle: `animateLifestyleText` + `animateResidencesReveals` deleted from `src/lib/animations.ts`; `initAnimations()` now runs only `animateHeroParallax()`. File 91 → 37 lines. Parent `[data-reveal]` on `.lifestyle` + `.residences` is now single source. Build + astro-check clean (7 baseline errors unchanged). **Chrome visual verification pending** — user to spot-check Lifestyle/Residences reveals + reduced-motion.
 - Section 9 — heading CSS: Added `.text-section-heading` utility to typography layer in `src/styles/global.css`. Stripped shared type props from `.lifestyle__heading` (deleted outright — zero deltas), `.residences__heading` (kept text-align + margins), `.neighbourhood__heading` (kept `margin: 0`). Applied class in 3 components. `.enquiry__heading` deliberately skipped — uses different font-size ramp (`var(--text-section)` vs hard clamp), not byte-identical, forcing consolidation would regress. Label consolidation also skipped — existing 4-selector group rule already covers vision/lifestyle/residences/neighbourhood; `.hero__label` + `.enquiry__eyebrow` differ in color + tracking so they stay separate. Build + check clean.
-- Section 10 — @lucide/astro removal:
+- Section 10 — @lucide/astro removal: Grep confirmed zero source refs. Uninstalled. Build clean.
 - Section 11 — comment hygiene:
 - Section 12 — verification:
