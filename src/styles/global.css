@@ -1610,6 +1610,19 @@
     object-fit: cover;
   }
 
+  .hero__image::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      transparent 50%,
+      color-mix(in srgb, #000 45%, transparent) 100%
+    );
+    pointer-events: none;
+  }
+
   .hero__content {
     position: absolute;
     bottom: clamp(3rem, 8vh, 7rem);
