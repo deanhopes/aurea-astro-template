@@ -1,6 +1,7 @@
 import gsap from 'gsap';
 
 let cleanup: (() => void) | null = null;
+const loadedIframes = new WeakSet<HTMLIFrameElement>();
 
 interface NeighbourhoodState {
   section: HTMLElement;
@@ -44,10 +45,7 @@ function crossfadeImages(state: NeighbourhoodState, id: string, instant: boolean
 }
 
 function fadeInOnLoad(iframe: HTMLIFrameElement, panel: HTMLElement, instant: boolean) {
-  const ext = iframe as HTMLIFrameElement & { _loaded?: boolean };
-
-  if (ext._loaded) {
-    // Already loaded from a previous visit — show immediately
+  if (loadedIframes.has(iframe)) {
     if (instant) {
       gsap.set(panel, { opacity: 1 });
     } else {
@@ -61,19 +59,18 @@ function fadeInOnLoad(iframe: HTMLIFrameElement, panel: HTMLElement, instant: bo
   }
 
   if (iframe.src && iframe.contentWindow) {
-    ext._loaded = true;
+    loadedIframes.add(iframe);
     gsap.set(panel, { opacity: 1 });
     panel.classList.add('is-active');
     return;
   }
 
-  // Keep hidden until the iframe content loads
   gsap.set(panel, { opacity: 0 });
   panel.classList.add('is-active');
 
   function onLoad() {
     iframe.removeEventListener('load', onLoad);
-    ext._loaded = true;
+    loadedIframes.add(iframe);
     gsap.to(panel, { opacity: 1, duration: 0.5, ease: 'expo.out', overwrite: true });
   }
   iframe.addEventListener('load', onLoad);

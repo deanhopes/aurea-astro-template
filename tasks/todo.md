@@ -79,16 +79,16 @@ Pure deletions. No markup touched. Run a visual diff on the homepage after.
 
 One `as any` in the whole repo. Fix at the root.
 
-- [ ] Add `"@tweakpane/core": "^2.0.5"` to `devDependencies` in `package.json`
-- [ ] `npm install`
-- [ ] At `src/pages/dev/footer.astro:88`, replace `new Pane(...) as any` with a typed binding:
+- [x] Add `"@tweakpane/core": "^2.0.5"` to `devDependencies` in `package.json`
+- [x] `npm install`
+- [x] At `src/pages/dev/footer.astro:88`, replace `new Pane(...) as any` with a typed binding:
   ```ts
   import { Pane, type FolderApi } from 'tweakpane';
   const pane: FolderApi = new Pane({ container: document.getElementById('tp-root')! });
   ```
-- [ ] Delete all 11 `uniform.value as number` casts at `src/pages/dev/footer.astro:94-98, 135-137, 162-164` — TSL's `uniform()` already returns a typed node
-- [ ] Delete the `({ value }: { value: number })` annotations on the Tweakpane change handlers — they become inferred once `FolderApi` resolves
-- [ ] Introduce a `getX(el: HTMLElement): number` helper at the top of `src/lib/lifestyle-slider.ts`:
+- [x] Delete all 11 `uniform.value as number` casts at `src/pages/dev/footer.astro:94-98, 135-137, 162-164` — TSL's `uniform()` already returns a typed node
+- [x] Delete the `({ value }: { value: number })` annotations on the Tweakpane change handlers — they become inferred once `FolderApi` resolves
+- [x] Introduce a `getX(el: HTMLElement): number` helper at the top of `src/lib/lifestyle-slider.ts`:
   ```ts
   function getX(el: HTMLElement): number {
     const v = gsap.getProperty(el, 'x');
@@ -96,9 +96,9 @@ One `as any` in the whole repo. Fix at the root.
   }
   ```
   Replace the three `gsap.getProperty(..., 'x') as number` casts at lines 55, 104, 123
-- [ ] At `src/lib/lifestyle-slider.ts:207, 216`, replace `Array.from(track.children) as HTMLElement[]` with `Array.from(track.querySelectorAll<HTMLElement>(':scope > *'))` — matches the convention used elsewhere in the same file
-- [ ] At `src/lib/neighbourhood.ts:47`, replace the `HTMLIFrameElement & { _loaded?: boolean }` intersection cast with a module-scope `const loadedIframes = new WeakSet<HTMLIFrameElement>();` — update the read/write sites accordingly
-- [ ] `npm run check` — this pass should drop the `as any` count to zero
+- [x] At `src/lib/lifestyle-slider.ts:207, 216`, replace `Array.from(track.children) as HTMLElement[]` with `Array.from(track.querySelectorAll<HTMLElement>(':scope > *'))` — matches the convention used elsewhere in the same file
+- [x] At `src/lib/neighbourhood.ts:47`, replace the `HTMLIFrameElement & { _loaded?: boolean }` intersection cast with a module-scope `const loadedIframes = new WeakSet<HTMLIFrameElement>();` — update the read/write sites accordingly
+- [x] `npm run check` — this pass should drop the `as any` count to zero
 
 ---
 
@@ -212,7 +212,7 @@ These are out of scope for this cleanup pass — user will handle later:
 - Section 3 — dead lib code: 2 dead animation helpers + call sites removed, back-compat aliases dropped, 3 internal uniforms de-exported. Build clean. `npm run check` shows 7 pre-existing baseline errors, no new.
 - Section 4 — FooterShadows style block: `__overlay` rule moved to global.css alongside siblings. `.footer-shadows`/`__video` confirmed byte-identical with existing global.css rules, dropped. Component `<style>` block gone. Also dropped file-level JSDoc banner (convention, section 11 already flags).
 - Section 5 — neighbourhood try/catch: try/catch block collapsed to single guard. Both branches did identical work. Build clean.
-- Section 6 — weak type fixes:
+- Section 6 — weak type fixes: @tweakpane/core devDep added → FolderApi resolves → `as any` gone, all 11 `.value as number` casts removed, all 12 change-handler annotations inferred. `getX()` helper replaces 3 gsap.getProperty casts. HTMLCollection casts swapped for `querySelectorAll<HTMLElement>(':scope > *')`. Iframe `_loaded` intersection cast replaced by module WeakSet. `grep "as any" src/` returns zero. 7 pre-existing baseline errors unchanged.
 - Section 7 — nav/footer link consolidation:
 - Section 8 — double-reveal untangle:
 - Section 9 — heading/eyebrow CSS:

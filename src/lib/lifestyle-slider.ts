@@ -27,6 +27,11 @@ function getGap(track: HTMLElement): number {
   return parseFloat(getComputedStyle(track).gap) || 0;
 }
 
+function getX(el: HTMLElement): number {
+  const v = gsap.getProperty(el, 'x');
+  return typeof v === 'number' ? v : parseFloat(v);
+}
+
 function measure(state: SliderState) {
   const g = getGap(state.track);
   state.setWidth = 0;
@@ -52,7 +57,7 @@ function xForSlide(state: SliderState, index: number): number {
 
 function updateActive(state: SliderState) {
   const mx = markerX(state);
-  const currentX = gsap.getProperty(state.track, 'x') as number;
+  const currentX = getX(state.track);
 
   let closest = -1;
   let closestDist = Infinity;
@@ -101,7 +106,7 @@ function snapX(state: SliderState, endValue: number): number {
 }
 
 function wrapX(state: SliderState) {
-  let x = gsap.getProperty(state.track, 'x') as number;
+  let x = getX(state.track);
   if (x < -state.setWidth || x > 0) {
     x = ((x % state.setWidth) + state.setWidth) % state.setWidth;
     if (x > 0) x -= state.setWidth;
@@ -120,7 +125,7 @@ function stopAutoPlay(state: SliderState) {
 function advanceToNext(state: SliderState) {
   const nextOrig = (state.activeOrigIndex + 1) % state.slideCount;
   const targetX = xForSlide(state, nextOrig);
-  const currentX = gsap.getProperty(state.track, 'x') as number;
+  const currentX = getX(state.track);
 
   let best = targetX;
   let bestDist = Infinity;
@@ -204,7 +209,7 @@ export function initLifestyleSlider() {
   const track = document.querySelector<HTMLElement>('.lifestyle__track');
   if (!slider || !container || !track) return;
 
-  const originals = Array.from(track.children) as HTMLElement[];
+  const originals = Array.from(track.querySelectorAll<HTMLElement>(':scope > *'));
   const slideCount = originals.length;
 
   originals.forEach((child) => track.appendChild(child.cloneNode(true)));
@@ -213,7 +218,7 @@ export function initLifestyleSlider() {
     slider,
     container,
     track,
-    allSlides: Array.from(track.children) as HTMLElement[],
+    allSlides: Array.from(track.querySelectorAll<HTMLElement>(':scope > *')),
     slideCount,
     setWidth: 0,
     slideWidths: [],

@@ -66,7 +66,7 @@ import '@styles/global.css';
     <div id="tp-root"></div>
 
     <script>
-      import { Pane } from 'tweakpane';
+      import { Pane, type FolderApi } from 'tweakpane';
       import {
         initFooterShaders,
         setProgress,
@@ -82,103 +82,99 @@ import '@styles/global.css';
         uSpecSharp,
       } from '@lib/footer-shaders';
 
-      // Boot shaders at full reveal — staticProgress bypasses ScrollTrigger entirely
       await initFooterShaders({ staticProgress: 1 });
 
-      const pane = new Pane({ container: document.getElementById('tp-root')! }) as any;
+      const pane: FolderApi = new Pane({ container: document.getElementById('tp-root')! });
 
-      // ── Caustics ────────────────────────────────────────────
       const caustics = pane.addFolder({ title: 'Caustics', expanded: true });
 
       const cState = {
-        scale: uCausticScale.value as number,
-        speed: uCausticSpeed.value as number,
-        sharpness: uCausticSharpness.value as number,
-        height: uCausticHeight.value as number,
+        scale: uCausticScale.value,
+        speed: uCausticSpeed.value,
+        sharpness: uCausticSharpness.value,
+        height: uCausticHeight.value,
         progress: 1,
       };
 
       caustics
         .addBinding(cState, 'scale', { min: 1, max: 20, step: 0.1, label: 'Scale' })
-        .on('change', ({ value }: { value: number }) => {
+        .on('change', ({ value }) => {
           uCausticScale.value = value;
         });
 
       caustics
         .addBinding(cState, 'speed', { min: 0, max: 0.5, step: 0.005, label: 'Speed' })
-        .on('change', ({ value }: { value: number }) => {
+        .on('change', ({ value }) => {
           uCausticSpeed.value = value;
         });
 
       caustics
         .addBinding(cState, 'sharpness', { min: 0.5, max: 6, step: 0.1, label: 'Sharpness' })
-        .on('change', ({ value }: { value: number }) => {
+        .on('change', ({ value }) => {
           uCausticSharpness.value = value;
         });
 
       caustics
         .addBinding(cState, 'height', { min: 0, max: 6, step: 0.1, label: 'Height' })
-        .on('change', ({ value }: { value: number }) => {
+        .on('change', ({ value }) => {
           uCausticHeight.value = value;
         });
 
       caustics
         .addBinding(cState, 'progress', { min: 0, max: 1, step: 0.01, label: 'Progress' })
-        .on('change', ({ value }: { value: number }) => {
+        .on('change', ({ value }) => {
           setProgress(value);
         });
 
-      // ── Shadow mask ──────────────────────────────────────────
       const shadows = pane.addFolder({ title: 'Shadow Mask', expanded: false });
 
       const sState = {
-        threshold: uShadowThreshold.value as number,
-        softness: uShadowSoftness.value as number,
-        alpha: uShadowAlpha.value as number,
+        threshold: uShadowThreshold.value,
+        softness: uShadowSoftness.value,
+        alpha: uShadowAlpha.value,
       };
 
       shadows
         .addBinding(sState, 'threshold', { min: -1, max: 1, step: 0.01, label: 'Threshold' })
-        .on('change', ({ value }: { value: number }) => {
+        .on('change', ({ value }) => {
           uShadowThreshold.value = value;
         });
 
       shadows
         .addBinding(sState, 'softness', { min: 0, max: 4, step: 0.01, label: 'Softness' })
-        .on('change', ({ value }: { value: number }) => {
+        .on('change', ({ value }) => {
           uShadowSoftness.value = value;
         });
 
       shadows
         .addBinding(sState, 'alpha', { min: 0, max: 1, step: 0.01, label: 'Opacity' })
-        .on('change', ({ value }: { value: number }) => {
+        .on('change', ({ value }) => {
           uShadowAlpha.value = value;
         });
 
-      // ── Lighting ─────────────────────────────────────────
       const lighting = pane.addFolder({ title: 'Lighting', expanded: false });
 
       const lState = {
-        refraction: uRefraction.value as number,
-        specStrength: uSpecStrength.value as number,
-        specSharp: uSpecSharp.value as number,
+        refraction: uRefraction.value,
+        specStrength: uSpecStrength.value,
+        specSharp: uSpecSharp.value,
       };
 
       lighting
         .addBinding(lState, 'refraction', { min: 0, max: 0.1, step: 0.001, label: 'Refraction' })
-        .on('change', ({ value }: { value: number }) => {
+        .on('change', ({ value }) => {
           uRefraction.value = value;
         });
 
       lighting
         .addBinding(lState, 'specStrength', { min: 0, max: 4, step: 0.01, label: 'Spec Strength' })
-        .on('change', ({ value }: { value: number }) => {
+        .on('change', ({ value }) => {
           uSpecStrength.value = value;
         });
 
       lighting
         .addBinding(lState, 'specSharp', { min: 8, max: 256, step: 1, label: 'Spec Sharpness' })
-        .on('change', ({ value }: { value: number }) => {
+        .on('change', ({ value }) => {
           uSpecSharp.value = value;
         });
     </script>
