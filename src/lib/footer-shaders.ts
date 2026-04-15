@@ -80,9 +80,9 @@ let mouseQuickToX: gsap.QuickToFunc | null = null;
 let mouseQuickToY: gsap.QuickToFunc | null = null;
 
 /* ── TSL Uniforms ── */
-export const uProgress = uniform(0);
-export const uSunX = uniform(0.34); // sun horizontal position, driven by mouseX
-export const uSunY = uniform(0.5); // sun vertical tilt, driven by mouseY — narrow range
+const uProgress = uniform(0);
+const uSunX = uniform(0.34); // sun horizontal position, driven by mouseX
+const uSunY = uniform(0.5); // sun vertical tilt, driven by mouseY — narrow range
 
 // Caustic tuning — exposed for tweakpane
 export const uCausticScale = uniform(2.3);
@@ -537,6 +537,3 @@ export function destroyFooterShaders(): void {
   state.mouseX = 0.34;
   state.mouseY = 0.5;
 }
-
-// Back-compat aliases
-export { initFooterShaders as initFooterShadows, destroyFooterShaders as destroyFooterShadows };

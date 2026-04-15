@@ -42,12 +42,12 @@ Pure deletions. No markup touched. Run a visual diff on the homepage after.
 
 ## 3. Dead code in `src/lib/`
 
-- [ ] Delete `animateLifestylePairImages` in `src/lib/animations.ts:24-40` (targets `.lifestyle__pair-image` / `.lifestyle__pair` — neither exists)
-- [ ] Delete `animateContainedParallax` in `src/lib/animations.ts:42-56` (targets `[data-parallax]` — zero DOM usages)
-- [ ] Remove the two call sites for the above in `initAnimations()` (around lines 101, 103)
-- [ ] Delete the back-compat aliases at `src/lib/footer-shaders.ts:541-542` (`initFooterShadows` / `destroyFooterShadows` — zero callers)
-- [ ] Drop the `export` keyword from `uProgress`, `uSunX`, `uSunY` at `src/lib/footer-shaders.ts:83-85` (internal-only — these three differ from `uCausticScale` etc. on 88-101 which ARE imported by `dev/footer.astro` and must stay exported)
-- [ ] `npm run build` + `npm run check`
+- [x] Delete `animateLifestylePairImages` in `src/lib/animations.ts:24-40` (targets `.lifestyle__pair-image` / `.lifestyle__pair` — neither exists)
+- [x] Delete `animateContainedParallax` in `src/lib/animations.ts:42-56` (targets `[data-parallax]` — zero DOM usages)
+- [x] Remove the two call sites for the above in `initAnimations()` (around lines 101, 103)
+- [x] Delete the back-compat aliases at `src/lib/footer-shaders.ts:541-542` (`initFooterShadows` / `destroyFooterShadows` — zero callers)
+- [x] Drop the `export` keyword from `uProgress`, `uSunX`, `uSunY` at `src/lib/footer-shaders.ts:83-85` (internal-only — these three differ from `uCausticScale` etc. on 88-101 which ARE imported by `dev/footer.astro` and must stay exported)
+- [x] `npm run build` + `npm run check`
 
 ---
 
@@ -209,7 +209,7 @@ These are out of scope for this cleanup pass — user will handle later:
 
 - Section 1 — dead assets: 34 images + orphan lib + unused component + stray font + tracked screenshot removed. `npm run build` clean (9 pages, ~8.5s). Zero grep refs confirmed before each delete.
 - Section 2 — dead CSS: ~390 lines removed from global.css. `.site-footer__enquiry/__dropdown` block + `.rwpaper` (~216 lines), `.col-*`/`.col-start-*` grid utility (~150 lines), `.section--hero`, `.text-section` class, mobile-override comments, `--radius-cta` token inlined. `.residences__cta` was inside the enquiry block → auto-gone. Build clean (9 pages, 5.3s). Visual spot-check pending user eyes.
-- Section 3 — dead lib code:
+- Section 3 — dead lib code: 2 dead animation helpers + call sites removed, back-compat aliases dropped, 3 internal uniforms de-exported. Build clean. `npm run check` shows 7 pre-existing baseline errors, no new.
 - Section 4 — FooterShadows style block:
 - Section 5 — neighbourhood try/catch:
 - Section 6 — weak type fixes:

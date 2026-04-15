@@ -21,54 +21,27 @@ function animateHeroParallax() {
   });
 }
 
-function animateLifestylePairImages() {
-  const pairImages = document.querySelectorAll('.lifestyle__pair-image img');
-  if (!pairImages.length) return;
-
-  gsap.from(pairImages, {
-    scale: 1.05,
-    opacity: 0,
-    duration: 1.25,
-    ease: 'expo.out',
-    stagger: 0.1,
-    scrollTrigger: {
-      trigger: '.lifestyle__pair',
-      start: 'top 85%',
-      once: true,
-    },
-  });
-}
-
-function animateContainedParallax() {
-  document.querySelectorAll<HTMLElement>('[data-parallax]').forEach((img) => {
-    gsap.set(img, { scale: 1.15 });
-    gsap.to(img, {
-      yPercent: -8,
-      ease: 'none',
-      scrollTrigger: {
-        trigger: img.parentElement,
-        start: 'top bottom',
-        end: 'bottom top',
-        scrub: 1,
-      },
-    });
-  });
-}
-
 function animateLifestyleText() {
   const label = document.querySelector('.lifestyle__label');
   const copy = document.querySelectorAll('.lifestyle__copy p');
 
   if (label) {
     gsap.from(label, {
-      y: 20, opacity: 0, duration: 0.9, ease: 'expo.out',
+      y: 20,
+      opacity: 0,
+      duration: 0.9,
+      ease: 'expo.out',
       scrollTrigger: { trigger: '.lifestyle', start: 'top 85%', once: true },
     });
   }
 
   if (copy.length) {
     gsap.from(copy, {
-      y: 30, opacity: 0, duration: 0.9, ease: 'expo.out', stagger: 0.04,
+      y: 30,
+      opacity: 0,
+      duration: 0.9,
+      ease: 'expo.out',
+      stagger: 0.04,
       scrollTrigger: { trigger: '.lifestyle__copy', start: 'top 85%', once: true },
     });
   }
@@ -80,27 +53,31 @@ function animateResidencesReveals() {
 
   if (label) {
     gsap.from(label, {
-      y: 20, opacity: 0, duration: 0.9, ease: 'expo.out',
+      y: 20,
+      opacity: 0,
+      duration: 0.9,
+      ease: 'expo.out',
       scrollTrigger: { trigger: '.residences', start: 'top 85%', once: true },
     });
   }
 
   if (cards.length) {
     gsap.from(cards, {
-      y: 40, opacity: 0, duration: 1, ease: 'expo.out', stagger: 0.1,
+      y: 40,
+      opacity: 0,
+      duration: 1,
+      ease: 'expo.out',
+      stagger: 0.1,
       scrollTrigger: { trigger: '.residences__grid', start: 'top 85%', once: true },
     });
   }
 }
-
 
 export function initAnimations() {
   ctx?.revert();
   ctx = gsap.context(() => {
     gsap.matchMedia().add('(prefers-reduced-motion: no-preference)', () => {
       animateHeroParallax();
-      animateLifestylePairImages();
-      animateContainedParallax();
       animateLifestyleText();
       animateResidencesReveals();
     });
