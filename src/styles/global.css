@@ -986,7 +986,7 @@
   .enquiry__left {
     display: flex;
     flex-direction: column;
-    gap: var(--space-block);
+    gap: var(--space-element);
     padding-top: clamp(1rem, 2vw, 2rem);
   }
 
@@ -1892,11 +1892,12 @@
     align-self: flex-start;
   }
 
-  /* Underline animation — reveal on hover (shared).
+  /* Underline animation — reveal on hover (shared across every text link CTA).
      Reveals in accent, not currentColor — the one place in the UI
      where the sunset orange shows up, deliberately. */
   .link-underline::after,
   .vision__cta::after,
+  .neighbourhood__cta::after,
   .site-footer__link::after,
   .menu-sidebar__link::after {
     content: '';
@@ -1914,33 +1915,11 @@
   @media (hover: hover) {
     .link-underline:hover::after,
     .vision__cta:hover::after,
+    .neighbourhood__cta:hover::after,
     .site-footer__link:hover::after,
     .menu-sidebar__link:hover::after {
       transform: scaleX(1);
       transform-origin: left;
-    }
-  }
-
-  /* Underline animation — persistent, hide on hover */
-  .residences__cta::after,
-  .neighbourhood__cta::after {
-    content: '';
-    position: absolute;
-    bottom: -2px;
-    left: 0;
-    width: 100%;
-    height: 1px;
-    background: currentColor;
-    transform: scaleX(1);
-    transform-origin: left;
-    transition: transform 400ms var(--ease-premium);
-  }
-
-  @media (hover: hover) {
-    .residences__cta:hover::after,
-    .neighbourhood__cta:hover::after {
-      transform: scaleX(0);
-      transform-origin: right;
     }
   }
 } /* end @layer utilities */
