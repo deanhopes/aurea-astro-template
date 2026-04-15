@@ -120,9 +120,9 @@ One `as any` in the whole repo. Fix at the root.
 
 The one substantial behavioural fix. Matches the "parent + children double-fade" anti-pattern in `tasks/lessons.md:10`. **Visual verification required after** — test in Chrome before marking done.
 
-- [ ] Delete `animateLifestyleText` (`src/lib/animations.ts:58-75`) — the `.lifestyle__label` and `.lifestyle__copy p` reveals are already handled by the `data-reveal` on `<section class="lifestyle">` at `Lifestyle.astro:12`
-- [ ] Delete `animateResidencesReveals` (`src/lib/animations.ts:77-94`) — same story for `.residences__label` and `.residences__card`
-- [ ] Remove the two `initAnimations()` call sites for the deleted helpers
+- [x] Delete `animateLifestyleText` (`src/lib/animations.ts:58-75`) — the `.lifestyle__label` and `.lifestyle__copy p` reveals are already handled by the `data-reveal` on `<section class="lifestyle">` at `Lifestyle.astro:12`
+- [x] Delete `animateResidencesReveals` (`src/lib/animations.ts:77-94`) — same story for `.residences__label` and `.residences__card`
+- [x] Remove the two `initAnimations()` call sites for the deleted helpers
 - [ ] Open the homepage in Chrome, scroll through Lifestyle and Residences sections, verify:
   - Label + copy/cards fade in cleanly (single system, not double)
   - No visible opacity stutter or early-vanish
@@ -214,7 +214,7 @@ These are out of scope for this cleanup pass — user will handle later:
 - Section 5 — neighbourhood try/catch: try/catch block collapsed to single guard. Both branches did identical work. Build clean.
 - Section 6 — weak type fixes: @tweakpane/core devDep added → FolderApi resolves → `as any` gone, all 11 `.value as number` casts removed, all 12 change-handler annotations inferred. `getX()` helper replaces 3 gsap.getProperty casts. HTMLCollection casts swapped for `querySelectorAll<HTMLElement>(':scope > *')`. Iframe `_loaded` intersection cast replaced by module WeakSet. `grep "as any" src/` returns zero. 7 pre-existing baseline errors unchanged.
 - Section 7 — nav/footer link consolidation: NavLink type + footerLinkGroups exported from site.ts. Footer.astro imports, deletes local hard-code (+ drops JSDoc banner). Neighbourhood.astro `items` flatten — now sorted `CollectionEntry<'neighbourhood'>[]`, all downstream accesses via `item.id`/`item.data.*`. Build + check clean.
-- Section 8 — double-reveal untangle:
+- Section 8 — double-reveal untangle: `animateLifestyleText` + `animateResidencesReveals` deleted from `src/lib/animations.ts`; `initAnimations()` now runs only `animateHeroParallax()`. File 91 → 37 lines. Parent `[data-reveal]` on `.lifestyle` + `.residences` is now single source. Build + astro-check clean (7 baseline errors unchanged). **Chrome visual verification pending** — user to spot-check Lifestyle/Residences reveals + reduced-motion.
 - Section 9 — heading/eyebrow CSS:
 - Section 10 — @lucide/astro removal:
 - Section 11 — comment hygiene:
