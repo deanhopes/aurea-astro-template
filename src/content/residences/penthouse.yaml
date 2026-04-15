@@ -1,7 +1,7 @@
 order: 3
 name: Penthouse
 detail: Top floor, private lift. Windows on every side of the bay.
-image: ../../assets/images/vision-sunset.png
+image: ../../assets/images/residences-penthouse.png
 alt: Penthouse terrace at sunset overlooking the bay
 specs:
   - label: Beds
