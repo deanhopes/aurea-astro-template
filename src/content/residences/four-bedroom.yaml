@@ -1,7 +1,7 @@
 order: 2
 name: Four Bedroom
 detail: Corner aspect. The sun crosses the flat from one terrace to the other.
-image: ../../assets/images/vision-tower.png
+image: ../../assets/images/vision-interior.png
 alt: Four bedroom residence with wraparound terrace
 specs:
   - label: Beds
