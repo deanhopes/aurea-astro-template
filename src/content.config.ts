@@ -45,4 +45,29 @@ const lifestyle = defineCollection({
     }),
 });
 
-export const collections = { neighbourhood, residences, lifestyle };
+const pages = defineCollection({
+  loader: glob({ pattern: '**/*.yaml', base: './src/content/pages' }),
+  schema: ({ image }) =>
+    z.object({
+      label: z.string(),
+      towerBody: z.string(),
+      cardCopy: z.array(z.string()),
+      cta: z.object({
+        label: z.string(),
+        href: z.string(),
+      }),
+      images: z.object({
+        tower: z.object({ src: image(), alt: z.string() }),
+        interior: z.object({ src: image(), alt: z.string() }),
+        sunset: z.object({ src: image(), alt: z.string() }),
+        terrace: z.object({ src: image(), alt: z.string() }),
+      }),
+      captions: z.object({
+        towerNumber: z.string(),
+        interiorMuted: z.string(),
+        interiorNumber: z.string(),
+      }),
+    }),
+});
+
+export const collections = { neighbourhood, residences, lifestyle, pages };
