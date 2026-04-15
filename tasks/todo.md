@@ -53,10 +53,10 @@ Pure deletions. No markup touched. Run a visual diff on the homepage after.
 
 ## 4. Convention violation — `FooterShadows.astro` `<style>` block
 
-- [ ] Move `.footer-shadows__overlay` from `src/components/FooterShadows.astro:29-57` into `src/styles/global.css` alongside its siblings (~line 710, under the existing `.footer-shadows` / `.footer-shadows__video` rules)
-- [ ] Confirm `.footer-shadows__video` and `.footer-shadows` in the component's `<style>` block are byte-identical to the `global.css` versions — if so, drop them; if not, reconcile
-- [ ] Delete the entire `<style>` block from `FooterShadows.astro`
-- [ ] Visual spot-check the footer — gradient, caustics, palm leaf shadow mask
+- [x] Move `.footer-shadows__overlay` from `src/components/FooterShadows.astro:29-57` into `src/styles/global.css` alongside its siblings (~line 710, under the existing `.footer-shadows` / `.footer-shadows__video` rules)
+- [x] Confirm `.footer-shadows__video` and `.footer-shadows` in the component's `<style>` block are byte-identical to the `global.css` versions — byte-identical, dropped
+- [x] Delete the entire `<style>` block from `FooterShadows.astro`
+- [ ] Visual spot-check the footer — gradient, caustics, palm leaf shadow mask (user eyes)
 
 ---
 
@@ -210,7 +210,7 @@ These are out of scope for this cleanup pass — user will handle later:
 - Section 1 — dead assets: 34 images + orphan lib + unused component + stray font + tracked screenshot removed. `npm run build` clean (9 pages, ~8.5s). Zero grep refs confirmed before each delete.
 - Section 2 — dead CSS: ~390 lines removed from global.css. `.site-footer__enquiry/__dropdown` block + `.rwpaper` (~216 lines), `.col-*`/`.col-start-*` grid utility (~150 lines), `.section--hero`, `.text-section` class, mobile-override comments, `--radius-cta` token inlined. `.residences__cta` was inside the enquiry block → auto-gone. Build clean (9 pages, 5.3s). Visual spot-check pending user eyes.
 - Section 3 — dead lib code: 2 dead animation helpers + call sites removed, back-compat aliases dropped, 3 internal uniforms de-exported. Build clean. `npm run check` shows 7 pre-existing baseline errors, no new.
-- Section 4 — FooterShadows style block:
+- Section 4 — FooterShadows style block: `__overlay` rule moved to global.css alongside siblings. `.footer-shadows`/`__video` confirmed byte-identical with existing global.css rules, dropped. Component `<style>` block gone. Also dropped file-level JSDoc banner (convention, section 11 already flags).
 - Section 5 — neighbourhood try/catch:
 - Section 6 — weak type fixes:
 - Section 7 — nav/footer link consolidation:

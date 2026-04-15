@@ -708,6 +708,17 @@
     pointer-events: none;
   }
 
+  .footer-shadows__overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+      to bottom,
+      var(--color-background) 0%,
+      color-mix(in srgb, var(--color-background) 20%, transparent) 100%
+    );
+  }
+
   /* ─── Footer (fixed reveal) ─── */
 
   .site-footer {
