@@ -17,7 +17,12 @@ const items = entries
 
 <section class="neighbourhood" data-neighbourhood>
   <div class="neighbourhood__container">
-    <p class="neighbourhood__label">The Neighbourhood</p>
+    <div class="neighbourhood__intro">
+      <div class="neighbourhood__intro-head">
+        <p class="neighbourhood__label">The Neighbourhood</p>
+        <h2 class="neighbourhood__heading">A neighbourhood you walk into,<br />not out of.</h2>
+      </div>
+    </div>
 
     <!-- Desktop tabs -->
     <div class="neighbourhood__tabs" role="tablist">
@@ -62,6 +67,26 @@ const items = entries
         }
       </div>
 
+      <div class="neighbourhood__text">
+        {
+          items.map((item, i) => (
+            <div
+              class:list={['neighbourhood__text-panel', { 'is-active': i === 0 }]}
+              data-neighbourhood-text={item.id}
+            >
+              {item.description ? (
+                <>
+                  <p class="neighbourhood__body">{item.description}</p>
+                  <a href="/neighbourhood" class="neighbourhood__cta">
+                    Walk the Neighbourhood
+                  </a>
+                </>
+              ) : null}
+            </div>
+          ))
+        }
+      </div>
+
       <div class="neighbourhood__map">
         {
           items.map((item, i) => (
@@ -75,26 +100,6 @@ const items = entries
                 loading="lazy"
                 allowfullscreen=""
               />
-            </div>
-          ))
-        }
-      </div>
-
-      <div class="neighbourhood__text">
-        {
-          items.map((item, i) => (
-            <div
-              class:list={['neighbourhood__text-panel', { 'is-active': i === 0 }]}
-              data-neighbourhood-text={item.id}
-            >
-              {item.description ? (
-                <>
-                  <p class="neighbourhood__body">{item.description}</p>
-                  <a href="/neighbourhood" class="neighbourhood__cta">
-                    Discover the Neighbourhood
-                  </a>
-                </>
-              ) : null}
             </div>
           ))
         }

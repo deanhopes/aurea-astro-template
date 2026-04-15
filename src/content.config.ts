@@ -7,7 +7,7 @@ const neighbourhood = defineCollection({
     z.object({
       order: z.number(),
       label: z.string(),
-      layout: z.enum(['a', 'b', 'c', 'd']),
+      layout: z.enum(['a', 'b']),
       image: image(),
       alt: z.string(),
       mapEmbed: z.string().url(),
