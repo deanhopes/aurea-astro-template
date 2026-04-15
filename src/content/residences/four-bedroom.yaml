@@ -1,0 +1,12 @@
+order: 2
+name: Four Bedroom
+detail: Corner aspect. The sun crosses the flat from one terrace to the other.
+image: ../../assets/images/vision-tower.png
+alt: Four bedroom residence with wraparound terrace
+specs:
+  - label: Beds
+    value: 4 / 4.5
+  - label: Area
+    value: 2,400–3,100 sq ft
+  - label: Aspect
+    value: Corner

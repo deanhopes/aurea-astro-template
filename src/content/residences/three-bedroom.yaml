@@ -1,0 +1,12 @@
+order: 1
+name: Three Bedroom
+detail: Bay view east. The water changes colour six times before breakfast.
+image: ../../assets/images/vision-interior.png
+alt: Three bedroom residence interior with bay view
+specs:
+  - label: Beds
+    value: 3 / 3.5
+  - label: Area
+    value: 1,800–2,100 sq ft
+  - label: Aspect
+    value: East

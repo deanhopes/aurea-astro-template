@@ -15,4 +15,22 @@ const neighbourhood = defineCollection({
     }),
 });
 
-export const collections = { neighbourhood };
+const residences = defineCollection({
+  loader: glob({ pattern: '**/*.yaml', base: './src/content/residences' }),
+  schema: ({ image }) =>
+    z.object({
+      order: z.number(),
+      name: z.string(),
+      detail: z.string(),
+      image: image(),
+      alt: z.string(),
+      specs: z.array(
+        z.object({
+          label: z.string(),
+          value: z.string(),
+        }),
+      ),
+    }),
+});
+
+export const collections = { neighbourhood, residences };

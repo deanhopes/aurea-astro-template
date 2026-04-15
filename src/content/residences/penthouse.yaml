@@ -1,0 +1,12 @@
+order: 3
+name: Penthouse
+detail: Top floor, private lift. Windows on every side of the bay.
+image: ../../assets/images/vision-sunset.png
+alt: Penthouse terrace at sunset overlooking the bay
+specs:
+  - label: Beds
+    value: 5 / 6.5
+  - label: Area
+    value: 4,200+ sq ft
+  - label: Aspect
+    value: Full floor
