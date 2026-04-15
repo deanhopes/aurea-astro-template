@@ -62,7 +62,7 @@ Pure deletions. No markup touched. Run a visual diff on the homepage after.
 
 ## 5. Remove defensive try/catch — `neighbourhood.ts` iframe probe
 
-- [ ] Collapse `src/lib/neighbourhood.ts:64-80` (iframe loaded-state probe) into the existing `if (iframe.src && iframe.contentWindow)` guard. Both branches of the current try/catch do identical work — `void contentWindow.location` is throwaway. Keep only:
+- [x] Collapse `src/lib/neighbourhood.ts:64-80` (iframe loaded-state probe) into the existing `if (iframe.src && iframe.contentWindow)` guard. Both branches of the current try/catch do identical work — `void contentWindow.location` is throwaway. Keep only:
   ```ts
   if (iframe.src && iframe.contentWindow) {
     ext._loaded = true;
@@ -71,7 +71,7 @@ Pure deletions. No markup touched. Run a visual diff on the homepage after.
     return;
   }
   ```
-- [ ] Test neighbourhood tab switching — click through Margaret Pace, The Bay, etc., and verify the map iframes still fade in correctly on first click and show immediately on repeat clicks
+- [ ] Test neighbourhood tab switching — click through Margaret Pace, The Bay, etc., and verify the map iframes still fade in correctly on first click and show immediately on repeat clicks (user eyes)
 
 ---
 
@@ -211,7 +211,7 @@ These are out of scope for this cleanup pass — user will handle later:
 - Section 2 — dead CSS: ~390 lines removed from global.css. `.site-footer__enquiry/__dropdown` block + `.rwpaper` (~216 lines), `.col-*`/`.col-start-*` grid utility (~150 lines), `.section--hero`, `.text-section` class, mobile-override comments, `--radius-cta` token inlined. `.residences__cta` was inside the enquiry block → auto-gone. Build clean (9 pages, 5.3s). Visual spot-check pending user eyes.
 - Section 3 — dead lib code: 2 dead animation helpers + call sites removed, back-compat aliases dropped, 3 internal uniforms de-exported. Build clean. `npm run check` shows 7 pre-existing baseline errors, no new.
 - Section 4 — FooterShadows style block: `__overlay` rule moved to global.css alongside siblings. `.footer-shadows`/`__video` confirmed byte-identical with existing global.css rules, dropped. Component `<style>` block gone. Also dropped file-level JSDoc banner (convention, section 11 already flags).
-- Section 5 — neighbourhood try/catch:
+- Section 5 — neighbourhood try/catch: try/catch block collapsed to single guard. Both branches did identical work. Build clean.
 - Section 6 — weak type fixes:
 - Section 7 — nav/footer link consolidation:
 - Section 8 — double-reveal untangle:

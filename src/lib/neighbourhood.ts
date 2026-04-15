@@ -60,23 +60,11 @@ function fadeInOnLoad(iframe: HTMLIFrameElement, panel: HTMLElement, instant: bo
     return;
   }
 
-  // Check if iframe already loaded before JS ran (first tab with src in HTML)
   if (iframe.src && iframe.contentWindow) {
-    try {
-      // If we can access contentWindow without error, it's loaded
-      // (cross-origin will throw, but that means it loaded)
-      void iframe.contentWindow.location;
-      ext._loaded = true;
-      gsap.set(panel, { opacity: 1 });
-      panel.classList.add('is-active');
-      return;
-    } catch {
-      // Cross-origin = loaded
-      ext._loaded = true;
-      gsap.set(panel, { opacity: 1 });
-      panel.classList.add('is-active');
-      return;
-    }
+    ext._loaded = true;
+    gsap.set(panel, { opacity: 1 });
+    panel.classList.add('is-active');
+    return;
   }
 
   // Keep hidden until the iframe content loads
