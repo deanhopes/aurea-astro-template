@@ -20,10 +20,7 @@ const { title, description = 'Aurea Residences — Waterfront living in Edgewate
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Mark document as booting before curtain renders. CSS uses this to
-         pin the curtain panels over the viewport on first load so the
-         ~1500ms TSL shader compile is masked behind a brand-consistent
-         wipe instead of surfacing as a mid-scroll hitch. -->
+    <!-- Booting flag pins curtain over viewport until TSL compile finishes (~1500ms) -->
     <script is:inline>
       document.documentElement.dataset.booting = '';
     </script>
@@ -48,10 +45,7 @@ const { title, description = 'Aurea Residences — Waterfront living in Edgewate
     <slot name="head" />
     <ClientRouter />
 
-    <!-- Early Lenis init — runs as soon as the parser hits this <script>,
-         well before astro:page-load. Closes the "scroll feels locked on
-         reload" gap. initLenis() is idempotent so the bootstrap call later
-         no-ops cleanly. -->
+    <!-- Early Lenis — closes the "scroll feels locked on reload" gap before astro:page-load fires -->
     <script>
       import { initLenis } from '@lib/lenis';
       initLenis();
@@ -81,9 +75,7 @@ const { title, description = 'Aurea Residences — Waterfront living in Edgewate
     </main>
     <Footer />
 
-    <!-- Single bootstrap entry — one page-load handler, one before-swap,
-         one after-swap. Heavy modules (footer shader / three/webgpu) are
-         dynamically imported and gated on idle + IO inside bootstrap. -->
+    <!-- Single bootstrap entry. Heavy modules lazy-loaded inside (idle + IO gated) -->
     <script>
       import { bootstrap } from '@lib/bootstrap';
       bootstrap();

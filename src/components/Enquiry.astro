@@ -1,8 +1,5 @@
 ---
-/**
- * Enquiry — "Schedule a Private Viewing" section.
- * Reusable between pages. Anchored as #enquire for nav CTAs.
- */
+
 ---
 
 <section class="enquiry" id="enquire">
@@ -188,7 +185,6 @@
     const enquiry = document.querySelector<HTMLElement>('.enquiry');
     if (!enquiry) return;
 
-    // ── Phone country selector ────────────────────
     const phoneCountry = enquiry.querySelector<HTMLElement>('[data-phone-country]');
     if (phoneCountry) {
       const trigger = phoneCountry.querySelector<HTMLButtonElement>('[data-phone-trigger]')!;
@@ -243,7 +239,6 @@
       searchInput.addEventListener('input', () => renderList(searchInput.value));
     }
 
-    // ── Residence select ──────────────────────────
     enquiry.querySelectorAll<HTMLElement>('[data-select]').forEach((select) => {
       const trigger = select.querySelector<HTMLButtonElement>('[data-select-trigger]')!;
       const menu = select.querySelector<HTMLUListElement>('[data-select-menu]')!;
@@ -272,7 +267,6 @@
       });
     });
 
-    // ── Close all ─────────────────────────────────
     function closeAll() {
       enquiry.querySelectorAll('[data-phone-country].is-open').forEach((el) => {
         el.classList.remove('is-open');
@@ -296,7 +290,6 @@
     };
     document.addEventListener('click', handleOutsideClick);
 
-    // ── Form submission ───────────────────────────
     const form = enquiry.querySelector<HTMLFormElement>('.enquiry__form')!;
     const wrap = enquiry.querySelector<HTMLElement>('.enquiry__form-wrap')!;
     form.addEventListener('submit', async (e) => {

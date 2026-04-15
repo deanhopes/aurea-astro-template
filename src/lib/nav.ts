@@ -35,7 +35,6 @@ function createPanelTimeline(panel: HTMLElement): gsap.core.Timeline {
       0.1,
     );
   } else {
-    // Desktop: cards with images + sidebar links
     const cards = panel.querySelectorAll('.menu-card');
     const links = panel.querySelectorAll('.menu-sidebar__link');
     const cta = panel.querySelector('.menu-sidebar__cta');

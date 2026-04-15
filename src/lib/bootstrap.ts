@@ -1,14 +1,5 @@
-/**
- * bootstrap.ts — single entry point for all client modules.
- *
- * Replaces the 8 separate <script> blocks in BaseLayout.astro. One
- * astro:page-load handler, one astro:before-swap, one astro:after-swap.
- * Every nav under ClientRouter re-fires page-load, so doing this once
- * instead of eight times saves real startup cost on each transition.
- *
- * Heavy work (three/webgpu for the footer shader) is deferred inside
- * its own init — gated on idle + IO so it doesn't compete with LCP.
- */
+// Single entry for all client modules. One page-load / before-swap / after-swap
+// handler triple, shared across ClientRouter navs. Heavy modules lazy + idle-gated.
 
 import { initLenis, destroyLenis } from './lenis';
 import { initNav, destroyNav } from './nav';
@@ -17,8 +8,6 @@ import { initLifestyleSlider, destroyLifestyleSlider } from './lifestyle-slider'
 import { initNeighbourhood, destroyNeighbourhood } from './neighbourhood';
 import { initVisionScroll, destroyVisionScroll } from './vision-scroll';
 import { initPageTransition, firstLoadCurtain } from './page-transition';
-
-/* ── Scroll reveal observer (was inline in BaseLayout) ── */
 
 let revealObserver: IntersectionObserver | null = null;
 
@@ -47,19 +36,8 @@ function destroyReveal() {
   revealObserver = null;
 }
 
-/* ── Footer shader — compile-behind-curtain on first load ────────────────
- * The TSL pipeline compile is a single ~1500ms atomic block in
- * getNodeType — can't be split. Two-part strategy:
- *
- *   1. Compile immediately on first page-load, during the hero read,
- *      while the user is looking at the headline and not scrolling.
- *   2. Hold the transition curtain closed until the compile finishes,
- *      so the lag is visually absorbed by a brand-consistent mask
- *      instead of surfacing as a mid-scroll hitch.
- *
- * On ClientRouter navigations the module is already warm, so the IO
- * observer remains the right gate for subsequent mounts.
- * ──────────────────────────────────────────────────────────────────────── */
+// TSL compile is an atomic ~1500ms block — mask it behind firstLoadCurtain on
+// first load; IO-gate subsequent ClientRouter mounts
 
 type FooterShaderModule = typeof import('./footer-shaders');
 
@@ -90,19 +68,14 @@ export function footerShadersReady(): Promise<void> {
 }
 
 function scheduleFooterShaders() {
-  // First load: kick off the compile synchronously so footerReadyPromise
-  // is populated by the time firstLoadCurtain() reads it. The dynamic
-  // import + initFooterShaders() work happens off the main thread
-  // anyway — the module resolution is what matters for promise identity.
+  // First load: kick compile sync so footerReadyPromise exists when firstLoadCurtain reads it
   if (!hasDoneFirstLoad) {
     hasDoneFirstLoad = true;
     void loadFooterShaders();
     return;
   }
 
-  // Subsequent ClientRouter mounts: module is already warm, but the
-  // renderer may have been torn down. Gate on IO to avoid re-mounting
-  // until the footer is actually approached.
+  // Subsequent mounts: module warm but renderer torn down — IO-gate re-mount
   if (footerReadyPromise) return;
   const footer = document.querySelector('[data-footer]');
   if (!footer) return;
@@ -129,8 +102,6 @@ function destroyFooterShaders() {
   footerReadyPromise = null;
 }
 
-/* ── Lifecycle ── */
-
 function onPageLoad() {
   const isFirstLoad = !hasDoneFirstLoad;
 
@@ -144,9 +115,7 @@ function onPageLoad() {
   scheduleFooterShaders();
 
   if (isFirstLoad) {
-    // Shader is already compiling (kicked off inside scheduleFooterShaders).
-    // Keep the curtain over the viewport until it resolves, with a hard
-    // timeout so a broken shader never traps the user.
+    // Hold curtain until shader resolves; hard timeout prevents a broken shader trapping the user
     void firstLoadCurtain(footerShadersReady(), 2500);
   }
 }
@@ -166,7 +135,7 @@ function onAfterSwap() {
 }
 
 export function bootstrap() {
-  // Page transition listeners attach once and persist across navigations.
+  // Page transition listeners persist across navs
   initPageTransition();
 
   document.addEventListener('astro:page-load', onPageLoad);

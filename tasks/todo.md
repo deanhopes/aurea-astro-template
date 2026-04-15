@@ -163,12 +163,12 @@ The one substantial behavioural fix. Matches the "parent + children double-fade"
 
 Lowest priority, cosmetic. Save for last so the diff stays tight.
 
-- [ ] Delete the nine file-level `/** ComponentName — description */` banners in `src/components/*.astro` and `src/pages/dev/footer.astro`. The filename already says it. See `tasks/cleanup-08-slop.md` §2 for the file:line list
-- [ ] Strip section-banner dividers (`/* ── State ── */`, `// ── Caustics ──`, etc.) from `src/lib/footer-shaders.ts`, `src/lib/page-transition.ts`, `src/lib/bootstrap.ts`, `src/components/Enquiry.astro`, `src/pages/dev/footer.astro`
-- [ ] Flatten section-label comments in `src/styles/global.css` that sit directly above selectors of the same name (`/* Header */` above `.header`, `/* Nav bar */` above `.nav-bar`, `/* Menu panel */` above `.menu-panel`, and similar ~60 sites). See `cleanup-08-slop.md` §2 "CSS section labels"
-- [ ] Delete all `/* end @layer X */` sentinel comments (`global.css:89, 101, 163, 1580, 1665, 1946, 3037, 3089, 3098`) — editor folding + `@layer` blocks make them redundant
-- [ ] Delete narration-style inline comments (`// Reset the unused axis`, `// Freeze scroll immediately`, `// Close nav menu if open`, etc.) that restate the next line. Full list in `cleanup-08-slop.md` §2
-- [ ] Rewrite multi-paragraph WHY blocks in `src/lib/lenis.ts`, `src/lib/bootstrap.ts`, `src/lib/neighbourhood.ts`, `src/lib/page-transition.ts`, and the `BaseLayout.astro` head scripts to one-line maximums
+- [x] Delete the nine file-level `/** ComponentName — description */` banners in `src/components/*.astro` and `src/pages/dev/footer.astro`. The filename already says it. See `tasks/cleanup-08-slop.md` §2 for the file:line list
+- [x] Strip section-banner dividers (`/* ── State ── */`, `// ── Caustics ──`, etc.) from `src/lib/footer-shaders.ts`, `src/lib/page-transition.ts`, `src/lib/bootstrap.ts`, `src/components/Enquiry.astro`, `src/pages/dev/footer.astro`
+- [x] Flatten section-label comments in `src/styles/global.css` that sit directly above selectors of the same name (`/* Header */` above `.header`, `/* Nav bar */` above `.nav-bar`, `/* Menu panel */` above `.menu-panel`, and similar ~60 sites). See `cleanup-08-slop.md` §2 "CSS section labels"
+- [x] Delete all `/* end @layer X */` sentinel comments (`global.css:89, 101, 163, 1580, 1665, 1946, 3037, 3089, 3098`) — editor folding + `@layer` blocks make them redundant
+- [x] Delete narration-style inline comments (`// Reset the unused axis`, `// Freeze scroll immediately`, `// Close nav menu if open`, etc.) that restate the next line. Full list in `cleanup-08-slop.md` §2
+- [x] Rewrite multi-paragraph WHY blocks in `src/lib/lenis.ts`, `src/lib/bootstrap.ts`, `src/lib/neighbourhood.ts`, `src/lib/page-transition.ts`, and the `BaseLayout.astro` head scripts to one-line maximums
 - [ ] **Keep these** (doing real work — do NOT touch):
   - `footer-shaders.ts:1-25` file-level physics model
   - `footer-shaders.ts:134-148` fBm-vs-Voronoi rejection rationale
@@ -178,7 +178,7 @@ Lowest priority, cosmetic. Save for last so the diff stays tight.
   - `global.css:3063-3065` `html[data-booting]` curtain pin coupling
   - `global.css:76-80` per-radius-token intent comments
   - `global.css:1079-1081` "hotel-form pattern, not shadcn pattern" design note
-- [ ] `npm run check`
+- [x] `npm run check`
 
 ---
 
@@ -217,5 +217,5 @@ These are out of scope for this cleanup pass — user will handle later:
 - Section 8 — double-reveal untangle: `animateLifestyleText` + `animateResidencesReveals` deleted from `src/lib/animations.ts`; `initAnimations()` now runs only `animateHeroParallax()`. File 91 → 37 lines. Parent `[data-reveal]` on `.lifestyle` + `.residences` is now single source. Build + astro-check clean (7 baseline errors unchanged). **Chrome visual verification pending** — user to spot-check Lifestyle/Residences reveals + reduced-motion.
 - Section 9 — heading CSS: Added `.text-section-heading` utility to typography layer in `src/styles/global.css`. Stripped shared type props from `.lifestyle__heading` (deleted outright — zero deltas), `.residences__heading` (kept text-align + margins), `.neighbourhood__heading` (kept `margin: 0`). Applied class in 3 components. `.enquiry__heading` deliberately skipped — uses different font-size ramp (`var(--text-section)` vs hard clamp), not byte-identical, forcing consolidation would regress. Label consolidation also skipped — existing 4-selector group rule already covers vision/lifestyle/residences/neighbourhood; `.hero__label` + `.enquiry__eyebrow` differ in color + tracking so they stay separate. Build + check clean.
 - Section 10 — @lucide/astro removal: Grep confirmed zero source refs. Uninstalled. Build clean.
-- Section 11 — comment hygiene:
+- Section 11 — comment hygiene: Deleted 9 Astro JSDoc banners (Hero/Vision/Lifestyle/Residences/Neighbourhood/Enquiry/Footer/dev/footer + helpers). Stripped `/* ── X ── */` banners from footer-shaders.ts, page-transition.ts, bootstrap.ts, Enquiry.astro. Flattened ~60 CSS section-label comments in global.css (kept 8 load-bearing WHYs: accent palette, short-screen tightening, hotel-form pattern, underline animation, two-slot flex structural, layout-variant contracts, first-load mask contract, `data-booting` coupling). Removed all 9 `/* end @layer X */` sentinels. Stripped narration comments across lib/ts files (neighbourhood, nav, page-transition, bootstrap, enquiry). Compressed multi-paragraph WHY blocks in lenis.ts (3→1 line idempotency, 3→2 line duration/lerp), bootstrap.ts (file header JSDoc + 5 inline blocks), neighbourhood.ts (stash + initial setActive + IO restore), page-transition.ts (firstLoadCurtain WHY), BaseLayout.astro head (3 multi-line blocks). Kept load-bearing physics model in footer-shaders.ts file header, fBm-vs-Voronoi rationale, Y-flip gotcha, Lenis scrollend workaround, per-radius-token intents. Build + check clean (7 baseline errors unchanged).
 - Section 12 — verification:

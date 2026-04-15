@@ -2,15 +2,11 @@ import type { TransitionBeforePreparationEvent } from 'astro:transitions/client'
 import gsap from 'gsap';
 import { getLenis } from './lenis';
 
-/* ── Constants ── */
 const DURATION = 1;
 const EASE = 'power3.inOut';
 const MOBILE_BP = 991;
 
-/* ── State ── */
 let isAnimating = false;
-
-/* ── DOM refs ── */
 let panelLeft: HTMLElement | null = null;
 let panelRight: HTMLElement | null = null;
 
@@ -28,7 +24,6 @@ function prefersReducedMotion(): boolean {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
-/* ── Curtain Close (cover the viewport) ── */
 function curtainClose(): Promise<void> {
   return new Promise((resolve) => {
     if (!resolvePanels()) {
@@ -40,7 +35,7 @@ function curtainClose(): Promise<void> {
     const axis = mobile ? 'y' : 'x';
     const resetAxis = mobile ? 'x' : 'y';
 
-    // Reset the unused axis in case viewport changed since last navigation
+    // Reset the unused axis in case the viewport crossed the breakpoint since last nav
     gsap.set([panelLeft, panelRight], { [resetAxis]: 0 });
 
     gsap
@@ -50,7 +45,6 @@ function curtainClose(): Promise<void> {
   });
 }
 
-/* ── Curtain Snap Closed (no animation, for first load) ── */
 function curtainSnapClosed(): void {
   if (!resolvePanels()) return;
   const mobile = isMobile();
@@ -59,7 +53,6 @@ function curtainSnapClosed(): void {
   gsap.set([panelLeft, panelRight], { [axis]: 0, [resetAxis]: 0 });
 }
 
-/* ── Curtain Open (reveal the page) ── */
 function curtainOpen(): Promise<void> {
   return new Promise((resolve) => {
     if (!resolvePanels()) {
@@ -82,33 +75,23 @@ function curtainOpen(): Promise<void> {
   });
 }
 
-/* ── Lifecycle Handlers ── */
-
 function onBeforePreparation(event: TransitionBeforePreparationEvent) {
-  // Back/forward: skip curtains, instant swap
   if (event.navigationType === 'traverse') return;
-
-  // Respect reduced motion
   if (prefersReducedMotion()) return;
 
-  // Prevent overlapping navigations
   if (isAnimating) {
     event.preventDefault();
     return;
   }
 
   isAnimating = true;
-
-  // Freeze scroll immediately
   getLenis()?.stop();
 
-  // Close nav menu if open
   const toggle = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
   if (toggle?.getAttribute('aria-expanded') === 'true') {
     toggle.click();
   }
 
-  // Wrap Astro's loader: animate curtains closed while page fetches in parallel
   const originalLoader = event.loader;
   event.loader = async () => {
     const [fetched] = await Promise.all([originalLoader(), curtainClose()]);
@@ -124,17 +107,11 @@ function onPageLoad() {
   }
 }
 
-/* ── First-load curtain ──────────────────────────────────────────────────
- * On hard reload the curtain panels are off-screen by default (CSS).
- * This pulls them back over the viewport, freezes scroll, and waits
- * for `ready` to resolve (or a hard timeout) before animating open.
- * Used to mask the ~1500ms TSL shader compile on first paint.
- * ──────────────────────────────────────────────────────────────────────── */
+// First load: CSS pins panels closed (via data-booting). Wait for ready (or timeout), then open.
 export async function firstLoadCurtain(ready: Promise<void>, timeoutMs: number): Promise<void> {
   const root = document.documentElement;
   const wasBooting = root.hasAttribute('data-booting');
 
-  // Reduced motion: reveal immediately, no wait.
   if (prefersReducedMotion()) {
     if (wasBooting) root.removeAttribute('data-booting');
     return;
@@ -156,9 +133,7 @@ export async function firstLoadCurtain(ready: Promise<void>, timeoutMs: number):
   await Promise.race([ready, timeout]);
   if (timer !== undefined) window.clearTimeout(timer);
 
-  // Hand control from CSS (pinned via data-booting) to GSAP. Snap-set
-  // the panels to the same closed position, then drop data-booting so
-  // the curtainOpen() tween can actually move them.
+  // Hand control from CSS (pinned via data-booting) to GSAP before tweening open
   curtainSnapClosed();
   if (wasBooting) root.removeAttribute('data-booting');
 
@@ -166,7 +141,6 @@ export async function firstLoadCurtain(ready: Promise<void>, timeoutMs: number):
   getLenis()?.start();
 }
 
-/* ── Init (called once, listeners persist across navigations) ── */
 export function initPageTransition() {
   resolvePanels();
   document.addEventListener('astro:before-preparation', onBeforePreparation as EventListener);

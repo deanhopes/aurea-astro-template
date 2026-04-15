@@ -11,34 +11,28 @@
 
 @layer reset, base, tokens, components, sections, utilities, overrides;
 
-/* ─── Custom Properties ─── */
-
 @layer tokens {
   :root {
-    /* Core palette */
     --color-background: #f9efe6;
     --color-white: #f5f5f5;
     --color-black: #323032;
 
-    /* Grays */
     --color-light-gray: #d9d9d9;
     --color-mid-gray-1: #a3a3a3;
     --color-mid-gray-2: #737373;
     --color-dark-gray: #4a4a4a;
 
-    /* The single accent — sunset over the bay. Used sparingly:
-       caption numbers, focus rings, CTA underline reveal, scrollbar.
-       If it creeps beyond that, cut it back. */
+    /* The single accent — sunset over the bay. Caption numbers, focus
+       rings, CTA underline reveal, scrollbar. If it creeps beyond that,
+       cut it back. */
     --color-accent: #ef5d2a;
 
-    /* Font families */
     --font-display: 'Test Sohne', system-ui, sans-serif;
     --font-body: 'Aktiv Grotesk', system-ui, sans-serif;
 
-    /* Type scale */
     --text-hero: clamp(4rem, 8vw + 1rem, 9rem);
     --leading-hero: 0.95;
-    --tracking-hero: -0.025em; /* display sizes need tight, not airy */
+    --tracking-hero: -0.025em;
 
     --text-section: clamp(2rem, 4vw + 0.5rem, 4rem);
     --leading-section: 1.1;
@@ -50,18 +44,15 @@
     --leading-ui: 1.5;
     --tracking-ui: 0.08em;
 
-    /* Spacing scale */
     --space-section: clamp(6rem, 10vw, 10rem);
     --space-block: clamp(3rem, 6vw, 6rem);
     --space-element: clamp(1.5rem, 3vw, 3rem);
     --space-edge: 4px;
     --space-gap: 4px;
 
-    /* Surfaces */
     --color-surface-subtle: color-mix(in srgb, var(--color-black) 3%, transparent);
     --color-surface-muted: color-mix(in srgb, var(--color-black) 5%, transparent);
 
-    /* Ink tonal scale — black at fixed alphas, named once, used everywhere */
     --ink-08: color-mix(in srgb, var(--color-black) 8%, transparent);
     --ink-14: color-mix(in srgb, var(--color-black) 14%, transparent);
     --ink-20: color-mix(in srgb, var(--color-black) 20%, transparent);
@@ -71,23 +62,18 @@
     --ink-60: color-mix(in srgb, var(--color-black) 60%, transparent);
     --ink-70: color-mix(in srgb, var(--color-black) 70%, transparent);
 
-    /* Radii — one spine, explicit scale */
     --radius-sm: 2px;
     --radius-md: 4px; /* buttons, inputs, nav pills — default */
     --radius-lg: 6px; /* menu cards, small surfaces */
     --radius-xl: 8px; /* popovers, phone dropdown */
     --radius-2xl: 12px; /* hero card, enquiry card */
 
-    /* The easing */
     --ease-premium: cubic-bezier(0.19, 1, 0.22, 1);
 
-    /* Transitions */
     --transition-reveal: opacity 0.8s var(--ease-premium), transform 0.8s var(--ease-premium);
     --transition-color: color 0.3s ease, border-color 0.3s ease;
   }
-} /* end @layer tokens */
-
-/* ─── Reset ─── */
+}
 
 @layer reset {
   *,
@@ -97,9 +83,7 @@
     margin: 0;
     padding: 0;
   }
-} /* end @layer reset */
-
-/* ─── Base ─── */
+}
 
 @layer base {
   html {
@@ -119,8 +103,6 @@
     min-height: 100dvh;
   }
 
-  /* ─── Display type defaults ─── */
-
   h1,
   h2,
   h3 {
@@ -133,21 +115,15 @@
     text-wrap: pretty;
   }
 
-  /* ─── Selection ─── */
-
   ::selection {
     background-color: var(--color-black);
     color: var(--color-background);
   }
 
-  /* ─── Links ─── */
-
   a {
     color: inherit;
     text-decoration: none;
   }
-
-  /* ─── Scroll reveal ─── */
 
   [data-reveal] {
     opacity: 0;
@@ -159,12 +135,9 @@
     opacity: 1;
     transform: translateY(0);
   }
-} /* end @layer base */
-
-/* ─── Component styles ─── */
+}
 
 @layer components {
-  /* Header */
   .header {
     position: fixed;
     top: 0;
@@ -185,7 +158,6 @@
     pointer-events: auto;
   }
 
-  /* Nav bar */
   .nav-bar {
     display: flex;
     gap: var(--space-gap);
@@ -258,8 +230,6 @@
     }
   }
 
-  /* ─── Button component ─── */
-
   .btn {
     display: inline-flex;
     align-items: center;
@@ -303,7 +273,6 @@
     }
   }
 
-  /* Menu panel */
   .menu-panel {
     display: flex;
     gap: var(--space-gap);
@@ -318,7 +287,6 @@
     visibility: hidden;
   }
 
-  /* Menu cards */
   .menu-cards {
     display: flex;
     gap: var(--space-gap);
@@ -387,7 +355,6 @@
     }
   }
 
-  /* Menu sidebar */
   .menu-sidebar {
     display: flex;
     flex-direction: column;
@@ -432,7 +399,6 @@
     border-top: 1px solid var(--ink-20);
   }
 
-  /* Mobile menu */
   @media (max-width: 767px) {
     .nav-bar {
       display: grid;
@@ -468,7 +434,6 @@
       display: none;
     }
 
-    /* Panel: simple vertical list, no image cards */
     .menu-panel {
       flex-direction: column;
       height: calc(100svh - 60px);
@@ -476,7 +441,6 @@
       overscroll-behavior: contain;
     }
 
-    /* Hide card images, convert cards to text links */
     .menu-cards {
       display: flex;
       flex-direction: column;
@@ -522,7 +486,6 @@
       border-top: 1px solid color-mix(in srgb, var(--color-black) 8%, transparent);
     }
 
-    /* Override hover styles */
     .menu-card:hover .menu-card__image {
       transform: none;
     }
@@ -533,7 +496,6 @@
       color: var(--color-black);
     }
 
-    /* Sidebar: same text-link style, flush with cards */
     .menu-sidebar {
       width: 100%;
       flex-shrink: 1;
@@ -571,13 +533,11 @@
       display: none;
     }
 
-    /* Divider between primary and secondary */
     .menu-sidebar__divider {
       margin: 8px 24px;
       border-top-color: color-mix(in srgb, var(--color-black) 15%, transparent);
     }
 
-    /* Secondary links: smaller, muted */
     .menu-sidebar__links:last-child .menu-sidebar__link {
       font-family: var(--font-body);
       font-weight: 400;
@@ -614,7 +574,6 @@
     }
   }
 
-  /* Tablet + small desktop menu */
   @media (min-width: 768px) and (max-width: 1279px) {
     .nav-bar {
       background: var(--color-background);
@@ -658,7 +617,6 @@
     }
   }
 
-  /* Narrow tablet: 2-col cards */
   @media (min-width: 768px) and (max-width: 1023px) {
     .menu-cards {
       grid-template-columns: 1fr 1fr;
@@ -689,8 +647,6 @@
     }
   }
 
-  /* ─── Footer shadows ─── */
-
   .footer-shadows__video {
     position: absolute;
     width: 1px;
@@ -719,8 +675,6 @@
     );
   }
 
-  /* ─── Footer (fixed reveal) ─── */
-
   .site-footer {
     position: fixed;
     bottom: 0;
@@ -747,7 +701,6 @@
     padding: 0 1.5rem;
   }
 
-  /* Content wrapper — centres icon, tagline, nav */
   .site-footer__content {
     position: relative;
     z-index: 1;
@@ -760,7 +713,6 @@
     padding-top: clamp(2rem, 4vw, 2rem);
   }
 
-  /* ── Enquiry ──────────────────────────────────── */
   .enquiry {
     position: relative;
     z-index: 1;
@@ -843,7 +795,6 @@
     color: color-mix(in srgb, var(--color-black) 20%, transparent);
   }
 
-  /* Card surface for the form */
   .enquiry__card {
     max-width: 954px;
     background: transparent;
@@ -928,7 +879,7 @@
     border-bottom-width: 2px;
   }
 
-  /* ── Phone field with country selector ─────────────
+  /*
      Whole field sits on one shared underline. Country trigger and
      input are visually independent but acoustically one element —
      the hairline underneath carries them both. Focus moves the line. */
@@ -1000,7 +951,6 @@
     min-width: 0;
   }
 
-  /* Popover */
   .enquiry__phone-popover {
     position: absolute;
     top: calc(100% + 4px);
@@ -1097,7 +1047,6 @@
     color: color-mix(in srgb, var(--color-black) 40%, transparent);
   }
 
-  /* ── Residence select ─────────────────────────────── */
   .enquiry__select {
     position: relative;
   }
@@ -1252,7 +1201,6 @@
     }
   }
 
-  /* Nav links row */
   .site-footer__nav {
     display: flex;
     justify-content: space-between;
@@ -1298,7 +1246,6 @@
     }
   }
 
-  /* Giant wordmark */
   .site-footer__wordmark {
     position: absolute;
     z-index: 1;
@@ -1315,7 +1262,6 @@
     pointer-events: none;
   }
 
-  /* Footer responsive */
   @media (max-width: 767px) {
     .site-footer {
       position: relative;
@@ -1361,9 +1307,7 @@
       font-size: clamp(6rem, 20vw, 15rem);
     }
   }
-} /* end @layer components */
-
-/* ─── Page layout ─── */
+}
 
 @layer sections {
   .section {
@@ -1372,7 +1316,6 @@
     padding-bottom: var(--space-section);
   }
 
-  /* Hero */
   .hero {
     position: relative;
     height: calc(100dvh - var(--space-edge) * 2);
@@ -1451,9 +1394,7 @@
     justify-content: center;
     text-align: center;
   }
-} /* end @layer sections */
-
-/* ─── Typography ─── */
+}
 
 @layer utilities {
   .text-hero {
@@ -1480,7 +1421,6 @@
     color: color-mix(in srgb, var(--color-black) 60%, transparent);
   }
 
-  /* Section label (shared across vision, lifestyle, residences, neighbourhood) */
   .vision__label,
   .lifestyle__label,
   .residences__label,
@@ -1497,8 +1437,6 @@
   .vision__label {
     padding-left: 4px;
   }
-
-  /* ─── Grid System ─── */
 
   .grid {
     --grid-margin: var(--space-edge);
@@ -1525,8 +1463,6 @@
     }
   }
 
-  /* ─── Content containers ─── */
-
   .content-narrow {
     max-width: 48rem;
   }
@@ -1535,16 +1471,12 @@
     max-width: 36rem;
   }
 
-  /* ─── Spacing ─── */
-
   .mt-sm {
     margin-top: 1rem;
   }
   .mt-md {
     margin-top: 2rem;
   }
-
-  /* ─── Links ─── */
 
   .link-underline {
     font-size: var(--text-ui);
@@ -1586,9 +1518,7 @@
       transform-origin: left;
     }
   }
-} /* end @layer utilities */
-
-/* ─── Vision (horizontal scroll) ─── */
+}
 
 @layer sections {
   .vision {
@@ -1610,7 +1540,6 @@
     width: max-content;
   }
 
-  /* Panels */
   .vision__panel {
     height: 100%;
     flex-shrink: 0;
@@ -1634,7 +1563,6 @@
     padding: var(--space-edge) var(--space-edge) var(--space-edge) 0;
   }
 
-  /* Tower text block */
   .vision__tower {
     display: flex;
     flex-direction: column;
@@ -1653,7 +1581,6 @@
     padding-left: 1rem;
   }
 
-  /* Editorial card */
   .vision__card {
     display: flex;
     gap: var(--space-gap);
@@ -1664,7 +1591,6 @@
     padding: 4px;
   }
 
-  /* Card columns */
   .vision__card-left {
     display: flex;
     flex-direction: column;
@@ -1698,7 +1624,6 @@
     padding-bottom: 1rem;
   }
 
-  /* Card copy */
   .vision__card-copy {
     display: flex;
     flex-direction: column;
@@ -1717,7 +1642,6 @@
     opacity: 0.6;
   }
 
-  /* CTA */
   .vision__cta {
     font-family: var(--font-body);
     font-weight: 500;
@@ -1731,7 +1655,6 @@
     align-self: flex-start;
   }
 
-  /* Card images */
   .vision__card-image {
     border-radius: 0;
     overflow: hidden;
@@ -1746,7 +1669,6 @@
     display: block;
   }
 
-  /* Captions — matches lifestyle caption style */
   .vision__caption {
     font-family: var(--font-body);
     font-weight: 500;
@@ -1770,7 +1692,6 @@
     gap: 0.75rem;
   }
 
-  /* Full-bleed image pair */
   .vision__image-pair {
     display: flex;
     gap: var(--space-gap);
@@ -1796,7 +1717,6 @@
     display: block;
   }
 
-  /* Image hover */
   .vision__card-image img {
     transition: transform 600ms var(--ease-premium);
   }
@@ -1807,7 +1727,6 @@
     }
   }
 
-  /* ── Vision: responsive ── */
   @media (max-width: 1023px) {
     .vision__sticky {
       height: auto;
@@ -1875,7 +1794,6 @@
     }
   }
 
-  /* ── Reduced motion ── */
   @media (prefers-reduced-motion: reduce) {
     .vision__sticky {
       height: auto;
@@ -1917,8 +1835,6 @@
     }
   }
 
-  /* ─── Lifestyle (editorial two-column) ─── */
-
   .lifestyle {
     background: var(--color-background);
     border-radius: var(--radius-md);
@@ -1939,14 +1855,12 @@
     gap: 1rem;
   }
 
-  /* Copy block under slider, pinned right */
   .lifestyle__footer {
     display: flex;
     justify-content: flex-end;
     padding: var(--space-block);
   }
 
-  /* Draggable slider */
   .lifestyle__slider {
     position: relative;
     cursor: grab;
@@ -2110,7 +2024,6 @@
     margin-top: 0.25rem;
   }
 
-  /* Lifestyle responsive */
   @media (max-width: 1023px) {
     .lifestyle__footer {
       justify-content: flex-start;
@@ -2121,8 +2034,6 @@
       height: 60vw;
     }
   }
-
-  /* ─── Residences (card grid teaser) ─── */
 
   .residences {
     background: var(--color-background);
@@ -2255,8 +2166,6 @@
     }
   }
 
-  /* ─── Neighbourhood (tabbed section) ─── */
-
   .neighbourhood {
     margin-top: var(--space-section);
     padding: 0 var(--space-edge);
@@ -2272,7 +2181,6 @@
     padding: var(--space-block);
   }
 
-  /* Intro — centred label + heading (matches residences) */
   .neighbourhood__intro {
     margin-bottom: var(--space-block);
   }
@@ -2289,7 +2197,6 @@
     margin: 0;
   }
 
-  /* Tabs — segmented control */
   .neighbourhood__tabs {
     display: flex;
     position: relative;
@@ -2322,7 +2229,6 @@
     opacity: 1;
   }
 
-  /* Sliding pill — positioned by JS, slides between tabs */
   .neighbourhood__indicator {
     position: absolute;
     top: 4px;
@@ -2348,7 +2254,6 @@
     }
   }
 
-  /* Focus-visible — keyboard accessibility */
   .neighbourhood__tab:focus-visible,
   .neighbourhood__line:focus-visible {
     outline: 1px solid currentColor;
@@ -2370,7 +2275,6 @@
     padding: var(--space-element);
   }
 
-  /* Media — fixed aspect */
   .neighbourhood__media {
     flex: 0 0 auto;
     position: relative;
@@ -2382,7 +2286,6 @@
     border-radius: var(--radius-md);
   }
 
-  /* Text — fills remaining space, body pinned bottom */
   .neighbourhood__text {
     flex: 1 1 0;
     display: flex;
@@ -2409,7 +2312,6 @@
     display: block;
   }
 
-  /* Map — pinned top-right corner of content box */
   .neighbourhood__map {
     position: absolute;
     top: var(--space-element);
@@ -2450,7 +2352,6 @@
     filter: grayscale(0.3) contrast(1.05) sepia(0.05);
   }
 
-  /* Text — bottom of right column */
   .neighbourhood__text {
     position: relative;
     min-height: 1px;
@@ -2506,12 +2407,10 @@
     left: var(--space-element);
   }
 
-  /* Accordion — hidden on desktop */
   .neighbourhood__accordion {
     display: none;
   }
 
-  /* Tablet */
   @media (max-width: 1023px) {
     .neighbourhood__tab {
       font-size: clamp(0.8125rem, 2vw + 0.25rem, 1.25rem);
@@ -2521,7 +2420,6 @@
     }
   }
 
-  /* Mobile */
   @media (max-width: 767px) {
     .neighbourhood__container {
       padding: var(--space-edge);
@@ -2617,7 +2515,6 @@
     }
   }
 
-  /* Neighbourhood — reduced motion */
   @media (prefers-reduced-motion: reduce) {
     .neighbourhood__tab,
     .neighbourhood__line,
@@ -2626,9 +2523,7 @@
       transition-duration: 0.01ms !important;
     }
   }
-} /* end @layer sections */
-
-/* ─── Page Transition Curtains ─── */
+}
 
 @layer components {
   #page-curtain {
@@ -2678,13 +2573,12 @@
       transform: translateY(0) !important;
     }
   }
-} /* end @layer components */
+}
 
-/* Suppress Astro's default view-transition crossfade */
 @layer overrides {
   ::view-transition-old(root),
   ::view-transition-new(root) {
     animation: none;
     mix-blend-mode: normal;
   }
-} /* end @layer overrides */
+}

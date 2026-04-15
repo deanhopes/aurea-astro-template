@@ -8,15 +8,12 @@ let lenis: Lenis | null = null;
 let rafId: number | null = null;
 
 export function initLenis() {
-  // Idempotent — safe to call from both the early head script and the
-  // bootstrap astro:page-load handler. First call wins; later calls no-op
-  // unless a destroyLenis() has run between them.
+  // Idempotent — first call wins, later calls no-op until destroyLenis()
   if (lenis) return;
 
   lenis = new Lenis({
-    // Shorter duration + lerp = responsive on first wheel after reload.
-    // The old 1.2s duration made the page feel locked while the tween
-    // caught up to the user's first input.
+    // Shorter duration + lerp keeps the first wheel-event after reload responsive;
+    // the old 1.2s felt locked while the tween caught up
     duration: 0.8,
     lerp: 0.12,
     easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),

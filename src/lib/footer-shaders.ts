@@ -57,8 +57,6 @@ gsap.registerPlugin(ScrollTrigger);
 // directly, so we recover it from the constructor's return type.
 type Vec2Node = ReturnType<typeof vec2>;
 
-/* ── State ── */
-
 let renderer: THREE.WebGPURenderer | null = null;
 let scene: THREE.Scene | null = null;
 let camera: THREE.OrthographicCamera | null = null;
@@ -79,39 +77,30 @@ const state = { progress: 0, mouseX: 0.34, mouseY: 0.5 };
 let mouseQuickToX: gsap.QuickToFunc | null = null;
 let mouseQuickToY: gsap.QuickToFunc | null = null;
 
-/* ── TSL Uniforms ── */
 const uProgress = uniform(0);
-const uSunX = uniform(0.34); // sun horizontal position, driven by mouseX
-const uSunY = uniform(0.5); // sun vertical tilt, driven by mouseY — narrow range
+const uSunX = uniform(0.34);
+const uSunY = uniform(0.5);
 
-// Caustic tuning — exposed for tweakpane
 export const uCausticScale = uniform(2.3);
 export const uCausticSpeed = uniform(0.14);
 export const uCausticSharpness = uniform(2.5);
 export const uCausticHeight = uniform(2.0);
 
-// Shadow mask tuning
 export const uShadowThreshold = uniform(0.0);
 export const uShadowSoftness = uniform(2.0);
 export const uShadowAlpha = uniform(0.54);
 
-// Lighting
 export const uRefraction = uniform(0.02);
 export const uSpecStrength = uniform(0.9);
 export const uSpecSharp = uniform(128.0);
 
-// VideoTexNode — placeholder swapped to real VideoTexture when video plays
 let placeholderTex: THREE.Texture | null = null;
 let videoTexNode: ReturnType<typeof texture> | null = null;
 
-/* ── TSL: Gradient ──────────────────────────────────────────────────────────
- * Vertical 5-stop ramp: deep burnt orange at the bottom → orange → coral →
- * peach → parchment at the top. A gentle horizontal sine ripple offsets the
- * sample so the bands read as a painted blend rather than a hard ramp.
- * Progress compresses the Y axis — at progress=0 nothing lit, at 1 full cone.
- *
- * Parameterized by UV so the fragment can sample it at a refracted position.
- * ───────────────────────────────────────────────────────────────────────────*/
+/* Vertical 5-stop ramp with a horizontal sine ripple so the bands read as a
+ * painted blend, not a hard ramp. Progress compresses the Y axis so at 0
+ * nothing is lit and at 1 the full cone shows. Parameterised by UV so the
+ * fragment can sample it at a refracted position. */
 const gradientFn = Fn(([sampleUV]: [Vec2Node]) => {
   const cDeep = color(0xc94020);
   const cOrange = color(0xef5d2a);
@@ -131,31 +120,28 @@ const gradientFn = Fn(([sampleUV]: [Vec2Node]) => {
   return c34;
 });
 
-/* ── TSL: Smooth caustic height field ───────────────────────────────────────
- * Three-octave domain-warped fBm. A continuous, nonzero-everywhere scalar
- * field representing the shape of the rippling water surface (not the caustic
- * brightness directly — that comes from the gradient of this field).
+/* Three-octave domain-warped fBm. A continuous, nonzero-everywhere scalar
+ * field representing the rippling water surface (not caustic brightness —
+ * that comes from the gradient of this field).
  *
  * Why not Voronoi edges? F2−F1 produces thin filaments that are near-zero
  * everywhere except on a 1-pixel-wide crease. Finite-difference sampling
- * (eps ≈ a few pixels) misses the crease entirely 99% of the time, so the
- * derived normal is flat almost everywhere and lighting doesn't register.
+ * (eps ≈ a few pixels) misses the crease 99% of the time so the derived
+ * normal is flat almost everywhere and lighting doesn't register.
  *
  * fBm gives smooth slopes nonzero across the whole field. |∇h| is high where
- * the surface is steep — which is where physical caustics form (light
- * concentrates on slope changes). Same field provides (a) a smooth normal
- * for lighting + refraction and (b) caustic brightness from the gradient.
- * ───────────────────────────────────────────────────────────────────────────*/
+ * the surface is steep — which is where physical caustics form. Same field
+ * provides (a) a smooth normal for lighting + refraction and (b) caustic
+ * brightness from the gradient. */
 const hash2 = Fn(([p]: [Vec2Node]) => {
   return fract(sin(p.x.mul(127.1).add(p.y.mul(311.7))).mul(43758.5453));
 });
 
-// Smooth value noise — bilinear interp of 4 hashed corners, quintic smooth
 const valueNoise = Fn(([p]: [Vec2Node]) => {
   const i = floor(p);
   const f = fract(p);
 
-  // Quintic smoothstep for smoother derivatives at cell boundaries
+  // Quintic smoothstep — smoother derivatives at cell boundaries
   const u = f
     .mul(f)
     .mul(f)
@@ -169,7 +155,6 @@ const valueNoise = Fn(([p]: [Vec2Node]) => {
   return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
 });
 
-// 3-octave fBm — sum of value noise at doubling frequencies, halving amplitudes
 const fbm = Fn(([p]: [Vec2Node]) => {
   const n1 = valueNoise(p);
   const n2 = valueNoise(p.mul(2.0)).mul(0.5);
@@ -177,31 +162,24 @@ const fbm = Fn(([p]: [Vec2Node]) => {
   return n1.add(n2).add(n3).mul(0.571); // normalise to [0, 1]
 });
 
-// The scalar height field. Domain-warped so it flows rather than obviously tiles.
 const causticHeightFn = Fn(([sampleUV]: [Vec2Node]) => {
   const t = time.mul(uCausticSpeed);
   const p = sampleUV.mul(uCausticScale);
 
-  // Domain warp — feed p into fbm, use the result to offset p, sample fbm again.
-  // This destroys the grid structure of valueNoise and creates flowing forms.
+  // Domain warp destroys the grid structure of valueNoise → flowing forms
   const warpX = fbm(p.add(vec2(t, float(0.0))));
   const warpY = fbm(p.add(vec2(float(0.0), t.mul(0.8))));
   const warped = p.add(vec2(warpX, warpY).mul(1.5)).add(vec2(t.mul(0.3), t.mul(-0.2)));
 
-  // Final sample — smooth animated field ∈ [0, 1]
   return fbm(warped);
 });
 
-/* ── TSL: Shadow mask ───────────────────────────────────────────────────────
- * Dark video pixels (leaf silhouettes) → shadow = 1.
- * Bright video pixels (lit sky between leaves) → shadow = 0.
- * Sampled at an arbitrary UV so the refraction pass can displace it.
- * ───────────────────────────────────────────────────────────────────────────*/
+/* Dark video pixels (leaf silhouettes) → shadow = 1. Bright pixels → 0.
+ * Sampled at an arbitrary UV so the refraction pass can displace it. */
 const shadowMaskFn = Fn(([sampleUV]: [Vec2Node]) => {
   // Video texture is Y-flipped relative to canvas UV convention
   const flipped = vec2(sampleUV.x, float(1.0).sub(sampleUV.y));
-  // Sample the same videoTexNode at a new UV — TSL clones with referenceNode
-  // so `.value =` swaps still apply to this sample.
+  // TSL clones with referenceNode so `.value =` swaps still apply to this sample
   const videoRgb = texture(videoTexNode!, flipped).rgb;
   const luma = dot(videoRgb, vec3(0.2126, 0.7152, 0.0722));
   return smoothstep(
@@ -211,16 +189,12 @@ const shadowMaskFn = Fn(([sampleUV]: [Vec2Node]) => {
   );
 });
 
-/* ── Sizing ── */
-
 function resize(): void {
   if (!canvas || !renderer) return;
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
   renderer.setPixelRatio(dpr);
   renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
 }
-
-/* ── Render loop ── */
 
 const VIDEO_UPDATE_INTERVAL = 1000 / 15;
 
@@ -256,8 +230,6 @@ export function setProgress(v: number): void {
   state.progress = v;
   ensureLoop();
 }
-
-/* ── Renderer init ── */
 
 async function initRenderer(): Promise<boolean> {
   if (!canvas) return false;
@@ -305,20 +277,17 @@ async function initRenderer(): Promise<boolean> {
   // Warm specular tint — sunlight glint on caustic peaks
   const specTint = color(0xfff4d8);
 
-  /* ── Physical model ──────────────────────────────────────────────────────
-   * Treat the caustic field as a height map. Sample it at four neighbouring
-   * points; the central differences give a surface normal. From that normal:
+  /* Treat the caustic field as a height map. Sample it at four neighbouring
+   * points; central differences give a surface normal. From that normal:
    *
    *  1. Refraction — n.xy displaces where we sample the gradient and shadow
-   *     mask, so the underlying image visibly distorts around caustic regions.
+   *     mask, so the underlying image distorts around caustic regions.
    *  2. Diffuse — n · sunDir, centred above 1.0 so slopes facing the sun
-   *     *brighten* the gradient rather than only shading darker.
+   *     brighten the gradient rather than only shading darker.
    *  3. Specular — pow(n · sunDir, hard) weighted by |∇h|², so only steep
    *     slopes facing the sun sparkle. Tied to sun direction → moves with mouse.
    *
-   * Everything composites on the refracted gradient sample — one field drives
-   * the whole composite, no layer-on-layer fighting.
-   * ────────────────────────────────────────────────────────────────────────*/
+   * One field drives the whole composite, no layer-on-layer fighting. */
   const finalColorFn = Fn(() => {
     const baseUV = uv();
 
@@ -388,8 +357,6 @@ async function initRenderer(): Promise<boolean> {
   return true;
 }
 
-/* ── Video loading ── */
-
 function initVideo(): void {
   videoEl = document.querySelector<HTMLVideoElement>('[data-footer-shadows-video]');
   if (!videoEl) return;
@@ -427,8 +394,6 @@ function initVideo(): void {
   videoEl.addEventListener('playing', onReady, { once: true });
   videoEl.addEventListener('canplay', onReady, { once: true });
 }
-
-/* ── Public API ── */
 
 export async function initFooterShaders(opts?: { staticProgress?: number }): Promise<void> {
   canvas = document.querySelector<HTMLCanvasElement>('[data-footer-shadows]');

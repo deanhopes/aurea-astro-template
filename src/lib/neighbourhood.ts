@@ -81,7 +81,6 @@ function crossfadeMaps(state: NeighbourhoodState, id: string, instant: boolean) 
     const isActive = panel.dataset.neighbourhoodMap === id;
     const iframe = panel.querySelector<HTMLIFrameElement>('iframe');
 
-    // Lazy-load iframe src on first activation
     if (isActive && iframe && !iframe.src && iframe.dataset.src) {
       iframe.src = iframe.dataset.src;
     }
@@ -299,7 +298,6 @@ export function initNeighbourhood() {
     if (!accIds.length) return;
   }
 
-  // Build layout map from tab data attributes
   const layoutMap: Record<string, string> = {};
   tabs.forEach((tab) => {
     const id = tab.dataset.neighbourhoodTab!;
@@ -325,7 +323,6 @@ export function initNeighbourhood() {
     isMobile: mobileQuery.matches,
   };
 
-  // Measure text panel heights for stable layout
   function measureIfDesktop() {
     if (state.isMobile) return;
     const textWrap = section.querySelector<HTMLElement>('.neighbourhood__text');
@@ -338,9 +335,7 @@ export function initNeighbourhood() {
     measureIfDesktop();
   }
 
-  // Stash all map data-src values so the initial setActive() call can't
-  // eagerly load Google Maps (~500KB of JS). Loading the maps mid-scroll
-  // stalls the main thread and locks Lenis. Restored on first IO hit.
+  // Stash data-src so initial setActive() can't eagerly load Google Maps (~500KB) and stall Lenis. Restored on first IO hit.
   const stashedMapSrcs = new Map<HTMLIFrameElement, string>();
   state.maps.forEach((panel) => {
     const iframe = panel.querySelector<HTMLIFrameElement>('iframe');
@@ -350,14 +345,10 @@ export function initNeighbourhood() {
     }
   });
 
-  // Set initial visual tab state — runs against the stashed iframes, so
-  // crossfadeMaps's "lazy-load on activation" path is a no-op for the
-  // first run. Tab classes / images / text still set correctly.
+  // Initial visual state — runs against stashed iframes so crossfadeMaps lazy-load is a no-op here
   setActive(state, state.activeId, true);
 
-  // Restore data-src + activate the current tab's map only when the
-  // neighbourhood section approaches viewport. From there, normal
-  // tab-click + tab-hover preload behaviour takes over.
+  // Restore data-src + activate current map when section approaches viewport
   const sectionLoadObserver = new IntersectionObserver(
     (entries) => {
       if (!entries[0]?.isIntersecting) return;
@@ -377,7 +368,6 @@ export function initNeighbourhood() {
   );
   sectionLoadObserver.observe(section);
 
-  // Desktop: preload map iframe on tab hover so it's ready by click
   function onTabHover(e: Event) {
     if (state.isMobile) return;
     const id = (e.currentTarget as HTMLElement).dataset.neighbourhoodTab;
@@ -389,7 +379,6 @@ export function initNeighbourhood() {
     }
   }
 
-  // Desktop: tab clicks
   function onTabClick(e: Event) {
     const id = (e.currentTarget as HTMLElement).dataset.neighbourhoodTab;
     if (id) setActive(state, id);
@@ -400,7 +389,6 @@ export function initNeighbourhood() {
     tab.addEventListener('click', onTabClick);
   });
 
-  // Mobile: accordion clicks
   function onLineClick(e: Event) {
     const item = (e.currentTarget as HTMLElement).closest<HTMLElement>('[data-neighbourhood-item]');
     const id = item?.dataset.neighbourhoodItem;
@@ -409,7 +397,6 @@ export function initNeighbourhood() {
 
   lines.forEach((line) => line.addEventListener('click', onLineClick));
 
-  // Respond to breakpoint crossing
   function onBreakpoint(e: MediaQueryListEvent) {
     state.isMobile = e.matches;
     if (!e.matches) measureIfDesktop();
@@ -417,7 +404,6 @@ export function initNeighbourhood() {
   }
   mobileQuery.addEventListener('change', onBreakpoint);
 
-  // Reposition indicator on resize
   function onResize() {
     if (!state.isMobile) {
       moveIndicator(state, state.activeId, true);
@@ -425,7 +411,6 @@ export function initNeighbourhood() {
   }
   window.addEventListener('resize', onResize);
 
-  // Visibility restore
   function onVisibility() {
     if (!document.hidden) setActive(state, state.activeId, true);
   }
