@@ -26,13 +26,13 @@ images:
   interior:
     src: ../../assets/images/vision-interior.png
     alt: Warm interior with bay view
-  sunset:
+  entrance:
     src: ../../assets/images/neighbourhood-palms.png
     alt: Palm trees framed by the building overhangs
-  terrace:
-    src: ../../assets/images/hero.png
-    alt: Aurea tower at golden hour, curved balconies glowing
+  video:
+    src: /video/vision-drone.mp4
+    alt: Drone video of Aurea tower at golden hour, curved balconies glowing
 captions:
   towerNumber: (1)
   interiorMuted: Hospitality, not housing.
-  interiorNumber: (3)
+  interiorNumber: (2)

@@ -73,13 +73,13 @@ const { label, towerBody, cardCopy, cta, images, captions } = vision.data;
         </div>
       </div>
 
-      <!-- Panel 3: Full-bleed images -->
+      <!-- Panel 3: Full-bleed entrance image + drone video -->
       <div class="vision__panel vision__panel--images">
         <div class="vision__image-pair">
-          <div class="vision__card-image vision__card-image--sunset">
+          <div class="vision__card-image vision__card-image--entrance">
             <Image
-              src={images.sunset.src}
-              alt={images.sunset.alt}
+              src={images.entrance.src}
+              alt={images.entrance.alt}
               widths={[400, 600, 800]}
               sizes="(max-width: 1024px) 90vw, 45vw"
               format="webp"
@@ -88,17 +88,15 @@ const { label, towerBody, cardCopy, cta, images, captions } = vision.data;
               decoding="async"
             />
           </div>
-          <div class="vision__card-image vision__card-image--terrace">
-            <Image
-              src={images.terrace.src}
-              alt={images.terrace.alt}
-              widths={[400, 600, 800]}
-              sizes="(max-width: 1024px) 90vw, 45vw"
-              format="webp"
-              quality={80}
-              loading="lazy"
-              decoding="async"
-            />
+          <div class="vision__card-image vision__card-image--video">
+            <video
+              src={images.video.src}
+              aria-label={images.video.alt}
+              autoplay
+              muted
+              loop
+              playsinline
+              preload="metadata"></video>
           </div>
         </div>
       </div>

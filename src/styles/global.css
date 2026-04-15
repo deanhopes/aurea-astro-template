@@ -2093,12 +2093,19 @@
     height: 100%;
   }
 
-  .vision__card-image--sunset {
+  .vision__card-image--entrance {
     width: clamp(300px, 38vw, 611px);
   }
 
-  .vision__card-image--terrace {
+  .vision__card-image--video {
     width: clamp(500px, 73vw, 1176px);
+  }
+
+  .vision__card-image--video video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
   }
 
   /* Image hover */
@@ -2173,8 +2180,8 @@
       height: 50vw;
     }
 
-    .vision__card-image--sunset,
-    .vision__card-image--terrace {
+    .vision__card-image--entrance,
+    .vision__card-image--video {
       width: 100%;
       max-width: none;
     }
