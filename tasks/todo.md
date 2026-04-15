@@ -104,15 +104,15 @@ One `as any` in the whole repo. Fix at the root.
 
 ## 7. Type consolidation — nav/footer link source of truth
 
-- [ ] In `src/data/site.ts`, define a `NavLink` type next to the existing `nav` export:
+- [x] In `src/data/site.ts`, define a `NavLink` type next to the existing `nav` export:
   ```ts
   export type NavLink = { label: string; href: string };
   ```
-- [ ] Add a `footerLinkGroups` export to `site.ts` — three groups matching the current Footer hard-coded shape (primary cards: Vision/Residences/Lifestyle/Neighbourhood; secondary: Location/The Team/Blog; legal: Terms/Privacy)
-- [ ] In `src/components/Footer.astro:7-23`, delete the local `linkGroups` array and import `footerLinkGroups` from `@data/site`
-- [ ] Visual spot-check the footer link columns still group and order as before
-- [ ] Flatten the `items` construction in `src/components/Neighbourhood.astro:12-15` — drop the `{ id: entry.id, ...entry.data }` spread. Use `item.id` and `item.data.*` directly through the downstream maps. `CollectionEntry<'neighbourhood'>` is already inferred by Astro, so no new type is needed
-- [ ] `npm run check`
+- [x] Add a `footerLinkGroups` export to `site.ts` — three groups matching the current Footer hard-coded shape (primary cards: Vision/Residences/Lifestyle/Neighbourhood; secondary: Location/The Team/Blog; legal: Terms/Privacy)
+- [x] In `src/components/Footer.astro:7-23`, delete the local `linkGroups` array and import `footerLinkGroups` from `@data/site`
+- [ ] Visual spot-check the footer link columns still group and order as before (user eyes)
+- [x] Flatten the `items` construction in `src/components/Neighbourhood.astro:12-15` — drop the `{ id: entry.id, ...entry.data }` spread. Use `item.id` and `item.data.*` directly through the downstream maps. `CollectionEntry<'neighbourhood'>` is already inferred by Astro, so no new type is needed
+- [x] `npm run check`
 
 ---
 
@@ -213,7 +213,7 @@ These are out of scope for this cleanup pass — user will handle later:
 - Section 4 — FooterShadows style block: `__overlay` rule moved to global.css alongside siblings. `.footer-shadows`/`__video` confirmed byte-identical with existing global.css rules, dropped. Component `<style>` block gone. Also dropped file-level JSDoc banner (convention, section 11 already flags).
 - Section 5 — neighbourhood try/catch: try/catch block collapsed to single guard. Both branches did identical work. Build clean.
 - Section 6 — weak type fixes: @tweakpane/core devDep added → FolderApi resolves → `as any` gone, all 11 `.value as number` casts removed, all 12 change-handler annotations inferred. `getX()` helper replaces 3 gsap.getProperty casts. HTMLCollection casts swapped for `querySelectorAll<HTMLElement>(':scope > *')`. Iframe `_loaded` intersection cast replaced by module WeakSet. `grep "as any" src/` returns zero. 7 pre-existing baseline errors unchanged.
-- Section 7 — nav/footer link consolidation:
+- Section 7 — nav/footer link consolidation: NavLink type + footerLinkGroups exported from site.ts. Footer.astro imports, deletes local hard-code (+ drops JSDoc banner). Neighbourhood.astro `items` flatten — now sorted `CollectionEntry<'neighbourhood'>[]`, all downstream accesses via `item.id`/`item.data.*`. Build + check clean.
 - Section 8 — double-reveal untangle:
 - Section 9 — heading/eyebrow CSS:
 - Section 10 — @lucide/astro removal:

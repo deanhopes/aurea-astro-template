@@ -1,18 +1,10 @@
 ---
-/**
- * Neighbourhood — tabbed section.
- * Tabs across the top, 12-col grid below: image left, map top-right, body copy + CTA right.
- * Mobile: accordion with inline image + text per item.
- * Content from the `neighbourhood` collection — edit src/content/neighbourhood/*.yaml.
- */
 import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
 
-const entries = await getCollection('neighbourhood');
-const items = entries
+const items = (await getCollection('neighbourhood'))
   .slice()
-  .sort((a, b) => a.data.order - b.data.order)
-  .map((entry) => ({ id: entry.id, ...entry.data }));
+  .sort((a, b) => a.data.order - b.data.order);
 ---
 
 <section class="neighbourhood" data-neighbourhood>
@@ -35,9 +27,9 @@ const items = entries
             aria-selected={i === 0 ? 'true' : 'false'}
             aria-controls={`panel-${item.id}`}
             data-neighbourhood-tab={item.id}
-            data-layout={item.layout}
+            data-layout={item.data.layout}
           >
-            {item.label}
+            {item.data.label}
           </button>
         ))
       }
@@ -54,8 +46,8 @@ const items = entries
               data-neighbourhood-image={item.id}
             >
               <Image
-                src={item.image}
-                alt={item.alt}
+                src={item.data.image}
+                alt={item.data.alt}
                 widths={[400, 600, 800]}
                 sizes="(max-width: 767px) 100vw, (max-width: 1023px) 45vw, 35vw"
                 format="webp"
@@ -74,9 +66,9 @@ const items = entries
               class:list={['neighbourhood__text-panel', { 'is-active': i === 0 }]}
               data-neighbourhood-text={item.id}
             >
-              {item.description ? (
+              {item.data.description ? (
                 <>
-                  <p class="neighbourhood__body">{item.description}</p>
+                  <p class="neighbourhood__body">{item.data.description}</p>
                   <a href="/neighbourhood" class="neighbourhood__cta">
                     Walk the Neighbourhood
                   </a>
@@ -95,8 +87,8 @@ const items = entries
               data-neighbourhood-map={item.id}
             >
               <iframe
-                data-src={item.mapEmbed}
-                title={`Map of ${item.label}`}
+                data-src={item.data.mapEmbed}
+                title={`Map of ${item.data.label}`}
                 loading="lazy"
                 allowfullscreen=""
               />
@@ -115,7 +107,7 @@ const items = entries
             data-neighbourhood-item={item.id}
           >
             <button class="neighbourhood__line" type="button">
-              <span class="neighbourhood__line-text">{item.label}</span>
+              <span class="neighbourhood__line-text">{item.data.label}</span>
               <svg
                 class="neighbourhood__line-chevron"
                 width="20"
@@ -136,8 +128,8 @@ const items = entries
             <div class="neighbourhood__inline-content" data-neighbourhood-inline={item.id}>
               <div class="neighbourhood__inline-image">
                 <Image
-                  src={item.image}
-                  alt={item.alt}
+                  src={item.data.image}
+                  alt={item.data.alt}
                   widths={[400, 600]}
                   sizes="(max-width: 767px) 95vw"
                   format="webp"
@@ -145,7 +137,7 @@ const items = entries
                   loading="lazy"
                 />
               </div>
-              <p class="neighbourhood__inline-body">{item.description}</p>
+              <p class="neighbourhood__inline-body">{item.data.description}</p>
             </div>
           </div>
         ))

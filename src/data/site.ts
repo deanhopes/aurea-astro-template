@@ -1,3 +1,5 @@
+export type NavLink = { label: string; href: string };
+
 export const site = {
   name: 'Aurea Residences',
   url: 'https://aurearesidences.com',
@@ -26,3 +28,21 @@ export const nav = {
     ],
   },
 } as const;
+
+export const footerLinkGroups: NavLink[][] = [
+  [
+    { label: 'Vision', href: '/vision' },
+    { label: 'Residences', href: '/residences' },
+    { label: 'Lifestyle', href: '/lifestyle' },
+    { label: 'Neighbourhood', href: '/neighbourhood' },
+  ],
+  [
+    { label: 'Location', href: '/location' },
+    { label: 'The Team', href: '/team' },
+    { label: 'Blog', href: '/blog' },
+  ],
+  [
+    { label: 'Terms & Conditions', href: '/terms' },
+    { label: 'Privacy Policy', href: '/privacy' },
+  ],
+];

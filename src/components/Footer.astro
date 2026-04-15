@@ -1,26 +1,6 @@
 ---
-/**
- * Footer — fixed behind content, revealed as page scrolls past.
- * Nav links + giant AUREA wordmark. Enquiry lives in Enquiry.astro above.
- */
 import FooterShadows from '@components/FooterShadows.astro';
-const linkGroups = [
-  [
-    { label: 'Vision', href: '/vision' },
-    { label: 'Residences', href: '/residences' },
-    { label: 'Lifestyle', href: '/lifestyle' },
-    { label: 'Neighbourhood', href: '/neighbourhood' },
-  ],
-  [
-    { label: 'Location', href: '/location' },
-    { label: 'The Team', href: '/team' },
-    { label: 'Blog', href: '/blog' },
-  ],
-  [
-    { label: 'Terms & Conditions', href: '/terms' },
-    { label: 'Privacy Policy', href: '/privacy' },
-  ],
-];
+import { footerLinkGroups } from '@data/site';
 ---
 
 <footer class="site-footer" data-footer>
@@ -31,7 +11,7 @@ const linkGroups = [
       <!-- Navigation -->
       <div class="site-footer__nav">
         {
-          linkGroups.map((group) => (
+          footerLinkGroups.map((group) => (
             <ul class="site-footer__links">
               {group.map(({ label, href }) => (
                 <li>
