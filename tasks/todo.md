@@ -133,7 +133,7 @@ The one substantial behavioural fix. Matches the "parent + children double-fade"
 
 ## 9. Consolidate shared heading/eyebrow CSS
 
-- [ ] Add a `.text-section-heading` utility to `src/styles/global.css` (near `.text-hero` / `.text-section`, around line 1680):
+- [x] Add a `.text-section-heading` utility to `src/styles/global.css` (near `.text-hero` / `.text-section`, around line 1680):
   ```css
   .text-section-heading {
     font-family: var(--font-display);
@@ -144,9 +144,9 @@ The one substantial behavioural fix. Matches the "parent + children double-fade"
     color: var(--color-black);
   }
   ```
-- [ ] Replace the identical bodies inside `.enquiry__heading` (`:1007-1014`), `.lifestyle__heading` (`:2299-2306`), `.residences__heading` (`:2507-2517`), `.neighbourhood__heading` (`:2664-2672`) with just their context-specific deltas (text-align, margin) — delete the shared type properties from each
-- [ ] Apply `text-section-heading` in the four components' markup
-- [ ] Extend the existing `.vision__label, .lifestyle__label, .residences__label, .neighbourhood__label` group at `global.css:1693-1704` to also include `.enquiry__eyebrow` and `.hero__label` — or promote the body to a `.text-eyebrow` utility and apply it across all six. If promoted, remember `.hero__label` inherits `color: var(--color-background)` from its parent — preserve that override
+- [x] Replace the identical bodies inside `.lifestyle__heading`, `.residences__heading`, `.neighbourhood__heading` with just their context-specific deltas — `.enquiry__heading` skipped (different size ramp)
+- [x] Apply `text-section-heading` in the three component markups
+- [~] Label group extension — skipped: existing 4-selector group already covers shared labels; `.hero__label` and `.enquiry__eyebrow` have divergent color/tracking, consolidation would regress
 - [ ] Visual spot-check — all four section intros should be pixel-identical to before
 
 ---
@@ -215,7 +215,7 @@ These are out of scope for this cleanup pass — user will handle later:
 - Section 6 — weak type fixes: @tweakpane/core devDep added → FolderApi resolves → `as any` gone, all 11 `.value as number` casts removed, all 12 change-handler annotations inferred. `getX()` helper replaces 3 gsap.getProperty casts. HTMLCollection casts swapped for `querySelectorAll<HTMLElement>(':scope > *')`. Iframe `_loaded` intersection cast replaced by module WeakSet. `grep "as any" src/` returns zero. 7 pre-existing baseline errors unchanged.
 - Section 7 — nav/footer link consolidation: NavLink type + footerLinkGroups exported from site.ts. Footer.astro imports, deletes local hard-code (+ drops JSDoc banner). Neighbourhood.astro `items` flatten — now sorted `CollectionEntry<'neighbourhood'>[]`, all downstream accesses via `item.id`/`item.data.*`. Build + check clean.
 - Section 8 — double-reveal untangle: `animateLifestyleText` + `animateResidencesReveals` deleted from `src/lib/animations.ts`; `initAnimations()` now runs only `animateHeroParallax()`. File 91 → 37 lines. Parent `[data-reveal]` on `.lifestyle` + `.residences` is now single source. Build + astro-check clean (7 baseline errors unchanged). **Chrome visual verification pending** — user to spot-check Lifestyle/Residences reveals + reduced-motion.
-- Section 9 — heading/eyebrow CSS:
+- Section 9 — heading CSS: Added `.text-section-heading` utility to typography layer in `src/styles/global.css`. Stripped shared type props from `.lifestyle__heading` (deleted outright — zero deltas), `.residences__heading` (kept text-align + margins), `.neighbourhood__heading` (kept `margin: 0`). Applied class in 3 components. `.enquiry__heading` deliberately skipped — uses different font-size ramp (`var(--text-section)` vs hard clamp), not byte-identical, forcing consolidation would regress. Label consolidation also skipped — existing 4-selector group rule already covers vision/lifestyle/residences/neighbourhood; `.hero__label` + `.enquiry__eyebrow` differ in color + tracking so they stay separate. Build + check clean.
 - Section 10 — @lucide/astro removal:
 - Section 11 — comment hygiene:
 - Section 12 — verification:

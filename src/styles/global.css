@@ -1465,6 +1465,15 @@
     color: var(--color-black);
   }
 
+  .text-section-heading {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: clamp(2rem, 3vw + 1rem, 3.5rem);
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    color: var(--color-black);
+  }
+
   .text-body-muted {
     font-size: var(--text-body);
     line-height: var(--leading-body);
@@ -1930,15 +1939,6 @@
     gap: 1rem;
   }
 
-  .lifestyle__heading {
-    font-family: var(--font-display);
-    font-weight: 300;
-    font-size: clamp(2rem, 3vw + 1rem, 3.5rem);
-    letter-spacing: -0.03em;
-    line-height: 1.1;
-    color: var(--color-black);
-  }
-
   /* Copy block under slider, pinned right */
   .lifestyle__footer {
     display: flex;
@@ -2137,12 +2137,6 @@
   }
 
   .residences__heading {
-    font-family: var(--font-display);
-    font-weight: 300;
-    font-size: clamp(2rem, 3vw + 1rem, 3.5rem);
-    letter-spacing: -0.03em;
-    line-height: 1.1;
-    color: var(--color-black);
     text-align: center;
     margin-top: 1rem;
     margin-bottom: var(--space-block);
@@ -2292,12 +2286,6 @@
   }
 
   .neighbourhood__heading {
-    font-family: var(--font-display);
-    font-weight: 300;
-    font-size: clamp(2rem, 3vw + 1rem, 3.5rem);
-    letter-spacing: -0.03em;
-    line-height: 1.1;
-    color: var(--color-black);
     margin: 0;
   }
 
