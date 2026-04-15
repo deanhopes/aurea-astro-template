@@ -3,57 +3,10 @@
  * Lifestyle — editorial section with draggable image slider.
  * Horizontal drag strip of lifestyle/amenity images, copy block below.
  */
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
 
-const slides = [
-  {
-    image: '/images/lifestyle-neighbourhood.jpg',
-    alt: 'Couple walking along the bay at golden hour, Edgewater neighbourhood',
-    top: 'Edgewater',
-    bottom: 'The Neighbourhood',
-  },
-  {
-    image: '/images/lifestyle-yoga.jpg',
-    alt: 'Morning yoga on a wooden terrace, aerial view',
-    top: 'Dawn Practice',
-    bottom: 'Rooftop Terrace',
-  },
-  {
-    image: '/images/lifestyle-plunge.jpg',
-    alt: 'Cold plunge pool in warm ambient light',
-    top: 'Cold Plunge',
-    bottom: 'Wellness Circuit',
-  },
-  {
-    image: '/images/lifestyle-04.jpg',
-    alt: 'Infrared sauna with floor-to-ceiling glass overlooking the bay',
-    top: 'Infrared Sauna',
-    bottom: 'Recovery Suite',
-  },
-  {
-    image: '/images/lifestyle-05.jpg',
-    alt: 'Rooftop pool deck at sunset with lounge seating',
-    top: 'Sunset Pool',
-    bottom: 'Rooftop Deck',
-  },
-  {
-    image: '/images/lifestyle-06.jpg',
-    alt: 'Breathwork terrace surrounded by tropical planting',
-    top: 'Breathwork',
-    bottom: 'Garden Terrace',
-  },
-  {
-    image: '/images/lifestyle-07.jpg',
-    alt: 'Spa treatment room with natural stone and soft lighting',
-    top: 'Spa Suite',
-    bottom: 'Natural Stone',
-  },
-  {
-    image: '/images/lifestyle-08.jpg',
-    alt: 'Residents lounge with curated art and bay views',
-    top: 'Residents Lounge',
-    bottom: 'Bay Views',
-  },
-];
+const slides = (await getCollection('lifestyle')).sort((a, b) => a.data.order - b.data.order);
 ---
 
 <section class="lifestyle" data-reveal>
@@ -82,9 +35,9 @@ const slides = [
     <div class="lifestyle__slider-container">
       <div class="lifestyle__track">
         {
-          slides.map((slide) => (
+          slides.map(({ data: slide }) => (
             <div class="lifestyle__slide">
-              <img src={slide.image} alt={slide.alt} loading="lazy" decoding="async" />
+              <Image src={slide.image} alt={slide.alt} loading="lazy" decoding="async" />
               <div class="lifestyle__slide-overlay" />
               <span class="lifestyle__slide-caption lifestyle__slide-caption--top">
                 {slide.top}

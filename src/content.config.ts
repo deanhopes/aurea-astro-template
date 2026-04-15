@@ -33,4 +33,16 @@ const residences = defineCollection({
     }),
 });
 
-export const collections = { neighbourhood, residences };
+const lifestyle = defineCollection({
+  loader: glob({ pattern: '**/*.yaml', base: './src/content/lifestyle' }),
+  schema: ({ image }) =>
+    z.object({
+      order: z.number(),
+      image: image(),
+      alt: z.string(),
+      top: z.string(),
+      bottom: z.string(),
+    }),
+});
+
+export const collections = { neighbourhood, residences, lifestyle };
