@@ -26,17 +26,17 @@ Lowest risk. No code behaviour touched. Biggest filesystem win.
 
 Pure deletions. No markup touched. Run a visual diff on the homepage after.
 
-- [ ] Delete `.site-footer__enquiry*` and `.site-footer__dropdown*` block — lines 754-960
-- [ ] Delete footer enquiry/dropdown media-query partials at lines 1571-1578 and 3012-3036
-- [ ] Delete `.rwpaper` — line 964
-- [ ] Delete 12-column grid utility: `.col-1` through `.col-12` and `.col-start-1` through `.col-start-12` (~24 selectors)
-- [ ] Delete `.section--hero` — line 1646
-- [ ] Delete `.text-section` class rule — line 1679 (the `--text-section` custom property stays; only the unused `.text-section` class goes)
-- [ ] Delete `.residences__cta` — lines 1925 and 1940
-- [ ] Inline `--radius-cta` → `var(--radius-md)` at its three call sites (`global.css:251, 269, 944`), then delete the `--radius-cta` token at line 80
-- [ ] Delete the "mobile lifestyle override removed" comment at `global.css:2491`
-- [ ] Delete the "mobile residences override removed" comment at `global.css:2632`
-- [ ] Visual spot-check the homepage in Chrome — Hero, Vision, Residences, Lifestyle, Neighbourhood, Enquiry, Footer — nothing should have shifted
+- [x] Delete `.site-footer__enquiry*` and `.site-footer__dropdown*` block — lines 754-960
+- [x] Delete footer enquiry/dropdown media-query partials at lines 1571-1578 and 3012-3036
+- [x] Delete `.rwpaper` — line 964
+- [x] Delete 12-column grid utility: `.col-1` through `.col-12` and `.col-start-1` through `.col-start-12` (~24 selectors)
+- [x] Delete `.section--hero` — line 1646
+- [x] Delete `.text-section` class rule — line 1679 (the `--text-section` custom property stays; only the unused `.text-section` class goes)
+- [x] Delete `.residences__cta` — lines 1925 and 1940 (was inside deleted enquiry block — auto-gone)
+- [x] Inline `--radius-cta` → `var(--radius-md)` at its three call sites, then delete the `--radius-cta` token
+- [x] Delete the "mobile lifestyle override removed" comment
+- [x] Delete the "mobile residences override removed" comment
+- [ ] Visual spot-check the homepage in Chrome — Hero, Vision, Residences, Lifestyle, Neighbourhood, Enquiry, Footer — nothing should have shifted (user eyes required)
 
 ---
 
@@ -208,7 +208,7 @@ These are out of scope for this cleanup pass — user will handle later:
 ## Review (fill in after each section lands)
 
 - Section 1 — dead assets: 34 images + orphan lib + unused component + stray font + tracked screenshot removed. `npm run build` clean (9 pages, ~8.5s). Zero grep refs confirmed before each delete.
-- Section 2 — dead CSS:
+- Section 2 — dead CSS: ~390 lines removed from global.css. `.site-footer__enquiry/__dropdown` block + `.rwpaper` (~216 lines), `.col-*`/`.col-start-*` grid utility (~150 lines), `.section--hero`, `.text-section` class, mobile-override comments, `--radius-cta` token inlined. `.residences__cta` was inside the enquiry block → auto-gone. Build clean (9 pages, 5.3s). Visual spot-check pending user eyes.
 - Section 3 — dead lib code:
 - Section 4 — FooterShadows style block:
 - Section 5 — neighbourhood try/catch:
