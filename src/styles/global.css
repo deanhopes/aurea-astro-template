@@ -328,13 +328,13 @@
   }
 
   .menu-card:nth-child(1) .menu-card__image {
-    background-image: url('/images/menu-vision.jpg');
+    background-image: url('../assets/images/menu-vision.jpg');
   }
   .menu-card:nth-child(2) .menu-card__image {
-    background-image: url('/images/menu-residences.jpg');
+    background-image: url('../assets/images/menu-residences.jpg');
   }
   .menu-card:nth-child(3) .menu-card__image {
-    background-image: url('/images/menu-lifestyle.jpg');
+    background-image: url('../assets/images/menu-lifestyle.jpg');
   }
 
   .menu-card__label {
