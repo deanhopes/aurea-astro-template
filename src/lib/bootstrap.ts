@@ -68,5 +68,5 @@ function onPageLoad() {
 }
 
 export function bootstrap() {
-  document.addEventListener('astro:page-load', onPageLoad);
+  onPageLoad();
 }

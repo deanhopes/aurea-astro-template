@@ -51,7 +51,7 @@ const { title, description = 'Aurea Residences — Waterfront living in Edgewate
     <SEO title={title} description={description} />
     <slot name="head" />
 
-    <!-- Early Lenis — closes the "scroll feels locked on reload" gap before astro:page-load fires -->
+    <!-- Early Lenis — init before bootstrap so scroll works immediately -->
     <script>
       import { initLenis } from '@lib/lenis';
       initLenis();
