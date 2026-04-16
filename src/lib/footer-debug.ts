@@ -13,7 +13,7 @@ const params = {
   // Wordmark
   wmOpacity: 1.0,
   wmScale: 1.13,
-  wmX: 0.0,
+  wmX: 0.02,
   wmY: 0.05,
   // Caustics
   causticScale: 2.3,
@@ -65,7 +65,7 @@ export function initFooterDebug(): void {
   container.style.cssText = 'position:fixed;top:0;right:0;z-index:9999;';
   document.body.appendChild(container);
 
-  pane = new Pane({ title: 'Footer Shaders', expanded: true, container });
+  pane = new Pane({ title: 'Footer Shaders', expanded: false, container });
 
   // -- Wordmark --
   const wm = pane.addFolder({ title: 'Wordmark', expanded: true });

@@ -50,7 +50,7 @@ export const uRefraction = uniform(0.008);
 // Wordmark
 export const uWordmarkOpacity = uniform(1.0);
 export const uWordmarkScale = uniform(1.13);
-export const uWordmarkX = uniform(0.0);
+export const uWordmarkX = uniform(0.02);
 export const uWordmarkY = uniform(0.05);
 
 // ── TSL node graph ────────────────────────────────────────────────────
