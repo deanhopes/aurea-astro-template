@@ -34,7 +34,7 @@
     --leading-hero: 0.95;
     --tracking-hero: -0.025em;
 
-    --text-section: clamp(2rem, 4vw + 0.5rem, 4rem);
+    --text-section: clamp(2.5rem, 4vw + 0.5rem, 4rem);
     --leading-section: 1.1;
 
     --text-body: clamp(1rem, 0.5vw + 0.875rem, 1.125rem);
@@ -1352,13 +1352,13 @@
 
   .hero__content {
     position: absolute;
-    bottom: clamp(3rem, 8vh, 7rem);
+    bottom: clamp(3rem, 4vh, 7rem);
     left: 0;
     right: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 24px;
+    gap: 8px;
     text-align: center;
     padding: 0 1.5rem;
     color: var(--color-background);
@@ -1367,7 +1367,7 @@
   .hero__label {
     font-family: var(--font-body);
     font-weight: 500;
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     line-height: 1.11;
     letter-spacing: 0.16em;
     text-transform: uppercase;
@@ -1376,7 +1376,7 @@
   .hero__headline {
     font-family: var(--font-display);
     font-weight: 300;
-    font-size: clamp(2rem, 4vw + 0.5rem, 4rem);
+    font-size: clamp(2.5rem, 4vw + 0.5rem, 4rem);
     line-height: 0.9;
     letter-spacing: -0.03em;
     max-width: 1412px;
@@ -1409,7 +1409,7 @@
   .text-section-heading {
     font-family: var(--font-display);
     font-weight: 300;
-    font-size: clamp(2rem, 3vw + 1rem, 3.5rem);
+    font-size: clamp(2.5rem, 3vw + 1rem, 3.5rem);
     letter-spacing: -0.03em;
     line-height: 1.1;
     color: var(--color-black);
@@ -1427,7 +1427,7 @@
   .neighbourhood__label {
     font-family: var(--font-body);
     font-weight: 500;
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     line-height: 1.11;
     letter-spacing: 0.16em;
     text-transform: uppercase;

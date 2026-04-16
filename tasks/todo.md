@@ -28,7 +28,7 @@ One-page downloadable Astro template. GitHub repo + Gumroad listing + case study
 - [ ] Update `CLAUDE.md` for one-pager scope
 - [ ] Update `docs/codebase.md` — remove personal local paths, reflect one-pager structure
 - [ ] Strip `private: true` from `package.json`
-- [ ] Add OG image + favicon to `public/`
+- [x] Add OG image + favicon to `public/`
 - [ ] Write launch checklist for template users (cookie consent, privacy policy, GDPR, analytics, domain)
 - [ ] Clean up `tasks/` — archive cleanup reports, keep `lessons.md`
 

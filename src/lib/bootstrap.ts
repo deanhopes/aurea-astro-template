@@ -53,7 +53,20 @@ export function footerShadersReady(): Promise<void> {
 }
 
 function scheduleFooterShaders() {
-  void loadFooterShaders();
+  const trigger = document.querySelector('[data-footer-trigger]');
+  if (!trigger) return;
+
+  const io = new IntersectionObserver(
+    (entries) => {
+      if (entries[0]?.isIntersecting) {
+        io.disconnect();
+        const idle = window.requestIdleCallback ?? ((cb: IdleRequestCallback) => setTimeout(cb, 1));
+        idle(() => void loadFooterShaders());
+      }
+    },
+    { rootMargin: '400px 0px' },
+  );
+  io.observe(trigger);
 }
 
 function onPageLoad() {
