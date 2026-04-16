@@ -1,6 +1,6 @@
 ---
 import FooterShadows from '@components/FooterShadows.astro';
-import { footerLinkGroups } from '@data/site';
+import { footerLinkGroups, contact } from '@data/site';
 ---
 
 <footer class="site-footer" data-footer>
@@ -8,6 +8,22 @@ import { footerLinkGroups } from '@data/site';
     <FooterShadows />
 
     <div class="site-footer__content">
+      <!-- Contact -->
+      <address class="site-footer__contact">
+        <span class="site-footer__contact-name">{contact.address.name}</span>
+        <span>{contact.address.street}</span>
+        <span>{contact.address.city}</span>
+        <a href={contact.phone.href} class="site-footer__contact-link">{contact.phone.display}</a>
+        <a
+          href={contact.mapUrl}
+          class="site-footer__contact-link"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          View on Map
+        </a>
+      </address>
+
       <!-- Navigation -->
       <div class="site-footer__nav">
         {

@@ -1,8 +1,12 @@
 /**
  * Calendar UI — dual-month date-range picker + flexible dates (nights + month pills).
  *
- * Renders into the static shell provided by Residences.astro.
- * No external deps beyond DOM — dates, grids, selection state all vanilla.
+ * State machine (resetOnSelect pattern):
+ *   EMPTY  → click → HALF { from }
+ *   HALF   → click → COMPLETE { from, to } (or deselect if same day)
+ *   COMPLETE → click → HALF { from: newDate } (reset)
+ *
+ * Hover preview is visual-only in HALF state.
  */
 
 let cleanup: (() => void) | null = null;
@@ -27,13 +31,13 @@ const MONTHS = [
 
 interface CalendarState {
   baseYear: number;
-  baseMonth: number; // 0-indexed, left calendar
+  baseMonth: number;
   mode: 'specific' | 'flexible';
   selStart: Date | null;
   selEnd: Date | null;
   hovered: Date | null;
   nights: number;
-  flexMonth: string | null; // "2026-04" format
+  flexMonth: string | null;
 }
 
 const now = new Date();
@@ -81,7 +85,6 @@ function sameDay(a: Date, b: Date): boolean {
   );
 }
 
-/** Normalize to midnight for clean day comparisons */
 function dayStart(d: Date): number {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
 }
@@ -96,9 +99,8 @@ function isStrictlyBetween(d: Date, start: Date, end: Date): boolean {
   return t > dayStart(start) && t < dayStart(end);
 }
 
-// ── Render specific dates ─────────────────────────────────────────────
+// ── Render ────────────────────────────────────────────────────────────
 
-/** Max rows a month grid can have: header + 6 week rows */
 const GRID_ROWS = 6;
 
 function renderMonth(container: HTMLElement, year: number, month: number): void {
@@ -107,7 +109,6 @@ function renderMonth(container: HTMLElement, year: number, month: number): void 
   const grid = document.createElement('div');
   grid.className = 'calendar__day-grid';
 
-  // Day-of-week headers
   for (const day of DAYS) {
     const dh = document.createElement('span');
     dh.className = 'calendar__day-header';
@@ -115,7 +116,6 @@ function renderMonth(container: HTMLElement, year: number, month: number): void 
     grid.appendChild(dh);
   }
 
-  // Empty cells before first day
   const firstDay = firstDayOfMonth(year, month);
   for (let i = 0; i < firstDay; i++) {
     const empty = document.createElement('span');
@@ -123,7 +123,6 @@ function renderMonth(container: HTMLElement, year: number, month: number): void 
     grid.appendChild(empty);
   }
 
-  // Day cells
   const totalDays = daysInMonth(year, month);
   for (let d = 1; d <= totalDays; d++) {
     const date = new Date(year, month, d);
@@ -142,11 +141,10 @@ function renderMonth(container: HTMLElement, year: number, month: number): void 
       btn.classList.add('is-today');
     }
 
-    applyDayState(btn, date);
+    applyDayClasses(btn, date);
     grid.appendChild(btn);
   }
 
-  // Pad trailing empty cells so all months have same grid height
   const cellsUsed = firstDay + totalDays;
   const totalCells = GRID_ROWS * 7;
   for (let i = cellsUsed; i < totalCells; i++) {
@@ -158,7 +156,7 @@ function renderMonth(container: HTMLElement, year: number, month: number): void 
   container.appendChild(grid);
 }
 
-function applyDayState(btn: HTMLElement, date: Date): void {
+function applyDayClasses(btn: HTMLElement, date: Date): void {
   btn.classList.remove(
     'is-selected-start',
     'is-selected-end',
@@ -178,13 +176,25 @@ function applyDayState(btn: HTMLElement, date: Date): void {
     btn.classList.add('is-in-range');
   }
 
-  // Hover preview — include endpoints for visual feedback
+  // Hover preview in HALF state only
   if (selStart && !selEnd && hovered && !sameDay(hovered, selStart)) {
     const a = dayStart(selStart) < dayStart(hovered) ? selStart : hovered;
     const b = dayStart(selStart) < dayStart(hovered) ? hovered : selStart;
     if (isInRange(date, a, b) && !sameDay(date, selStart)) {
       btn.classList.add('is-in-range-preview');
     }
+  }
+}
+
+/**
+ * Update day classes in-place without destroying/recreating DOM.
+ * Prevents the bug where mouseover re-renders → click fires on detached element.
+ */
+function refreshDayClasses(): void {
+  const days = document.querySelectorAll<HTMLElement>('.calendar__day[data-date]');
+  for (const btn of days) {
+    const date = parseDate(btn.dataset.date!);
+    applyDayClasses(btn, date);
   }
 }
 
@@ -220,7 +230,7 @@ function renderBothMonths(): void {
   updateHeaderLabels();
 }
 
-// ── Render flexible dates ─────────────────────────────────────────────
+// ── Flexible dates ────────────────────────────────────────────────────
 
 function renderFlexibleMonths(): void {
   const grid = document.querySelector<HTMLElement>('[data-months-grid]');
@@ -251,38 +261,70 @@ function renderFlexibleMonths(): void {
 
 // ── Event handling ────────────────────────────────────────────────────
 
+/**
+ * Date selection state machine (resetOnSelect pattern):
+ *   EMPTY    → click → HALF { selStart = date }
+ *   HALF     → click same day → EMPTY
+ *   HALF     → click different day → COMPLETE { selStart, selEnd } (ordered)
+ *   COMPLETE → click → HALF { selStart = date } (reset)
+ */
 function handleDayClick(e: Event): void {
   const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('.calendar__day[data-date]');
   if (!btn || btn.disabled) return;
 
   const date = parseDate(btn.dataset.date!);
 
-  if (!state.selStart || state.selEnd) {
+  // COMPLETE or EMPTY → start new selection
+  if (state.selEnd || !state.selStart) {
     state.selStart = date;
     state.selEnd = null;
+    state.hovered = null;
+    renderBothMonths();
+    return;
+  }
+
+  // HALF → click same day → deselect
+  if (sameDay(date, state.selStart)) {
+    state.selStart = null;
+    state.selEnd = null;
+    state.hovered = null;
+    renderBothMonths();
+    return;
+  }
+
+  // HALF → click different day → COMPLETE (order by date)
+  if (dayStart(date) < dayStart(state.selStart)) {
+    state.selEnd = state.selStart;
+    state.selStart = date;
   } else {
-    if (sameDay(date, state.selStart)) {
-      // Clicked same day — reset
-      state.selStart = null;
-      state.selEnd = null;
-    } else if (dayStart(date) > dayStart(state.selStart)) {
-      state.selEnd = date;
-    } else {
-      // Clicked before start — move start
-      state.selEnd = state.selStart;
-      state.selStart = date;
-    }
+    state.selEnd = date;
   }
   state.hovered = null;
   renderBothMonths();
 }
 
+/**
+ * Hover preview — only update classes in-place, never re-render DOM.
+ * This prevents the detached-element bug where mouseover re-renders
+ * and the subsequent click fires on a destroyed button.
+ */
 function handleDayHover(e: Event): void {
   const btn = (e.target as HTMLElement).closest<HTMLElement>('.calendar__day[data-date]');
-  if (!btn || !state.selStart || state.selEnd) return;
+  if (!state.selStart || state.selEnd) return;
 
-  state.hovered = parseDate(btn.dataset.date!);
-  renderBothMonths();
+  if (!btn) {
+    if (state.hovered) {
+      state.hovered = null;
+      refreshDayClasses();
+    }
+    return;
+  }
+
+  const date = parseDate(btn.dataset.date!);
+  if (state.hovered && sameDay(date, state.hovered)) return;
+
+  state.hovered = date;
+  refreshDayClasses();
 }
 
 function handleMonthPillClick(e: Event): void {
@@ -301,7 +343,6 @@ function handleNavPrev(): void {
     state.baseMonth = 11;
     state.baseYear--;
   }
-  // Clamp to current month
   const minYear = now.getFullYear();
   const minMonth = now.getMonth();
   if (state.baseYear < minYear || (state.baseYear === minYear && state.baseMonth < minMonth)) {

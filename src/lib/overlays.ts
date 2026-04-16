@@ -72,7 +72,7 @@ function open(overlay: HTMLElement): void {
 
   state.activeOverlay = overlay;
   overlay.classList.add('is-open');
-  overlay.setAttribute('aria-hidden', 'false');
+  overlay.removeAttribute('inert');
 
   const backdrop = overlay.querySelector<HTMLElement>('.overlay__backdrop');
   const panel = overlay.querySelector<HTMLElement>('.overlay__panel');
@@ -102,7 +102,7 @@ function close(overlay: HTMLElement): void {
       .timeline({
         onComplete() {
           overlay.classList.remove('is-open');
-          overlay.setAttribute('aria-hidden', 'true');
+          overlay.setAttribute('inert', '');
           if (state.activeOverlay === overlay) {
             state.activeOverlay = null;
             state.activeResidence = null;
@@ -127,7 +127,7 @@ function closeImmediate(overlay: HTMLElement): void {
   if (panel) gsap.set(panel, { opacity: 0, y: 20 });
 
   overlay.classList.remove('is-open');
-  overlay.setAttribute('aria-hidden', 'true');
+  overlay.setAttribute('inert', '');
 
   if (state.activeOverlay === overlay) {
     state.activeOverlay = null;

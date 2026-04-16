@@ -713,6 +713,40 @@
     padding-top: clamp(2rem, 4vw, 2rem);
   }
 
+  .site-footer__contact {
+    font-family: var(--font-body);
+    font-style: normal;
+    font-size: var(--text-ui);
+    letter-spacing: 0.01em;
+    line-height: 1.6;
+    color: color-mix(in srgb, var(--color-black) 45%, transparent);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.15rem;
+  }
+
+  .site-footer__contact-name {
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--color-black) 60%, transparent);
+    margin-bottom: 0.25rem;
+  }
+
+  .site-footer__contact-link {
+    color: color-mix(in srgb, var(--color-black) 50%, transparent);
+    transition: color 300ms var(--ease-premium);
+    margin-top: 0.35rem;
+  }
+
+  @media (hover: hover) {
+    .site-footer__contact-link:hover {
+      color: var(--color-black);
+    }
+  }
+
   .enquiry {
     position: relative;
     z-index: 1;
@@ -1274,6 +1308,10 @@
 
     .site-footer__flank:last-child {
       display: none;
+    }
+
+    .site-footer__contact {
+      padding-top: clamp(2rem, 6vw, 3rem);
     }
 
     .site-footer__nav {
@@ -2044,8 +2082,8 @@
 
   .residences__grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--space-gap);
+    grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+    gap: clamp(1rem, 2vw, 1.5rem);
   }
 
   .residences__card {
@@ -2120,14 +2158,13 @@
     padding: 8px 16px;
   }
 
-  @media (max-width: 1023px) {
+  @media (max-width: 599px) {
     .residences__grid {
-      grid-template-columns: 1fr;
-      gap: 3rem;
+      gap: 2.5rem;
     }
 
     .residences__card-image {
-      aspect-ratio: 4 / 5;
+      aspect-ratio: 3 / 4;
     }
   }
 
@@ -2528,13 +2565,18 @@
 
   .overlay__panel--detail {
     max-width: 860px;
+    max-height: calc(100dvh - 2rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: var(--ink-20) transparent;
   }
 
   .overlay__close {
     position: absolute;
     top: 1rem;
     right: 1rem;
-    z-index: 2;
+    z-index: 10;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2557,6 +2599,7 @@
   @media (max-width: 767px) {
     .overlay {
       padding: 0;
+      background: var(--color-background);
     }
 
     .overlay__panel {
@@ -2565,7 +2608,12 @@
       margin: 0;
       min-height: 100dvh;
       border-radius: 0;
-      padding: 1rem;
+      padding: 1.5rem 1rem;
+    }
+
+    .overlay__panel--detail {
+      max-height: none;
+      overflow-y: visible;
     }
   }
 }
@@ -2577,7 +2625,6 @@
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
-    padding-top: 0.5rem;
   }
 
   .calendar__toggle {
@@ -2638,6 +2685,9 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1.5rem;
+    /* 7 day-header rows + 6 week rows × day cell height ≈ fixed height prevents shift between months */
+    min-height: 280px;
+    align-content: start;
   }
 
   .calendar__nav {
@@ -2833,6 +2883,7 @@
     .calendar__grid-wrap {
       grid-template-columns: 1fr;
       gap: 2rem;
+      min-height: auto;
     }
 
     .calendar__months-grid {

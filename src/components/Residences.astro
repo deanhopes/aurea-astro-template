@@ -21,7 +21,7 @@ const residences = (await getCollection('residences')).sort((a, b) => a.data.ord
             <p class="residences__card-detail">{r.detail}</p>
             <div class="residences__card-actions">
               <button
-                class="btn btn--ghost residences__cta"
+                class="btn btn--primary residences__cta"
                 type="button"
                 data-overlay-trigger="calendar"
                 data-residence={r.slug}
@@ -29,7 +29,7 @@ const residences = (await getCollection('residences')).sort((a, b) => a.data.ord
                 View Rates
               </button>
               <button
-                class="btn btn--primary residences__cta"
+                class="btn btn--ghost residences__cta"
                 type="button"
                 data-overlay-trigger="detail"
                 data-residence={r.slug}
@@ -50,7 +50,7 @@ const residences = (await getCollection('residences')).sort((a, b) => a.data.ord
 <div
   class="overlay overlay--calendar"
   data-overlay="calendar"
-  aria-hidden="true"
+  inert
   role="dialog"
   aria-label="View Rates"
 >
@@ -165,7 +165,7 @@ const residences = (await getCollection('residences')).sort((a, b) => a.data.ord
       class="overlay overlay--detail"
       data-overlay="detail"
       data-overlay-residence={r.slug}
-      aria-hidden="true"
+      inert
       role="dialog"
       aria-label={`${r.name} Details`}
     >

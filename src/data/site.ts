@@ -8,6 +8,16 @@ export const site = {
   locale: 'en',
 } as const;
 
+export const contact = {
+  address: {
+    name: 'Aurea Residences',
+    street: '3900 Biscayne Blvd',
+    city: 'Edgewater, Miami FL 33137',
+  },
+  phone: { display: '+1 (305) 555-0180', href: 'tel:+13055550180' },
+  mapUrl: 'https://maps.google.com/?q=3900+Biscayne+Blvd+Miami+FL+33137',
+} as const;
+
 export const nav = {
   cta: { label: 'Enquire', href: '#enquire' },
   menu: {
