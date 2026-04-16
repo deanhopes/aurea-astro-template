@@ -1,12 +1,40 @@
 order: 3
 name: Penthouse
+slug: penthouse
 detail: Top floor, private lift. Sunrise over Miami Beach. Sunset over downtown. The bay holds the whole day in between.
+description: "Penthouse Suite, Full Floor. 2 King, 1 Queen, 2 Twin/King, Full kitchen, Wine storage, 4,200+sqft/390sqm, Private lift, Wraparound terrace, Separate living and dining, Study, Wireless internet, Coffee/tea maker."
 image: ../../assets/images/residences-penthouse.png
 alt: Penthouse terrace at sunset overlooking the bay
-specs:
-  - label: Beds
-    value: 5 / 6.5
+gallery:
+  - src: ../../assets/images/residences-penthouse.png
+    alt: Penthouse terrace at golden hour
+  - src: ../../assets/images/hero.png
+    alt: Tower from the bay
+  - src: ../../assets/images/vision-interior.png
+    alt: Penthouse living room
+  - src: ../../assets/images/vision-sunset.png
+    alt: Sunset panorama from penthouse
+  - src: ../../assets/images/menu-lifestyle.jpg
+    alt: Rooftop infinity pool
+roomOverview:
+  - label: Bedrooms
+    value: "5"
+  - label: Bathrooms
+    value: "6.5"
   - label: Area
-    value: 4,200+ sq ft
+    value: "4,200+ sq ft"
   - label: Aspect
     value: Full floor
+  - label: Floor
+    value: "48–52"
+bedsAndBedding:
+  - label: Master
+    value: 1 King
+  - label: Bedroom 2
+    value: 1 King
+  - label: Bedroom 3
+    value: 1 Queen
+  - label: Bedroom 4
+    value: Twin/King
+  - label: Bedroom 5
+    value: Twin/King

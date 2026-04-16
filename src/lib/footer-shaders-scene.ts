@@ -23,7 +23,6 @@ import {
   floor,
   fract,
   normalize,
-  pow,
   smoothstep,
   clamp,
   texture,
@@ -37,22 +36,27 @@ export const uProgress = uniform(0);
 export const uSunX = uniform(0.34);
 export const uSunY = uniform(0.5);
 
-const uCausticScale = uniform(2.3);
-const uCausticSpeed = uniform(0.14);
-const uCausticSharpness = uniform(2.5);
-const uCausticHeight = uniform(2.0);
+export const uCausticScale = uniform(2.3);
+export const uCausticSpeed = uniform(0.08);
+export const uCausticSharpness = uniform(2.5);
+export const uCausticHeight = uniform(2.0);
 
-const uShadowThreshold = uniform(0.0);
-const uShadowSoftness = uniform(2.0);
-const uShadowAlpha = uniform(0.54);
+export const uShadowThreshold = uniform(1.0);
+export const uShadowSoftness = uniform(0.5);
+export const uShadowAlpha = uniform(0.46);
 
-const uRefraction = uniform(0.02);
-const uSpecStrength = uniform(0.9);
-const uSpecSharp = uniform(128.0);
+export const uRefraction = uniform(0.008);
+
+// Wordmark
+export const uWordmarkOpacity = uniform(1.0);
+export const uWordmarkScale = uniform(1.13);
+export const uWordmarkX = uniform(0.0);
+export const uWordmarkY = uniform(0.05);
 
 // ── TSL node graph ────────────────────────────────────────────────────
 
 let videoTexNode: ReturnType<typeof texture> | null = null;
+let wordmarkTexNode: ReturnType<typeof texture> | null = null;
 
 const gradientFn = Fn(([sampleUV]: [Vec2Node]) => {
   const cDeep = color(0xc94020);
@@ -116,6 +120,19 @@ const shadowMaskFn = Fn(([sampleUV]: [Vec2Node]) => {
   );
 });
 
+const wordmarkFn = Fn(([sampleUV]: [Vec2Node]) => {
+  // Scale from center, offset Y
+  const centered = sampleUV.sub(vec2(0.5, 0.5));
+  const scaled = centered.div(uWordmarkScale).add(vec2(0.5, 0.5)).sub(vec2(uWordmarkX, uWordmarkY));
+  const alpha = texture(wordmarkTexNode!, scaled).r;
+  // Clamp to 0 outside [0,1] to avoid texture repeat
+  const inBounds = smoothstep(float(0.0), float(0.002), scaled.x)
+    .mul(smoothstep(float(0.0), float(0.002), scaled.y))
+    .mul(smoothstep(float(0.0), float(0.002), float(1.0).sub(scaled.x)))
+    .mul(smoothstep(float(0.0), float(0.002), float(1.0).sub(scaled.y)));
+  return alpha.mul(inBounds);
+});
+
 // ── Scene builder ─────────────────────────────────────────────────────
 
 export interface FooterScene {
@@ -124,6 +141,7 @@ export interface FooterScene {
   camera: THREE.OrthographicCamera;
   material: THREE.MeshBasicNodeMaterial;
   videoTexNode: ReturnType<typeof texture>;
+  wordmarkTexNode: ReturnType<typeof texture>;
 }
 
 export async function buildScene(
@@ -155,18 +173,23 @@ export async function buildScene(
   const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 10);
   camera.position.z = 1;
 
-  // 1x1 placeholder — works in both main thread and worker (no DOM needed)
+  // 1x1 placeholders — works in both main thread and worker (no DOM needed)
   const data = new Uint8Array([255, 255, 255, 255]);
   const placeholderTex = new THREE.DataTexture(data, 1, 1, THREE.RGBAFormat);
   placeholderTex.needsUpdate = true;
 
+  const wmData = new Uint8Array([0, 0, 0, 255]);
+  const wmPlaceholder = new THREE.DataTexture(wmData, 1, 1, THREE.RGBAFormat);
+  wmPlaceholder.needsUpdate = true;
+
   videoTexNode = texture(placeholderTex);
+  wordmarkTexNode = texture(wmPlaceholder);
 
   const geo = new THREE.PlaneGeometry(2, 2);
   const material = new THREE.MeshBasicNodeMaterial();
 
   const shadowTint = color(0x5a2818);
-  const specTint = color(0xfff4d8);
+  const causticTint = color(0xfff4d8);
 
   const finalColorFn = Fn(() => {
     const baseUV = uv();
@@ -195,14 +218,19 @@ export async function buildScene(
 
     const nDotL = max(dot(n, sunDir), float(0.0));
     const diffuse = nDotL.mul(0.5).add(0.75);
-    const spec = pow(nDotL, uSpecSharp).mul(causticBright).mul(uSpecStrength);
 
-    const causticGlow = specTint.mul(causticBright).mul(0.55);
-    const lit = grad.mul(diffuse).add(causticGlow).add(specTint.mul(spec));
+    const causticGlow = causticTint.mul(causticBright).mul(0.55);
+    const lit = grad.mul(diffuse).add(causticGlow);
 
     const shaded = mix(lit, shadowTint, shadow.mul(uShadowAlpha));
     const flatGrad = gradientFn(baseUV);
-    return mix(flatGrad, shaded, clamp(uProgress.mul(1.2), float(0.0), float(1.0)));
+    const scene = mix(flatGrad, shaded, clamp(uProgress.mul(1.2), float(0.0), float(1.0)));
+
+    // Wordmark: sampled through refracted UVs → swims with the water
+    const wmAlpha = wordmarkFn(refractedUV);
+    const wmColor = color(0x323032);
+    const wmLit = wmColor.mul(diffuse);
+    return mix(scene, wmLit, wmAlpha.mul(uWordmarkOpacity));
   });
 
   material.colorNode = vec4(finalColorFn(), float(1.0));
@@ -211,5 +239,5 @@ export async function buildScene(
   const quad = new THREE.Mesh(geo, material);
   scene.add(quad);
 
-  return { renderer, scene, camera, material, videoTexNode };
+  return { renderer, scene, camera, material, videoTexNode, wordmarkTexNode };
 }

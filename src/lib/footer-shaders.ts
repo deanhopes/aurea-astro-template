@@ -34,6 +34,7 @@ let fallbackUniforms: {
   uSunX: { value: number };
   uSunY: { value: number };
 } | null = null;
+let fallbackSceneModule: typeof import('./footer-shaders-scene') | null = null;
 let fallbackRafId = 0;
 
 // Shared
@@ -67,12 +68,13 @@ function initWorkerPath(offscreen: OffscreenCanvas, w: number, h: number): Promi
 // ── Fallback path (main thread) ───────────────────────────────────────
 
 async function initFallbackPath(cvs: HTMLCanvasElement): Promise<boolean> {
-  const { buildScene, uProgress, uSunX, uSunY } = await import('./footer-shaders-scene');
-  const scene = await buildScene(cvs);
+  const mod = await import('./footer-shaders-scene');
+  const scene = await mod.buildScene(cvs);
   if (!scene) return false;
 
   fallbackScene = scene;
-  fallbackUniforms = { uProgress, uSunX, uSunY };
+  fallbackSceneModule = mod;
+  fallbackUniforms = { uProgress: mod.uProgress, uSunX: mod.uSunX, uSunY: mod.uSunY };
 
   const dpr = Math.min(devicePixelRatio || 1, 2);
   scene.renderer.setPixelRatio(dpr);
@@ -228,6 +230,92 @@ function setupMouse() {
   window.addEventListener('mousemove', mouseHandler, { passive: true });
 }
 
+// ── Debug: uniform setter for tweakpane ──────────────────────────────
+
+export function setUniform(name: string, value: number): void {
+  if (worker) {
+    postWorker({ type: 'uniform', name, value });
+  } else if (fallbackSceneModule) {
+    const u = (fallbackSceneModule as unknown as Record<string, { value: number }>)[name];
+    if (u && 'value' in u) {
+      u.value = value;
+      ensureFallbackLoop();
+    }
+  }
+}
+
+// ── Wordmark rasterization ────────────────────────────────────────────
+
+async function rasterizeWordmark(
+  canvasWidth: number,
+  canvasHeight: number,
+): Promise<ImageBitmap | null> {
+  // Wait for Test Söhne to load
+  try {
+    await document.fonts.load('300 100px "Test Sohne"');
+  } catch {
+    // font may already be loaded
+  }
+
+  const offscreen = document.createElement('canvas');
+  // Match the aspect ratio of the footer canvas
+  const texW = Math.min(canvasWidth * Math.min(devicePixelRatio || 1, 2), 2048);
+  const texH = Math.round(texW * (canvasHeight / canvasWidth));
+  offscreen.width = texW;
+  offscreen.height = texH;
+
+  const ctx = offscreen.getContext('2d');
+  if (!ctx) return null;
+
+  // Clear to black (0 alpha in R channel = no wordmark)
+  ctx.clearRect(0, 0, texW, texH);
+
+  // Set font, measure, scale to fit within 90% of texture width
+  let fontSize = texH * 0.38;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillStyle = '#ffffff';
+
+  const applyFont = (size: number) => {
+    ctx.font = `300 ${size}px "Test Sohne", sans-serif`;
+    if ('letterSpacing' in ctx) {
+      ctx.letterSpacing = `${size * 0.15}px`;
+    }
+  };
+
+  applyFont(fontSize);
+  const measured = ctx.measureText('AUREA');
+  const maxW = texW * 0.9;
+  if (measured.width > maxW) {
+    fontSize *= maxW / measured.width;
+    applyFont(fontSize);
+  }
+
+  // Position: bottom of canvas, matching CSS bottom: -0.05em
+  const y = texH - fontSize * 0.05;
+  ctx.fillText('AUREA', texW / 2, y);
+
+  return createImageBitmap(offscreen);
+}
+
+async function sendWordmark(canvasWidth: number, canvasHeight: number): Promise<void> {
+  const bitmap = await rasterizeWordmark(canvasWidth, canvasHeight);
+  if (!bitmap) return;
+
+  if (worker) {
+    postWorker({ type: 'wordmarkBitmap', bitmap }, [bitmap]);
+  } else if (fallbackScene) {
+    const THREE = await import('three/webgpu');
+    const wmTex = new THREE.Texture(bitmap as unknown as HTMLImageElement);
+    wmTex.minFilter = THREE.LinearFilter;
+    wmTex.magFilter = THREE.LinearFilter;
+    wmTex.format = THREE.RGBAFormat;
+    wmTex.needsUpdate = true;
+    fallbackScene.wordmarkTexNode.value = wmTex;
+    ensureFallbackLoop();
+  }
+}
+
 // ── Public API ────────────────────────────────────────────────────────
 
 export async function initFooterShaders(): Promise<void> {
@@ -256,6 +344,7 @@ export async function initFooterShaders(): Promise<void> {
   setupScrollTrigger();
   setupMouse();
   initVideo();
+  sendWordmark(canvas.clientWidth, canvas.clientHeight);
 }
 
 export function destroyFooterShaders(): void {
@@ -294,6 +383,7 @@ export function destroyFooterShaders(): void {
     fallbackScene = null;
   }
   fallbackUniforms = null;
+  fallbackSceneModule = null;
 
   if (videoEl) {
     videoEl.pause();

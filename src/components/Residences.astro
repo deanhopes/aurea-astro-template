@@ -12,28 +12,265 @@ const residences = (await getCollection('residences')).sort((a, b) => a.data.ord
   <div class="residences__grid">
     {
       residences.map(({ data: r }) => (
-        <a href="#residences" class="residences__card">
+        <div class="residences__card">
           <div class="residences__card-image">
             <Image src={r.image} alt={r.alt} loading="lazy" decoding="async" />
           </div>
           <div class="residences__card-info">
             <h3 class="residences__card-name">{r.name}</h3>
             <p class="residences__card-detail">{r.detail}</p>
-            <dl class="residences__card-specs">
-              {r.specs.map((s) => (
-                <div class="residences__spec">
-                  <dt class="residences__spec-label">{s.label}</dt>
-                  <dd class="residences__spec-value">{s.value}</dd>
+            <div class="residences__card-actions">
+              <button
+                class="btn btn--ghost residences__cta"
+                type="button"
+                data-overlay-trigger="calendar"
+                data-residence={r.slug}
+              >
+                View Rates
+              </button>
+              <button
+                class="btn btn--primary residences__cta"
+                type="button"
+                data-overlay-trigger="detail"
+                data-residence={r.slug}
+              >
+                View Details
+              </button>
+            </div>
+          </div>
+        </div>
+      ))
+    }
+  </div>
+</section>
+
+<!-- Overlays live outside <section> so GSAP transforms don't break position:fixed -->
+
+<!-- Calendar overlay (shared, one instance) -->
+<div
+  class="overlay overlay--calendar"
+  data-overlay="calendar"
+  aria-hidden="true"
+  role="dialog"
+  aria-label="View Rates"
+>
+  <div class="overlay__backdrop" data-overlay-close></div>
+  <div class="overlay__panel">
+    <button class="overlay__close" type="button" data-overlay-close aria-label="Close">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <path
+          d="M15 5L5 15M5 5l10 10"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"></path>
+      </svg>
+    </button>
+    <div class="calendar" data-calendar>
+      <div class="calendar__toggle">
+        <button class="calendar__toggle-btn is-active" type="button" data-calendar-mode="specific"
+          >Specific Dates</button
+        >
+        <button class="calendar__toggle-btn" type="button" data-calendar-mode="flexible"
+          >Flexible Dates</button
+        >
+      </div>
+
+      <!-- Specific dates view -->
+      <div class="calendar__specific" data-calendar-view="specific">
+        <div class="calendar__header-row">
+          <button
+            class="calendar__nav"
+            type="button"
+            data-calendar-prev
+            aria-label="Previous months"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path
+                d="M10 4L6 8l4 4"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"></path>
+            </svg>
+          </button>
+          <span class="calendar__header-label" data-calendar-header-left></span>
+          <span class="calendar__header-label" data-calendar-header-right></span>
+          <button class="calendar__nav" type="button" data-calendar-next aria-label="Next months">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path
+                d="M6 4l4 4-4 4"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"></path>
+            </svg>
+          </button>
+        </div>
+        <div class="calendar__grid-wrap">
+          <div class="calendar__month" data-calendar-month="0"></div>
+          <div class="calendar__month" data-calendar-month="1"></div>
+        </div>
+      </div>
+
+      <!-- Flexible dates view -->
+      <div class="calendar__flexible" data-calendar-view="flexible" style="display:none">
+        <div class="calendar__nights-row">
+          <span class="calendar__nights-label">Number of Nights</span>
+          <div class="calendar__nights-stepper">
+            <button
+              class="calendar__stepper-btn"
+              type="button"
+              data-nights-dec
+              aria-label="Decrease nights"
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M4 8h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                ></path>
+              </svg>
+            </button>
+            <span class="calendar__nights-value" data-nights-value>1</span>
+            <button
+              class="calendar__stepper-btn"
+              type="button"
+              data-nights-inc
+              aria-label="Increase nights"
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path
+                  d="M8 4v8M4 8h8"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="calendar__months-grid" data-months-grid></div>
+      </div>
+
+      <a
+        href="https://www.cloudbeds.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="btn btn--primary calendar__submit">View Rates</a
+      >
+    </div>
+  </div>
+</div>
+
+<!-- Detail overlays (one per residence) -->
+{
+  residences.map(({ data: r }) => (
+    <div
+      class="overlay overlay--detail"
+      data-overlay="detail"
+      data-overlay-residence={r.slug}
+      aria-hidden="true"
+      role="dialog"
+      aria-label={`${r.name} Details`}
+    >
+      <div class="overlay__backdrop" data-overlay-close />
+      <div class="overlay__panel overlay__panel--detail">
+        <button class="overlay__close" type="button" data-overlay-close aria-label="Close">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path
+              d="M15 5L5 15M5 5l10 10"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+            />
+          </svg>
+        </button>
+
+        <h2 class="detail__name">{r.name}</h2>
+
+        <div class="detail__gallery" data-gallery>
+          <div class="detail__gallery-viewport">
+            <div class="detail__gallery-track" data-gallery-track>
+              {r.gallery.map((img) => (
+                <div class="detail__gallery-slide">
+                  <Image src={img.src} alt={img.alt} loading="lazy" decoding="async" />
+                </div>
+              ))}
+            </div>
+          </div>
+          <button
+            class="detail__gallery-arrow detail__gallery-arrow--prev"
+            type="button"
+            data-gallery-prev
+            aria-label="Previous image"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path
+                d="M10 4L6 8l4 4"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            Prev
+          </button>
+          <button
+            class="detail__gallery-arrow detail__gallery-arrow--next"
+            type="button"
+            data-gallery-next
+            aria-label="Next image"
+          >
+            Next
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path
+                d="M6 4l4 4-4 4"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+          <span class="detail__gallery-counter" data-gallery-counter>
+            1 / {r.gallery.length}
+          </span>
+        </div>
+
+        <div class="detail__body">
+          <h3 class="detail__title">{r.name}</h3>
+          <p class="detail__description">{r.description}</p>
+          <a
+            href="https://www.cloudbeds.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn btn--primary detail__rates-cta"
+          >
+            View Rates
+          </a>
+        </div>
+
+        <div class="detail__specs">
+          <div class="detail__specs-col">
+            <h4 class="detail__specs-heading">Room Overview</h4>
+            <dl class="detail__specs-list">
+              {r.roomOverview.map((s) => (
+                <div class="detail__spec-row">
+                  <dt>{s.label}</dt>
+                  <dd>{s.value}</dd>
                 </div>
               ))}
             </dl>
           </div>
-        </a>
-      ))
-    }
-  </div>
-
-  <div class="residences__footer">
-    <a href="#residences" class="btn btn--primary">See Every Residence</a>
-  </div>
-</section>
+          <div class="detail__specs-col">
+            <h4 class="detail__specs-heading">Beds and Bedding</h4>
+            <dl class="detail__specs-list">
+              {r.bedsAndBedding.map((s) => (
+                <div class="detail__spec-row">
+                  <dt>{s.label}</dt>
+                  <dd>{s.value}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+  ))
+}

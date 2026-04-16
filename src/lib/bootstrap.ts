@@ -6,6 +6,8 @@ import { initAnimations } from './animations';
 import { initLifestyleSlider } from './lifestyle-slider';
 import { initNeighbourhood } from './neighbourhood';
 import { initVisionScroll } from './vision-scroll';
+import { initOverlays } from './overlays';
+import { initCalendar } from './calendar';
 
 let revealObserver: IntersectionObserver | null = null;
 
@@ -44,6 +46,10 @@ function loadFooterShaders(): Promise<void> {
   footerReadyPromise = (async () => {
     footerModule = await import('./footer-shaders');
     await footerModule.initFooterShaders();
+    if (import.meta.env.DEV) {
+      const { initFooterDebug } = await import('./footer-debug');
+      initFooterDebug();
+    }
   })();
   return footerReadyPromise;
 }
@@ -53,20 +59,8 @@ export function footerShadersReady(): Promise<void> {
 }
 
 function scheduleFooterShaders() {
-  const trigger = document.querySelector('[data-footer-trigger]');
-  if (!trigger) return;
-
-  const io = new IntersectionObserver(
-    (entries) => {
-      if (entries[0]?.isIntersecting) {
-        io.disconnect();
-        const idle = window.requestIdleCallback ?? ((cb: IdleRequestCallback) => setTimeout(cb, 1));
-        idle(() => void loadFooterShaders());
-      }
-    },
-    { rootMargin: '400px 0px' },
-  );
-  io.observe(trigger);
+  const idle = window.requestIdleCallback ?? ((cb: IdleRequestCallback) => setTimeout(cb, 1));
+  idle(() => void loadFooterShaders());
 }
 
 function onPageLoad() {
@@ -76,6 +70,8 @@ function onPageLoad() {
   initLifestyleSlider();
   initNeighbourhood();
   initVisionScroll();
+  initOverlays();
+  initCalendar();
   initReveal();
   scheduleFooterShaders();
 }

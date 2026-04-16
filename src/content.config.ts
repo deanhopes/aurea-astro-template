@@ -21,10 +21,24 @@ const residences = defineCollection({
     z.object({
       order: z.number(),
       name: z.string(),
+      slug: z.string(),
       detail: z.string(),
+      description: z.string(),
       image: image(),
       alt: z.string(),
-      specs: z.array(
+      gallery: z.array(
+        z.object({
+          src: image(),
+          alt: z.string(),
+        }),
+      ),
+      roomOverview: z.array(
+        z.object({
+          label: z.string(),
+          value: z.string(),
+        }),
+      ),
+      bedsAndBedding: z.array(
         z.object({
           label: z.string(),
           value: z.string(),

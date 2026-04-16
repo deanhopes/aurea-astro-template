@@ -6,6 +6,8 @@ Rules discovered through mistakes. Read at session start.
 
 ## Code
 
+- **Never animate `border-width` for focus/active indicators.** Changing border-width shifts layout even with padding compensation — the padding jumps instantly while border-width transitions. Use `box-shadow: 0 1px 0 0 color` to simulate a thicker line with zero layout impact.
+- **Don't use `astro:page-load` without ClientRouter.** That event only fires when Astro's ViewTransitions/ClientRouter is active. Without it, the callback never runs. Astro `<script>` tags are modules — they execute after DOM parse. No wrapper event needed.
 - **Never animate `filter: blur()` in GSAP.** Composites every frame, expensive on mobile. Use opacity + scale for the same "materialise" feel.
 - **Don't double-fade with parent + children.** If you're fading out children individually, don't also fade the parent — the opacity compounds and things vanish too early.
 - **Use `scrub: 1`, not `scrub: 0.6` or `scrub: true`.** `1` gives physical weight. `true` has no interpolation. Fractional values feel twitchy.

@@ -181,10 +181,8 @@
 <script>
   import { COUNTRIES } from '../data/countries';
 
-  document.addEventListener('astro:page-load', () => {
-    const enquiry = document.querySelector<HTMLElement>('.enquiry');
-    if (!enquiry) return;
-
+  const enquiry = document.querySelector<HTMLElement>('.enquiry');
+  if (enquiry) {
     const phoneCountry = enquiry.querySelector<HTMLElement>('[data-phone-country]');
     if (phoneCountry) {
       const trigger = phoneCountry.querySelector<HTMLButtonElement>('[data-phone-trigger]')!;
@@ -298,5 +296,5 @@
       await new Promise((resolve) => setTimeout(resolve, 800));
       wrap.classList.add('is-done');
     });
-  });
+  }
 </script>

@@ -5,7 +5,24 @@
  */
 
 import * as THREE from 'three/webgpu';
-import { buildScene, uProgress, uSunX, uSunY } from './footer-shaders-scene';
+import {
+  buildScene,
+  uProgress,
+  uSunX,
+  uSunY,
+  uCausticScale,
+  uCausticSpeed,
+  uCausticSharpness,
+  uCausticHeight,
+  uShadowThreshold,
+  uShadowSoftness,
+  uShadowAlpha,
+  uRefraction,
+  uWordmarkOpacity,
+  uWordmarkScale,
+  uWordmarkX,
+  uWordmarkY,
+} from './footer-shaders-scene';
 import type { FooterScene } from './footer-shaders-scene';
 
 export type InboundMessage =
@@ -14,6 +31,8 @@ export type InboundMessage =
   | { type: 'progress'; value: number }
   | { type: 'mouse'; x: number; y: number }
   | { type: 'videoFrame'; bitmap: ImageBitmap }
+  | { type: 'wordmarkBitmap'; bitmap: ImageBitmap }
+  | { type: 'uniform'; name: string; value: number }
   | { type: 'destroy' };
 
 let fs: FooterScene | null = null;
@@ -97,6 +116,44 @@ self.onmessage = async (e: MessageEvent<InboundMessage>) => {
       prevBitmap = msg.bitmap;
 
       ensureLoop();
+      break;
+    }
+
+    case 'wordmarkBitmap': {
+      if (!fs) {
+        msg.bitmap.close();
+        return;
+      }
+      const wmTex = new THREE.Texture(msg.bitmap as unknown as HTMLImageElement);
+      wmTex.minFilter = THREE.LinearFilter;
+      wmTex.magFilter = THREE.LinearFilter;
+      wmTex.format = THREE.RGBAFormat;
+      wmTex.needsUpdate = true;
+      fs.wordmarkTexNode.value = wmTex;
+      ensureLoop();
+      break;
+    }
+
+    case 'uniform': {
+      const uniforms: Record<string, { value: number }> = {
+        uCausticScale,
+        uCausticSpeed,
+        uCausticSharpness,
+        uCausticHeight,
+        uShadowThreshold,
+        uShadowSoftness,
+        uShadowAlpha,
+        uRefraction,
+        uWordmarkOpacity,
+        uWordmarkScale,
+        uWordmarkX,
+        uWordmarkY,
+      };
+      const u = uniforms[msg.name];
+      if (u) {
+        u.value = msg.value;
+        ensureLoop();
+      }
       break;
     }
 
