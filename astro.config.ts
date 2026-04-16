@@ -6,7 +6,6 @@ export default defineConfig({
   trailingSlash: 'never',
   integrations: [sitemap()],
   devToolbar: { enabled: false },
-  prefetch: false,
   vite: {
     server: {
       watch: {
