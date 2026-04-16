@@ -7,7 +7,7 @@ const items = (await getCollection('neighbourhood'))
   .sort((a, b) => a.data.order - b.data.order);
 ---
 
-<section class="neighbourhood" data-neighbourhood>
+<section class="neighbourhood" id="neighbourhood" data-neighbourhood>
   <div class="neighbourhood__container">
     <div class="neighbourhood__intro">
       <div class="neighbourhood__intro-head">
@@ -71,7 +71,7 @@ const items = (await getCollection('neighbourhood'))
               {item.data.description ? (
                 <>
                   <p class="neighbourhood__body">{item.data.description}</p>
-                  <a href="/neighbourhood" class="neighbourhood__cta">
+                  <a href="#neighbourhood" class="neighbourhood__cta">
                     Walk the Neighbourhood
                   </a>
                 </>

@@ -5,7 +5,7 @@ import { Image } from 'astro:assets';
 const slides = (await getCollection('lifestyle')).sort((a, b) => a.data.order - b.data.order);
 ---
 
-<section class="lifestyle" data-reveal>
+<section class="lifestyle" id="lifestyle" data-reveal>
   <div class="lifestyle__header">
     <div class="lifestyle__header-left">
       <p class="lifestyle__label">The Lifestyle</p>
@@ -47,7 +47,7 @@ const slides = (await getCollection('lifestyle')).sort((a, b) => a.data.order - 
         residents' lounge where the only thing on the schedule is sunset. A building that gives the
         day back to you, hour by hour.
       </p>
-      <a href="/lifestyle" class="btn btn--ghost lifestyle__cta">Step Inside the Lifestyle</a>
+      <a href="#lifestyle" class="btn btn--ghost lifestyle__cta">Step Inside the Lifestyle</a>
     </div>
   </div>
 </section>

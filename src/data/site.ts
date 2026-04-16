@@ -12,17 +12,12 @@ export const nav = {
   cta: { label: 'Enquire', href: '#enquire' },
   menu: {
     cards: [
-      { label: 'Vision', href: '/vision' },
-      { label: 'Residences', href: '/residences' },
-      { label: 'Lifestyle', href: '/lifestyle' },
+      { label: 'Vision', href: '#vision' },
+      { label: 'Residences', href: '#residences' },
+      { label: 'Lifestyle', href: '#lifestyle' },
     ],
-    links: [
-      { label: 'Neighbourhood', href: '/neighbourhood' },
-      { label: 'Location', href: '/location' },
-      { label: 'The Team', href: '/team' },
-    ],
+    links: [{ label: 'Neighbourhood', href: '#neighbourhood' }],
     secondaryLinks: [
-      { label: 'Blog', href: '/blog' },
       { label: 'Terms & Conditions', href: '/terms' },
       { label: 'Privacy Policy', href: '/privacy' },
     ],
@@ -31,15 +26,10 @@ export const nav = {
 
 export const footerLinkGroups: NavLink[][] = [
   [
-    { label: 'Vision', href: '/vision' },
-    { label: 'Residences', href: '/residences' },
-    { label: 'Lifestyle', href: '/lifestyle' },
-    { label: 'Neighbourhood', href: '/neighbourhood' },
-  ],
-  [
-    { label: 'Location', href: '/location' },
-    { label: 'The Team', href: '/team' },
-    { label: 'Blog', href: '/blog' },
+    { label: 'Vision', href: '#vision' },
+    { label: 'Residences', href: '#residences' },
+    { label: 'Lifestyle', href: '#lifestyle' },
+    { label: 'Neighbourhood', href: '#neighbourhood' },
   ],
   [
     { label: 'Terms & Conditions', href: '/terms' },

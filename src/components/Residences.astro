@@ -5,14 +5,14 @@ import { Image } from 'astro:assets';
 const residences = (await getCollection('residences')).sort((a, b) => a.data.order - b.data.order);
 ---
 
-<section class="residences" data-reveal>
+<section class="residences" id="residences" data-reveal>
   <p class="residences__label">The Residences</p>
   <h2 class="residences__heading text-section-heading">Three ways to wake up<br />on the water.</h2>
 
   <div class="residences__grid">
     {
       residences.map(({ data: r }) => (
-        <a href="/residences" class="residences__card">
+        <a href="#residences" class="residences__card">
           <div class="residences__card-image">
             <Image src={r.image} alt={r.alt} loading="lazy" decoding="async" />
           </div>
@@ -34,6 +34,6 @@ const residences = (await getCollection('residences')).sort((a, b) => a.data.ord
   </div>
 
   <div class="residences__footer">
-    <a href="/residences" class="btn btn--primary">See Every Residence</a>
+    <a href="#residences" class="btn btn--primary">See Every Residence</a>
   </div>
 </section>
