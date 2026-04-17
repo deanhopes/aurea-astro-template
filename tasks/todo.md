@@ -17,19 +17,19 @@ One-page downloadable Astro template. GitHub repo + Gumroad listing + case study
 - [x] Add `terms.astro` and `privacy.astro` placeholder pages with TODO comments
 - [x] Update `src/data/site.ts` nav + footer link groups for one-pager structure
 - [x] Delete `src/pages/dev/footer.astro` (dev tool, not part of template)
-- [ ] Responsive pass
-- [ ] Visual verification of collapsed one-pager
+- [x] Responsive pass (desktop + mobile QA via Chrome DevTools, 2026-04-17)
+- [x] Visual verification of collapsed one-pager (2026-04-17)
 
 ---
 
 ## Phase 2 — Template-ify for GitHub
 
-- [ ] Write README (setup, structure, customising content via YAML, Claude Code usage)
+- [x] Write README (setup, structure, customising content via YAML, Claude Code usage)
 - [ ] Update `CLAUDE.md` for one-pager scope
-- [ ] Update `docs/codebase.md` — remove personal local paths, reflect one-pager structure
-- [ ] Strip `private: true` from `package.json`
+- [x] Update `docs/codebase.md` — remove personal local paths, reflect one-pager structure
+- [x] Strip `private: true` from `package.json` (already not present)
 - [x] Add OG image + favicon to `public/`
-- [ ] Write launch checklist for template users (cookie consent, privacy policy, GDPR, analytics, domain)
+- [x] Write launch checklist for template users (in README "Before you launch" section)
 - [ ] Clean up `tasks/` — archive cleanup reports, keep `lessons.md`
 
 ---
