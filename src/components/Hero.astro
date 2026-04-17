@@ -1,19 +1,17 @@
 ---
 import { Image } from 'astro:assets';
-import heroImage from '../assets/images/hero.png';
+import heroImage from '../assets/images/hero.jpg';
 ---
 
 <section class="hero" id="hero" data-hero>
   <div class="hero__image">
-    <video
-      src="/video/hero.mp4"
-      autoplay
-      muted
-      loop
-      playsinline
-      preload="auto"
-      poster={heroImage.src}
-      aria-label="Aurea Residences waterfront tower at golden hour"></video>
+    <Image
+      src={heroImage}
+      alt="Aurea Residences waterfront tower at golden hour"
+      widths={[768, 1280, 1920, 2560]}
+      sizes="100vw"
+      loading="eager"
+    />
   </div>
   <div class="hero__content" data-reveal>
     <p class="hero__label">Edgewater, Miami</p>
