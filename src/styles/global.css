@@ -683,6 +683,16 @@
     z-index: -1;
     height: 100dvh;
     overflow: hidden;
+    /* Fallback gradient — visible if WebGPU footer canvas fails to init.
+       Mirrors shader palette (bottom → top): deep → orange → coral → peach → parchment. */
+    background: linear-gradient(
+      to top,
+      #c94020 0%,
+      #ef5d2a 30%,
+      #f0a080 55%,
+      #f0c4a8 75%,
+      #f9efe6 100%
+    );
   }
 
   #main-content {
