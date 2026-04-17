@@ -1,0 +1,71 @@
+/* Size utilities — map to the primitive size scale in tokens.css.
+   Use semantic classes (.text-hero, .text-section-heading) for blessed
+   roles; drop to these size-only utilities when no role applies. */
+.text-xs {
+  font-size: var(--text-xs);
+}
+.text-sm {
+  font-size: var(--text-sm);
+}
+.text-base {
+  font-size: var(--text-base);
+}
+.text-lg {
+  font-size: var(--text-lg);
+}
+.text-xl {
+  font-size: var(--text-xl);
+}
+.text-2xl {
+  font-size: var(--text-2xl);
+}
+.text-3xl {
+  font-size: var(--text-3xl);
+}
+.text-4xl {
+  font-size: var(--text-4xl);
+}
+.text-5xl {
+  font-size: var(--text-5xl);
+}
+
+.text-hero {
+  font-family: var(--font-display);
+  font-size: var(--text-hero);
+  font-weight: 300;
+  line-height: var(--leading-hero);
+  letter-spacing: var(--tracking-hero);
+  color: var(--color-black);
+}
+
+.text-section-heading {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: clamp(2.5rem, 3vw + 1rem, 3.5rem);
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  color: var(--color-black);
+}
+
+.text-body-muted {
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  color: color-mix(in srgb, var(--color-black) 60%, transparent);
+}
+
+.vision__label,
+.lifestyle__label,
+.residences__label,
+.neighbourhood__label {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 0.75rem;
+  line-height: 1.11;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--color-black) 50%, transparent);
+}
+
+.vision__label {
+  padding-left: 4px;
+}

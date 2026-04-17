@@ -1,0 +1,75 @@
+:root {
+  --color-background: #f9efe6;
+  --color-white: #f5f5f5;
+  --color-black: #323032;
+
+  --color-light-gray: #d9d9d9;
+  --color-mid-gray-1: #a3a3a3;
+  --color-mid-gray-2: #737373;
+  --color-dark-gray: #4a4a4a;
+
+  /* The single accent — sunset over the bay. Caption numbers, focus
+     rings, CTA underline reveal, scrollbar. If it creeps beyond that,
+     cut it back. */
+  --color-accent: #ef5d2a;
+
+  --font-display: 'Test Sohne', system-ui, sans-serif;
+  --font-body: 'Aktiv Grotesk', system-ui, sans-serif;
+
+  /* Size scale — primitive. Fluid clamp across mobile → desktop.
+     Use these directly for ad-hoc sizing; semantic aliases below map
+     the blessed roles to specific steps. */
+  --text-xs: clamp(0.75rem, 0.25vw + 0.6875rem, 0.875rem); /* 12 → 14 */
+  --text-sm: clamp(0.875rem, 0.25vw + 0.8125rem, 1rem); /* 14 → 16 */
+  --text-base: clamp(1rem, 0.5vw + 0.875rem, 1.125rem); /* 16 → 18 */
+  --text-lg: clamp(1.125rem, 0.5vw + 1rem, 1.25rem); /* 18 → 20 */
+  --text-xl: clamp(1.25rem, 1vw + 1rem, 1.75rem); /* 20 → 28 */
+  --text-2xl: clamp(1.5rem, 1.5vw + 1rem, 2.25rem); /* 24 → 36 */
+  --text-3xl: clamp(2rem, 2.5vw + 1rem, 3rem); /* 32 → 48 */
+  --text-4xl: clamp(2.5rem, 4vw + 0.5rem, 4rem); /* 40 → 64 */
+  --text-5xl: clamp(4rem, 8vw + 1rem, 9rem); /* 64 → 144 */
+
+  /* Semantic aliases — role → size. */
+  --text-hero: var(--text-5xl);
+  --leading-hero: 0.95;
+  --tracking-hero: -0.025em;
+
+  --text-section: var(--text-4xl);
+  --leading-section: 1.1;
+
+  --text-body: var(--text-base);
+  --leading-body: 1.6;
+
+  --text-ui: var(--text-xs);
+  --leading-ui: 1.5;
+  --tracking-ui: 0.08em;
+
+  --space-section: clamp(6rem, 10vw, 10rem);
+  --space-block: clamp(3rem, 6vw, 6rem);
+  --space-element: clamp(1.5rem, 3vw, 3rem);
+  --space-edge: 4px;
+  --space-gap: 4px;
+
+  --color-surface-subtle: color-mix(in srgb, var(--color-black) 3%, transparent);
+  --color-surface-muted: color-mix(in srgb, var(--color-black) 5%, transparent);
+
+  --ink-08: color-mix(in srgb, var(--color-black) 8%, transparent);
+  --ink-14: color-mix(in srgb, var(--color-black) 14%, transparent);
+  --ink-20: color-mix(in srgb, var(--color-black) 20%, transparent);
+  --ink-35: color-mix(in srgb, var(--color-black) 35%, transparent);
+  --ink-45: color-mix(in srgb, var(--color-black) 45%, transparent);
+  --ink-55: color-mix(in srgb, var(--color-black) 55%, transparent);
+  --ink-60: color-mix(in srgb, var(--color-black) 60%, transparent);
+  --ink-70: color-mix(in srgb, var(--color-black) 70%, transparent);
+
+  --radius-sm: 2px;
+  --radius-md: 4px; /* buttons, inputs, nav pills — default */
+  --radius-lg: 6px; /* menu cards, small surfaces */
+  --radius-xl: 8px; /* popovers, phone dropdown */
+  --radius-2xl: 12px; /* hero card, enquiry card */
+
+  --ease-premium: cubic-bezier(0.19, 1, 0.22, 1);
+
+  --transition-reveal: opacity 0.8s var(--ease-premium), transform 0.8s var(--ease-premium);
+  --transition-color: color 0.3s ease, border-color 0.3s ease;
+}

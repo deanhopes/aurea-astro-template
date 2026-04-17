@@ -1,0 +1,91 @@
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  visibility: hidden;
+  pointer-events: none;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 1rem;
+}
+
+.overlay.is-open {
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.overlay__backdrop {
+  position: fixed;
+  inset: 0;
+  background: color-mix(in srgb, var(--color-black) 40%, transparent);
+  opacity: 0;
+}
+
+.overlay__panel {
+  position: relative;
+  max-width: 720px;
+  width: 100%;
+  margin: auto;
+  background: var(--color-background);
+  border-radius: var(--radius-2xl);
+  padding: clamp(1.5rem, 3vw, 2.5rem);
+  opacity: 0;
+}
+
+.overlay__panel--detail {
+  max-width: 860px;
+  max-height: calc(100dvh - 2rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ink-20) transparent;
+}
+
+.overlay__close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--ink-20);
+  border-radius: var(--radius-md);
+  background: var(--color-background);
+  color: var(--color-black);
+  cursor: pointer;
+  transition: border-color 300ms var(--ease-premium);
+}
+
+@media (hover: hover) {
+  .overlay__close:hover {
+    border-color: var(--color-black);
+  }
+}
+
+@media (max-width: 767px) {
+  .overlay {
+    padding: 0;
+    background: var(--color-background);
+  }
+
+  .overlay__panel {
+    max-width: none;
+    width: 100%;
+    margin: 0;
+    min-height: 100dvh;
+    border-radius: 0;
+    padding: 1.5rem 1rem;
+  }
+
+  .overlay__panel--detail {
+    max-height: none;
+    overflow-y: visible;
+  }
+}

@@ -15,6 +15,8 @@ Rules discovered through mistakes. Read at session start.
 - **Stop rAF loops when done.** Canvas rAF loops must stop when their animation reaches final state. Use an `ensureLoop()` pattern to restart on demand (e.g., scroll-back).
 - **Clean up ResizeObservers.** Store the observer reference at module scope and `.disconnect()` in the destroy function. Otherwise it's a memory leak on page transitions.
 - **Cap WebGL canvas DPR at 2.** Soft effects (shadows, blurs) don't benefit from 3x rendering. Saves significant GPU fill rate.
+- **Relative `url()` paths break when CSS files move.** `url('../foo.jpg')` resolves relative to the _source file_, not the bundle. When splitting `global.css` into subdirs, every `url()` must be rewritten to reflect the new depth (e.g. `../assets/` → `../../assets/` from `components/*.css`). Grep for `url\('\.\.` after any migration.
+- **CSS `@import ... layer(name)` preserves cascade across file splits.** Extract `@layer X { ... }` block bodies into separate files with no outer `@layer` wrapper, then import each via `@import './foo.css' layer(X)`. Lightning CSS inlines at build, bundle size stable (~±0.5%). Preserve original source order in the import list or overrides break silently.
 - **Lenis blocks native scroll inside modals.** When overlay calls `lenis.stop()` to lock page, scrollable panels inside the modal stop working too — Lenis intercepts wheel events and `preventDefault`s them. Add `data-lenis-prevent` to the scrollable container; Lenis checks ancestors via composedPath before the `isStopped` guard and returns early, restoring native scroll.
 
 ## Design

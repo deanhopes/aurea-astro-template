@@ -1,0 +1,41 @@
+.link-underline {
+  font-size: var(--text-ui);
+  line-height: var(--leading-ui);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-ui);
+  color: color-mix(in srgb, var(--color-black) 60%, transparent);
+  position: relative;
+  align-self: flex-start;
+}
+
+/* Underline animation — reveal on hover (shared across every text link CTA).
+   Reveals in accent, not currentColor — the one place in the UI
+   where the sunset orange shows up, deliberately. */
+.link-underline::after,
+.vision__cta::after,
+.neighbourhood__cta::after,
+.site-footer__link::after,
+.menu-sidebar__link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: var(--color-accent);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 500ms var(--ease-premium);
+}
+
+@media (hover: hover) {
+  .link-underline:hover::after,
+  .vision__cta:hover::after,
+  .neighbourhood__cta:hover::after,
+  .site-footer__link:hover::after,
+  .menu-sidebar__link:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+}
+

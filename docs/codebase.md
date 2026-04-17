@@ -31,7 +31,25 @@ src/
 
 ## Code Conventions
 
-**CSS architecture:** All styles live in `src/styles/global.css`. No `<style>` blocks in `.astro` files — ever. Scoped styles cause split-brain: the same class can be defined in two places with different rules, and the browser merges them silently. One file means one place to read, one place to edit, no surprises for humans or LLMs.
+**CSS architecture:** Styles split across `src/styles/` by layer and component. Entry point `global.css` declares the layer order and `@import`s each file with a `layer()` qualifier. No `<style>` blocks in `.astro` files — ever. Scoped styles cause split-brain: the same class can be defined in two places with different rules, and the browser merges them silently. Organising by file is fine; duplicating a selector across files is not.
+
+```
+src/styles/
+  global.css                 @layer decl + @imports only
+  tokens.css                 design tokens (custom properties)
+  base/
+    reset.css                box-sizing, margin/padding zero
+    base.css                 html, body, h1-h3, p, a, ::selection, [data-reveal]
+  components/                one file per component, BEM-named
+    header.css  nav.css  button.css  site-footer.css  footer-shadows.css
+    enquiry.css  overlay.css  calendar.css  detail.css
+  sections/                  one file per page section
+    section.css  hero.css  vision.css  lifestyle.css  residences.css  neighbourhood.css
+  utilities/
+    text.css  grid.css  content.css  link-underline.css
+```
+
+Import order within a layer matters — `global.css` preserves the cascade. When adding a new component, append its import at the bottom of the component block unless you know it needs to override an existing one.
 
 **CSS:** Design tokens defined in `global.css` via CSS custom properties. Use semantic class names (`.text-hero`, `.section`, `.nav-link`, `.link-underline`) not inline styles. Accent colours are gradient/atmospheric only, never solid fills. No utility framework. Lightning CSS (bundled with Astro) handles nesting, `color-mix()`, and minification.
 

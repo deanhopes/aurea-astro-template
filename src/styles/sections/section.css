@@ -1,0 +1,17 @@
+.section {
+  padding: var(--space-edge);
+  padding-top: var(--space-section);
+  padding-bottom: var(--space-section);
+}
+
+.section--inner {
+  padding-top: 12rem;
+}
+
+.section--center {
+  height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
