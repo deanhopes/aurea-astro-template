@@ -10,6 +10,7 @@ import {
   uProgress,
   uSunX,
   uSunY,
+  uQuality,
   uCausticScale,
   uCausticSpeed,
   uCausticSharpness,
@@ -33,20 +34,30 @@ export type InboundMessage =
   | { type: 'videoFrame'; bitmap: ImageBitmap }
   | { type: 'wordmarkBitmap'; bitmap: ImageBitmap }
   | { type: 'uniform'; name: string; value: number }
+  | { type: 'visibility'; visible: boolean }
+  | { type: 'quality'; value: number }
   | { type: 'destroy' };
 
 let fs: FooterScene | null = null;
 let rafId = 0;
 let videoTex: THREE.Texture | null = null;
 let prevBitmap: ImageBitmap | null = null;
+let visible = false;
+let dirty = false;
 
 function tick(): void {
   if (!fs) return;
+  if (!visible && !dirty) {
+    rafId = 0;
+    return;
+  }
+  dirty = false;
   fs.renderer.render(fs.scene, fs.camera);
   rafId = requestAnimationFrame(tick);
 }
 
 function ensureLoop(): void {
+  dirty = true;
   if (!rafId && fs) rafId = requestAnimationFrame(tick);
 }
 
@@ -55,6 +66,7 @@ function stopLoop(): void {
     cancelAnimationFrame(rafId);
     rafId = 0;
   }
+  dirty = false;
 }
 
 self.onmessage = async (e: MessageEvent<InboundMessage>) => {
@@ -67,7 +79,7 @@ self.onmessage = async (e: MessageEvent<InboundMessage>) => {
         self.postMessage({ type: 'error', message: 'WebGPU init failed' });
         return;
       }
-      fs.renderer.setPixelRatio(msg.dpr);
+      fs.renderer.setPixelRatio(1);
       fs.renderer.setSize(msg.width, msg.height, false);
       ensureLoop();
       self.postMessage({ type: 'ready' });
@@ -76,7 +88,7 @@ self.onmessage = async (e: MessageEvent<InboundMessage>) => {
 
     case 'resize': {
       if (!fs) return;
-      fs.renderer.setPixelRatio(msg.dpr);
+      fs.renderer.setPixelRatio(1);
       fs.renderer.setSize(msg.width, msg.height, false);
       break;
     }
@@ -154,6 +166,18 @@ self.onmessage = async (e: MessageEvent<InboundMessage>) => {
         u.value = msg.value;
         ensureLoop();
       }
+      break;
+    }
+
+    case 'visibility': {
+      visible = msg.visible;
+      if (visible) ensureLoop();
+      break;
+    }
+
+    case 'quality': {
+      uQuality.value = msg.value;
+      ensureLoop();
       break;
     }
 

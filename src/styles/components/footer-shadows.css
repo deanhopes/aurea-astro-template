@@ -13,6 +13,15 @@
   width: 100%;
   height: 100%;
   pointer-events: none;
+  /* Static fallback when WebGPU shaders are skipped */
+  background: linear-gradient(
+    to bottom,
+    #f9efe6 0%,
+    #f0c4a8 30%,
+    #f0a080 55%,
+    #ef5d2a 80%,
+    #c94020 100%
+  );
 }
 
 .footer-shadows__overlay {

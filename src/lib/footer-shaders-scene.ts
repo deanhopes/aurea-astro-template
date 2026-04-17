@@ -47,6 +47,9 @@ export const uShadowAlpha = uniform(0.46);
 
 export const uRefraction = uniform(0.008);
 
+// Quality tier: 0.0 = 2-octave fbm (light), 1.0 = 3-octave fbm (full)
+export const uQuality = uniform(0);
+
 // Wordmark
 export const uWordmarkOpacity = uniform(1.0);
 export const uWordmarkScale = uniform(1.13);
@@ -96,8 +99,13 @@ const valueNoise = Fn(([p]: [Vec2Node]) => {
 const fbm = Fn(([p]: [Vec2Node]) => {
   const n1 = valueNoise(p);
   const n2 = valueNoise(p.mul(2.0)).mul(0.5);
-  const n3 = valueNoise(p.mul(4.0)).mul(0.25);
-  return n1.add(n2).add(n3).mul(0.571);
+  const base = n1.add(n2);
+  // Third octave blended in by uQuality (0 = off, 1 = full)
+  const n3 = valueNoise(p.mul(4.0)).mul(0.25).mul(uQuality);
+  const sum = base.add(n3);
+  // Normalize: 2 octaves → /1.5, 3 octaves → /1.75, interpolate
+  const norm = mix(float(1.5), float(1.75), uQuality);
+  return sum.div(norm);
 });
 
 const causticHeightFn = Fn(([sampleUV]: [Vec2Node]) => {

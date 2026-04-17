@@ -13,6 +13,7 @@
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import type { FooterScene } from './footer-shaders-scene';
+import { uQuality } from './footer-shaders-scene';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -37,6 +38,10 @@ let fallbackUniforms: {
 let fallbackSceneModule: typeof import('./footer-shaders-scene') | null = null;
 let fallbackRafId = 0;
 
+// Visibility gating — stop rendering when footer is off-screen
+let footerVisible = false;
+let visibilityObserver: IntersectionObserver | null = null;
+
 // Shared
 const state = { progress: 0, mouseX: 0.34, mouseY: 0.5 };
 let mouseQuickToX: gsap.QuickToFunc | null = null;
@@ -60,7 +65,7 @@ function initWorkerPath(offscreen: OffscreenCanvas, w: number, h: number): Promi
       else if (e.data.type === 'error') reject(new Error(e.data.message));
     };
 
-    const dpr = Math.min(devicePixelRatio || 1, 2);
+    const dpr = 1;
     worker.postMessage({ type: 'init', canvas: offscreen, width: w, height: h, dpr }, [offscreen]);
   });
 }
@@ -76,7 +81,7 @@ async function initFallbackPath(cvs: HTMLCanvasElement): Promise<boolean> {
   fallbackSceneModule = mod;
   fallbackUniforms = { uProgress: mod.uProgress, uSunX: mod.uSunX, uSunY: mod.uSunY };
 
-  const dpr = Math.min(devicePixelRatio || 1, 2);
+  const dpr = 1;
   scene.renderer.setPixelRatio(dpr);
   scene.renderer.setSize(cvs.clientWidth, cvs.clientHeight, false);
 
@@ -95,7 +100,7 @@ function fallbackTick(): void {
 }
 
 function ensureFallbackLoop(): void {
-  if (!fallbackRafId && fallbackScene) fallbackRafId = requestAnimationFrame(fallbackTick);
+  if (!fallbackRafId && fallbackScene && footerVisible) fallbackRafId = requestAnimationFrame(fallbackTick);
 }
 
 // ── Shared: video lazy-load + frame pump ──────────────────────────────
@@ -160,7 +165,7 @@ function setupResize() {
   if (!canvas) return;
   ro = new ResizeObserver(() => {
     if (!canvas) return;
-    const dpr = Math.min(devicePixelRatio || 1, 2);
+    const dpr = 1;
     const w = canvas.clientWidth;
     const h = canvas.clientHeight;
     if (worker) {
@@ -316,6 +321,59 @@ async function sendWordmark(canvasWidth: number, canvasHeight: number): Promise<
   }
 }
 
+// ── Adaptive quality ──────────────────────────────────────────────────
+
+function adaptiveQuality(): void {
+  // Start at quality 0 (2-octave fbm). After 60 frames, measure fps.
+  // If we're holding 55+ fps, ramp up to full quality (3-octave fbm)
+  // and also increase DPR. If fps drops, ramp back down.
+  let frames = 0;
+  let t0 = 0;
+  let promoted = false;
+
+  function sample() {
+    if (!footerVisible) {
+      // Wait until footer is visible to measure
+      requestAnimationFrame(sample);
+      return;
+    }
+
+    if (frames === 0) t0 = performance.now();
+    frames++;
+
+    if (frames < 60) {
+      requestAnimationFrame(sample);
+      return;
+    }
+
+    const elapsed = performance.now() - t0;
+    const fps = (frames / elapsed) * 1000;
+
+    if (!promoted && fps > 55) {
+      // GPU is handling it — ramp up
+      promoted = true;
+      if (worker) {
+        postWorker({ type: 'quality', value: 1 });
+      } else {
+        uQuality.value = 1;
+      }
+      // Second pass: verify it holds after promotion
+      frames = 0;
+      requestAnimationFrame(sample);
+    } else if (promoted && fps < 40) {
+      // Can't sustain full quality — drop back
+      promoted = false;
+      if (worker) {
+        postWorker({ type: 'quality', value: 0 });
+      } else {
+        uQuality.value = 0;
+      }
+    }
+  }
+
+  requestAnimationFrame(sample);
+}
+
 // ── Public API ────────────────────────────────────────────────────────
 
 export async function initFooterShaders(): Promise<void> {
@@ -345,6 +403,24 @@ export async function initFooterShaders(): Promise<void> {
   setupMouse();
   initVideo();
   sendWordmark(canvas.clientWidth, canvas.clientHeight);
+  adaptiveQuality();
+
+  // Gate rendering to when footer is actually visible
+  const footer = document.querySelector('[data-footer]');
+  if (footer) {
+    visibilityObserver = new IntersectionObserver(
+      (entries) => {
+        footerVisible = !!entries[0]?.isIntersecting;
+        if (worker) {
+          postWorker({ type: 'visibility', visible: footerVisible });
+        } else if (footerVisible) {
+          ensureFallbackLoop();
+        }
+      },
+      { rootMargin: '100px 0px' },
+    );
+    visibilityObserver.observe(footer);
+  }
 }
 
 export function destroyFooterShaders(): void {
@@ -352,6 +428,10 @@ export function destroyFooterShaders(): void {
     clearInterval(videoPumpTimer);
     videoPumpTimer = null;
   }
+
+  visibilityObserver?.disconnect();
+  visibilityObserver = null;
+  footerVisible = false;
 
   ioObserver?.disconnect();
   ioObserver = null;

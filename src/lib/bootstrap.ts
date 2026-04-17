@@ -54,7 +54,18 @@ export function footerShadersReady(): Promise<void> {
   return footerReadyPromise ?? Promise.resolve();
 }
 
+function canRunShaders(): boolean {
+  // ?noshaders query param to force-disable
+  if (new URLSearchParams(window.location.search).has('noshaders')) return false;
+
+  // Mobile devices — skip entirely
+  if (window.matchMedia('(pointer: coarse)').matches) return false;
+
+  return true;
+}
+
 function scheduleFooterShaders() {
+  if (!canRunShaders()) return;
   const idle = window.requestIdleCallback ?? ((cb: IdleRequestCallback) => setTimeout(cb, 1));
   idle(() => void loadFooterShaders());
 }
