@@ -12,16 +12,16 @@ const residences = (await getCollection('residences')).sort((a, b) => a.data.ord
   <div class="residences__grid">
     {
       residences.map(({ data: r }) => (
-        <div class="residences__card">
-          <div class="residences__card-image">
+        <div class="card card--residence">
+          <div class="card__image">
             <Image src={r.image} alt={r.alt} loading="lazy" decoding="async" />
           </div>
-          <div class="residences__card-info">
-            <h3 class="residences__card-name">{r.name}</h3>
-            <p class="residences__card-detail">{r.detail}</p>
-            <div class="residences__card-actions">
+          <div class="card__info">
+            <h3 class="card__name">{r.name}</h3>
+            <p class="card__detail">{r.detail}</p>
+            <div class="card__actions">
               <button
-                class="btn btn--primary residences__cta"
+                class="btn btn--primary card__cta"
                 type="button"
                 data-overlay-trigger="calendar"
                 data-residence={r.slug}
@@ -29,7 +29,7 @@ const residences = (await getCollection('residences')).sort((a, b) => a.data.ord
                 View Rates
               </button>
               <button
-                class="btn btn--ghost residences__cta"
+                class="btn btn--ghost card__cta"
                 type="button"
                 data-overlay-trigger="detail"
                 data-residence={r.slug}

@@ -25,6 +25,7 @@
 @import './components/overlay.css' layer(components);
 @import './components/calendar.css' layer(components);
 @import './components/detail.css' layer(components);
+@import './components/card.css' layer(components);
 
 /* Sections — order preserves original cascade */
 @import './sections/section.css' layer(sections);
