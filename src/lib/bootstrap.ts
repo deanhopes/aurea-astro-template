@@ -46,10 +46,6 @@ function loadFooterShaders(): Promise<void> {
   footerReadyPromise = (async () => {
     footerModule = await import('./footer-shaders');
     await footerModule.initFooterShaders();
-    if (import.meta.env.DEV) {
-      const { initFooterDebug } = await import('./footer-debug');
-      initFooterDebug();
-    }
   })();
   return footerReadyPromise;
 }

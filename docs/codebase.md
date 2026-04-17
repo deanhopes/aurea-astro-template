@@ -1,13 +1,15 @@
-# Aurea Residences — Codebase Reference
+# Aurea Astro Template — Codebase Reference
 
-**What this is:** Spec project. Luxury waterfront residential tower marketing site, Edgewater, Miami.
+**What this is:** Astro template for luxury real estate marketing sites. Aurea Residences is the demo content — a fictional waterfront residential tower — shipped so the template works out of the box.
 
-**Stack:** Astro 5, vanilla CSS (Lightning CSS bundled with Astro), GSAP, Lenis, TypeScript. Static output, Netlify deploy.
+**Stack:** Astro 5, vanilla CSS (Lightning CSS bundled with Astro), GSAP, Lenis, TypeScript. Static output. Deploys anywhere (Netlify, Vercel, Cloudflare Pages).
 
-**Design context:** Lives in growth-os, not here. Read before building:
+**Design context:** All design decisions for this template live in `docs/`:
 
-- `D:\Beanos\Dev Stuff\growth-os\active\projects\aurea-residences\` — project index, brief, design direction, wireframes
-- `D:\Beanos\Dev Stuff\growth-os\archive\aurea-residences-research\` — competitive research, UX pillars, typography, palette, design patterns
+- `docs/soul.md` — design posture, quality standard, voice
+- `docs/ui-craft.md` — component and interaction patterns
+- `docs/sitemap.md` — page structure and section map
+- `README.md` — setup, structure, customisation, Claude Code usage
 
 ---
 
@@ -19,7 +21,7 @@ src/
 ├── components/       # Astro components (Nav, SEO, section components)
 ├── layouts/          # BaseLayout (Lenis, scroll reveal, View Transitions)
 ├── lib/              # Utilities, constants
-├── pages/            # Route pages (/, /vision, /residences, etc.)
+├── pages/            # Route pages (/, /terms, /privacy, /404)
 └── styles/
     ├── fonts.css     # @font-face declarations
     └── global.css    # Design tokens, base styles, utilities

@@ -19,6 +19,7 @@ The competitive research is clear: the best residential sites in the world (111 
 That's the bar. Not "good for a spec project." Good enough that it belongs in the same conversation as the sites in the research file.
 
 **What that means in practice:**
+
 - Every section should feel composed, not generated. If it looks like it came from a template, it's wrong.
 - Whitespace is a design decision, not leftover space. Generous spacing is how luxury reads on screen.
 - Motion serves the story. A reveal that helps the visitor feel the building is good. Animation that says "look what I can do" is bad.
@@ -73,5 +74,5 @@ The gap between competent and memorable is usually one decision per section: the
 ## Related
 
 - `docs/codebase.md` -- project structure, code conventions, commands
-- `D:\Beanos\Dev Stuff\growth-os\archive\aurea-residences-research\ux-pillars.md` -- full UX pillar definitions
-- `D:\Beanos\Dev Stuff\growth-os\archive\aurea-residences-research\research.md` -- competitive research and design direction
+- `docs/ui-craft.md` -- component and interaction patterns
+- `docs/sitemap.md` -- page structure and section map

@@ -46,8 +46,6 @@ One-page downloadable Astro template. GitHub repo + Gumroad listing + case study
 
 ## Out of scope for this repo
 
-These are tracked in growth-os `todo.md`:
-
 - Gumroad account setup
 - Case study writing
-- Substack / Twitter distribution
+- Distribution / social posts

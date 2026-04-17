@@ -170,7 +170,7 @@ const residences = (await getCollection('residences')).sort((a, b) => a.data.ord
       aria-label={`${r.name} Details`}
     >
       <div class="overlay__backdrop" data-overlay-close />
-      <div class="overlay__panel overlay__panel--detail">
+      <div class="overlay__panel overlay__panel--detail" data-lenis-prevent>
         <button class="overlay__close" type="button" data-overlay-close aria-label="Close">
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
             <path

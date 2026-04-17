@@ -1,70 +1,40 @@
-# Aurea Residences — Sitemap
+# Aurea Astro Template — Sitemap
 
-## Site-Wide
+## Architecture
 
-- Page Transition
-- Lenis Smooth Scroll
-- SEO Head
+One-pager. Anchor navigation. No page transitions. Lenis smooth scroll site-wide.
 
 ## Pages
 
-### Pre-Loader
-Triggered once on initial site load.
+### `/` — Home (one-pager)
 
-### Homepage
+Sections, in order:
+
 - Hero
-- Intro Section
-- Residence Highlights
-- Lifestyle Teaser
-- Enquire CTA / Modal
+- Vision
+- Residences
+- Lifestyle
+- Neighbourhood
+- Enquiry
 - Footer
 
-### Vision
-- Hero Image
-- Architectural Philosophy
-- Enquire CTA Band
-- Footer
+Each section maps to a component in `src/components/` and is anchored by an `id`
+matching its name. The `Nav` component links to those anchors.
 
-### Residences (CMS Driven)
-- Hero Image
-- Unit Type Cards
-- Terrace/View Gallery
-- Enquire CTA Band
-- Footer
+### `/terms` — Terms & Conditions
 
-### Lifestyle (CMS Driven)
-- Hero Image
-- Highlight Amenities
-- All Amenities Grid
-- Enquire CTA Band
-- Footer
+Placeholder legal page. Replace before launch.
 
-### Location
-- Hero Image
-- Map (Mapbox or static)
-- Transit Connections
-- Enquire CTA Band
-- Footer
+### `/privacy` — Privacy Policy
 
-### Neighbourhood
-- Hero Image
-- Spots by Category (Dining / Culture / Outdoors)
-- Enquire CTA Band
-- Footer
+Placeholder legal page. Replace before launch.
 
-### Team
-- Team Member Cards
-- Enquire CTA / Modal
-- Footer
+### `/404` — Not Found
 
-### 404
-Static error page.
+Static error page. Auto-served by Astro.
 
-## Shared Components
+## Shared
 
-| Component | Usage |
-|-----------|-------|
-| Enquire CTA Band | Vision, Residences, Lifestyle, Location, Neighbourhood |
-| Enquire CTA / Modal | Homepage, Team |
-| Footer | All pages |
-| Pre-Loader | Triggered once on initial load |
+- `Nav` — fixed/overlay nav, anchor-scroll to sections
+- `Footer` — shipped on every page
+- `SEO Head` — per-page title/description via `BaseLayout` props
