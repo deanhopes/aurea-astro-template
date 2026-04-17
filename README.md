@@ -106,7 +106,12 @@ src/
 │   └── 404.astro
 └── styles/
     ├── fonts.css          # @font-face
-    └── global.css         # Tokens + all styles (single source)
+    ├── global.css         # @layer declarations + @imports (entry)
+    ├── tokens.css         # Design tokens
+    ├── base/              # reset, element defaults
+    ├── components/        # One file per component (BEM)
+    ├── sections/          # One file per page section
+    └── utilities/         # Text, grid, link-underline
 public/
 ├── fonts/                 # .woff2 font files
 ├── video/                 # Background/shader video
@@ -143,19 +148,17 @@ rebuild.
 
 ### 2. Design tokens
 
-All visual tokens — colour, type, spacing, radii, easing — live in the `tokens`
-layer of `src/styles/global.css`. To rebrand:
+All visual tokens — colour, type, spacing, radii, easing — live in
+`src/styles/tokens.css`. To rebrand:
 
 ```css
-/* src/styles/global.css */
-@layer tokens {
-  :root {
-    --color-background: #f9efe6; /* your parchment */
-    --color-black: #323032; /* your ink */
-    --color-accent: #ef5d2a; /* your accent */
-    --font-display: 'Your Display', serif;
-    --font-body: 'Your Body', sans-serif;
-  }
+/* src/styles/tokens.css */
+:root {
+  --color-background: #f9efe6; /* your parchment */
+  --color-black: #323032; /* your ink */
+  --color-accent: #ef5d2a; /* your accent */
+  --font-display: 'Your Display', serif;
+  --font-body: 'Your Body', sans-serif;
 }
 ```
 
