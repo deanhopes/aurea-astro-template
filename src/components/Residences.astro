@@ -13,11 +13,48 @@ const residences = (await getCollection('residences')).sort((a, b) => a.data.ord
     {
       residences.map(({ data: r }) => (
         <div class="card card--residence">
-          <div class="card__image">
-            <Image src={r.image} alt={r.alt} loading="lazy" decoding="async" />
+          <div class="card__image" data-card-slider>
+            <div class="card__slider-track">
+              {r.gallery.map((img, i) => (
+                <div class="card__slide">
+                  <Image src={img.src} alt={img.alt} loading="lazy" decoding="async" />
+                </div>
+              ))}
+            </div>
+            <button
+              class="card__slider-arrow card__slider-arrow--prev"
+              type="button"
+              aria-label="Previous image"
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path
+                  d="M10 4L6 8l4 4"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </button>
+            <button
+              class="card__slider-arrow card__slider-arrow--next"
+              type="button"
+              aria-label="Next image"
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path
+                  d="M6 4l4 4-4 4"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </button>
           </div>
           <div class="card__info">
-            <h3 class="card__name">{r.name}</h3>
+            <p class="card__eyebrow">{r.name}</p>
+            <h3 class="card__name">{r.heading}</h3>
             <p class="card__detail">{r.detail}</p>
             <div class="card__actions">
               <button

@@ -69,12 +69,7 @@ const items = (await getCollection('neighbourhood'))
               data-neighbourhood-text={item.id}
             >
               {item.data.description ? (
-                <>
-                  <p class="neighbourhood__body">{item.data.description}</p>
-                  <a href="#neighbourhood" class="neighbourhood__cta">
-                    Walk the Neighbourhood
-                  </a>
-                </>
+                <p class="neighbourhood__body">{item.data.description}</p>
               ) : null}
             </div>
           ))

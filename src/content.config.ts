@@ -21,6 +21,7 @@ const residences = defineCollection({
     z.object({
       order: z.number(),
       name: z.string(),
+      heading: z.string(),
       slug: z.string(),
       detail: z.string(),
       description: z.string(),

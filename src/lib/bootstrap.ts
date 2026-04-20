@@ -8,6 +8,7 @@ import { initNeighbourhood } from './neighbourhood';
 import { initVisionScroll } from './vision-scroll';
 import { initOverlays } from './overlays';
 import { initCalendar } from './calendar';
+import { initCardSliders } from './card-slider';
 
 let revealObserver: IntersectionObserver | null = null;
 
@@ -79,6 +80,7 @@ function onPageLoad() {
   initVisionScroll();
   initOverlays();
   initCalendar();
+  initCardSliders();
   initReveal();
   scheduleFooterShaders();
 }
