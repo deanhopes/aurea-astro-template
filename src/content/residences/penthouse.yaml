@@ -4,19 +4,19 @@ heading: Above the Horizon
 slug: penthouse
 detail: Top floor, private lift. Sunrise over Miami Beach. Sunset over downtown. The bay holds the whole day in between.
 description: 'Penthouse Suite, Full Floor. 2 King, 1 Queen, 2 Twin/King, Full kitchen, Wine storage, 4,200+sqft/390sqm, Private lift, Wraparound terrace, Separate living and dining, Study, Wireless internet, Coffee/tea maker.'
-image: ../../assets/images/residences-penthouse.png
-alt: Penthouse terrace at sunset overlooking the bay
+image: ../../assets/images/res-ph-spa-interior.jpg
+alt: Penthouse spa interior with warm ambient light
 gallery:
-  - src: ../../assets/images/residences-penthouse.png
-    alt: Penthouse terrace at golden hour
-  - src: ../../assets/images/hero.jpg
-    alt: Tower from the bay
-  - src: ../../assets/images/vision-interior.png
-    alt: Penthouse living room
-  - src: ../../assets/images/vision-sunset.png
-    alt: Sunset panorama from penthouse
-  - src: ../../assets/images/menu-lifestyle.jpg
-    alt: Rooftop infinity pool
+  - src: ../../assets/images/res-ph-spa-interior.jpg
+    alt: Private spa with warm amber light and reflection pool
+  - src: ../../assets/images/res-ph-sauna.jpg
+    alt: Cedar sauna with Huum stone heaters
+  - src: ../../assets/images/res-ph-stone-massage.jpg
+    alt: Hot stone massage treatment
+  - src: ../../assets/images/res-ph-yoga-sunset.jpg
+    alt: Yoga practice at sunset over the water
+  - src: ../../assets/images/res-ph-bay-park.jpg
+    alt: Bay front park lined with royal palms
 roomOverview:
   - label: Bedrooms
     value: '5'
