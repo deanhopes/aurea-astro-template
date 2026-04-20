@@ -88,21 +88,22 @@ function updateActive(state: SliderState) {
 
 function snapX(state: SliderState, endValue: number): number {
   const mx = markerX(state);
-  let best = endValue;
+  const w = state.setWidth;
+  // Normalise endValue into (-w, 0] so we always search within one period
+  const wrapped = ((endValue % w) - w) % w;
+  let best = wrapped;
   let bestDist = Infinity;
 
   for (let i = 0; i < state.slideCount; i++) {
-    const slideCenter = state.slideOffsets[i]! + state.slideWidths[i]! / 2;
-    const targetX = -(slideCenter - mx);
-    for (const candidate of [targetX, targetX + state.setWidth, targetX - state.setWidth]) {
-      const dist = Math.abs(candidate - endValue);
-      if (dist < bestDist) {
-        bestDist = dist;
-        best = candidate;
-      }
+    const target = -(state.slideOffsets[i]! + state.slideWidths[i]! / 2 - mx);
+    const dist = Math.abs(target - wrapped);
+    if (dist < bestDist) {
+      bestDist = dist;
+      best = target;
     }
   }
-  return best;
+  // Re-add the multi-period offset so the throw lands in the right direction
+  return best + (endValue - wrapped);
 }
 
 function wrapX(state: SliderState) {
