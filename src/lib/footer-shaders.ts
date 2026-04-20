@@ -258,14 +258,14 @@ async function rasterizeWordmark(
 ): Promise<ImageBitmap | null> {
   // Wait for Test Söhne to load
   try {
-    await document.fonts.load('300 100px "Cormorant Garamond"');
+    await document.fonts.load('400 100px "Cormorant Garamond"');
   } catch {
     // font may already be loaded
   }
 
   const offscreen = document.createElement('canvas');
-  // Match the aspect ratio of the footer canvas
-  const texW = Math.min(canvasWidth * Math.min(devicePixelRatio || 1, 2), 2048);
+  const dpr = Math.min(devicePixelRatio || 1, 3);
+  const texW = Math.min(canvasWidth * dpr, 4096);
   const texH = Math.round(texW * (canvasHeight / canvasWidth));
   offscreen.width = texW;
   offscreen.height = texH;
@@ -283,7 +283,7 @@ async function rasterizeWordmark(
   ctx.fillStyle = '#ffffff';
 
   const applyFont = (size: number) => {
-    ctx.font = `300 ${size}px "Cormorant Garamond", serif`;
+    ctx.font = `400 ${size}px "Cormorant Garamond", serif`;
     if ('letterSpacing' in ctx) {
       ctx.letterSpacing = `${size * 0.08}px`;
     }
