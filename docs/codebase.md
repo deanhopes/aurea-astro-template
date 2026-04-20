@@ -17,7 +17,7 @@
 
 ```
 src/
-├── assets/fonts/     # .woff2 font files (Test Söhne + Aktiv Grotesk)
+├── assets/fonts/     # .woff2 font files (Cormorant Garamond + DM Sans, OFL licensed)
 ├── components/       # Astro components (Nav, SEO, section components)
 ├── layouts/          # BaseLayout (Lenis, scroll reveal, View Transitions)
 ├── lib/              # Utilities, constants
@@ -57,7 +57,7 @@ Import order within a layer matters — `global.css` preserves the cascade. When
 
 **Motion:** One easing curve: `var(--ease-premium)` — `cubic-bezier(0.19, 1, 0.22, 1)`. Two composite transitions: `--transition-reveal` (opacity+transform 0.8s) and `--transition-color` (color+border 0.3s). Lenis handles smooth scroll. `data-reveal` attribute for scroll-triggered fade-up. GSAP only for choreographed sequences (pinned sections, staggered reveals).
 
-**Typography:** `--font-display` (Test Söhne) for headings (weight 300 only). `--font-body` (Aktiv Grotesk) for everything else (weights 300, 400, 500). No bold headlines.
+**Typography:** `--font-display` (Cormorant Garamond) for headings (weight 400). `--font-body` (DM Sans) for everything else (weights 300, 400, 500). No bold headlines.
 
 **Responsive type scale:** Fluid `clamp()` values — no breakpoints needed for text sizing. Nav pills step down at mobile via media query.
 
@@ -146,5 +146,11 @@ The four complex components each have a dedicated doc in `docs/components/`. Rea
 npm run dev        # Start dev server
 npm run build      # Production build
 npm run preview    # Preview production build
-npm run check      # Format + lint check
+npm run check      # Astro type-check
+npm run lint       # ESLint + Prettier check (run before build)
+npm run fix        # ESLint --fix + Prettier --write (auto-fix what can be fixed)
 ```
+
+Run `npm run lint` before every build. If it errors, fix before merging — warnings (complexity, max-lines) are informational and won't block.
+
+The config enforces: import order, no hex colors in TS/Astro, no floating promises, no implicit coercion, no param reassign, typed TS rules (`prefer-nullish-coalescing`, `prefer-optional-chain`, `no-misused-promises`), and jsx-a11y on Astro files. Prettier normalises formatting — run `npm run fix` after bulk edits.
