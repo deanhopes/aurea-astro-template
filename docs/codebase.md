@@ -125,46 +125,18 @@ Each layer's role:
 
 ---
 
-## Footer Rendering Pipeline
+## Component References
 
-The footer uses a fixed-reveal pattern (`z-index: -1`, `margin-bottom: 100dvh` on `#main-content`). It has two visual layers inside `.site-footer__inner`:
+The four complex components each have a dedicated doc in `docs/components/`. Read before editing — they explain the mechanism, not just the API.
 
-1. **WebGPU canvas** (`footer-shadows.ts`) — Three.js WebGPU + TSL. Single opaque canvas that IS the footer background. Three TSL layers composited in one pass:
-   - Vertical gradient (warm parchment `#f9efe6` → sunset orange `#d95f2a`) driven by `uv.y`
-   - Adaptive-octave caustic light interference pattern (interior light through water glass)
-   - Video shadow mask: palm leaf silhouettes via luminance threshold shader
-2. **Content** — enquiry form (two-column card), nav links, AUREA wordmark (`z-index: 1`, above canvas)
+| Component                                    | What to read before touching it       |
+| -------------------------------------------- | ------------------------------------- |
+| Footer (WebGPU shader)                       | `docs/components/footer.md`           |
+| Vision (horizontal pin-scroll)               | `docs/components/vision.md`           |
+| Lifestyle slider (Draggable + infinite wrap) | `docs/components/lifestyle-slider.md` |
+| Residences (content collections + overlays)  | `docs/components/residences.md`       |
 
-Scroll progress (`uProgress`) and mouse position (`uMouse`) driven by GSAP ScrollTrigger + `quickTo` on `[data-footer-trigger]`. Mouse shifts the caustic UV origin subtly. No `mix-blend-mode` — canvas is opaque background.
-
-**Shadow video requirements:** `public/video/leaf-shadows.webm` + `.mp4` fallback. Palm/monstera leaf shadows on a warm wall. 360p, 6-8s seamless loop, <500KB WebM. Lazy-loaded via IntersectionObserver (200px rootMargin). Texture upload capped at 15fps. System works without the video — shadow mask is transparent, gradient + caustics still render.
-
-### Adaptive Quality System
-
-The footer shader is the heaviest thing on the page. Three layers of protection prevent it from killing performance on weaker machines:
-
-**1. GPU gating (`bootstrap.ts → canRunShaders()`):**
-- Mobile devices (`pointer: coarse`) → shader skipped entirely, CSS gradient fallback
-- `?noshaders` query param → force-disable for testing
-- When skipped, the canvas gets a static CSS gradient (`footer-shadows.css`) matching the shader's colour stops
-
-**2. Visibility gating (`footer-shaders.ts` + `footer-shaders.worker.ts`):**
-- IntersectionObserver on `[data-footer]` with 100px rootMargin
-- Worker receives `visibility` messages — render loop stops when footer is off-screen
-- Fallback main-thread path also gates on `footerVisible`
-- Before this was added, the worker ran a permanent rAF loop from idle-load onward
-
-**3. Adaptive quality (`uQuality` uniform):**
-- Starts at quality 0: 2-octave fbm, DPR capped at 1
-- After 60 rendered frames, measures actual fps
-- If holding 55+ fps → promotes to quality 1: 3-octave fbm blends in via `uQuality` uniform (no recompile)
-- After promotion, measures again. If drops below 40 fps → demotes back to quality 0
-- The third octave is multiplied by `uQuality` in the TSL node graph, so it's a smooth blend, not a hard switch
-
-**Render cost breakdown at each tier:**
-- Quality 0: 2 octaves × 3 fbm calls × 5 height samples = 30 noise evals/pixel, DPR 1
-- Quality 1: 3 octaves × 3 fbm calls × 5 height samples = 45 noise evals/pixel, DPR 1
-- ~5x cheaper than the original (3 octaves, DPR 2 on retina)
+**First time in the codebase?** Start with `docs/getting-started.md`.
 
 ---
 
