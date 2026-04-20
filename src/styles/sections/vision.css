@@ -49,12 +49,10 @@
 }
 
 .vision__tower-body {
-  font-family: var(--font-display);
-  font-weight: 400;
-  font-size: clamp(1.5rem, 1vw + 1.25rem, 2rem);
-  line-height: 1.5;
-  letter-spacing: -0.03em;
-  color: var(--color-black);
+  font-size: clamp(2.5rem, 3vw + 1rem, 3.5rem);
+  letter-spacing: -0.01em;
+  line-height: 1.05;
+  text-wrap: pretty;
   padding-left: 1rem;
 }
 
