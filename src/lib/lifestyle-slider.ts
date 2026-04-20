@@ -202,26 +202,19 @@ function createDraggable(
   })[0]!;
 }
 
-// eslint-disable-next-line max-lines-per-function -- IO observer + draggable + autoplay lifecycle can't split further without fake abstractions
-export function initLifestyleSlider() {
-  cleanup?.();
-
-  const slider = document.querySelector<HTMLElement>('.lifestyle__slider');
-  const container = document.querySelector<HTMLElement>('.lifestyle__slider-container');
-  const track = document.querySelector<HTMLElement>('.lifestyle__track');
-  if (!slider || !container || !track) return;
-
+function buildSliderState(
+  slider: HTMLElement,
+  container: HTMLElement,
+  track: HTMLElement,
+): SliderState {
   const originals = Array.from(track.querySelectorAll<HTMLElement>(':scope > *'));
-  const slideCount = originals.length;
-
   originals.forEach((child) => track.appendChild(child.cloneNode(true)));
-
-  const state: SliderState = {
+  return {
     slider,
     container,
     track,
     allSlides: Array.from(track.querySelectorAll<HTMLElement>(':scope > *')),
-    slideCount,
+    slideCount: originals.length,
     setWidth: 0,
     slideWidths: [],
     slideOffsets: [],
@@ -232,6 +225,18 @@ export function initLifestyleSlider() {
     autoTimer: null,
     draggable: null!,
   };
+}
+
+export function initLifestyleSlider() {
+  cleanup?.();
+
+  const slider = document.querySelector<HTMLElement>('.lifestyle__slider');
+  const container = document.querySelector<HTMLElement>('.lifestyle__slider-container');
+  const track = document.querySelector<HTMLElement>('.lifestyle__track');
+  if (!slider || !container || !track) return;
+
+  const state = buildSliderState(slider, container, track);
+  const { slideCount } = state;
 
   measure(state);
   gsap.set(track, { x: xForSlide(state, 2) });
@@ -243,32 +248,30 @@ export function initLifestyleSlider() {
 
   slider.addEventListener('pointerenter', showMarker);
   slider.addEventListener('pointerleave', hideMarker);
-
   state.draggable = createDraggable(state, showMarker, hideMarker);
-
   updateActive(state);
 
   const section = document.querySelector('.lifestyle');
   let autoStarted = false;
   let delayTimer: ReturnType<typeof setTimeout> | null = null;
-  const observer = new IntersectionObserver(
-    ([entry]) => {
-      if (entry!.isIntersecting) {
-        if (!autoStarted) {
-          autoStarted = true;
-          delayTimer = setTimeout(() => {
-            delayTimer = null;
-            startAutoPlay(state);
-          }, 3000);
-        } else {
-          startAutoPlay(state);
-        }
-      } else {
-        stopAutoPlay(state);
-      }
-    },
-    { threshold: 0.3 },
-  );
+
+  function onSectionIntersect([entry]: IntersectionObserverEntry[]) {
+    if (!entry!.isIntersecting) {
+      stopAutoPlay(state);
+      return;
+    }
+    if (autoStarted) {
+      startAutoPlay(state);
+      return;
+    }
+    autoStarted = true;
+    delayTimer = setTimeout(() => {
+      delayTimer = null;
+      startAutoPlay(state);
+    }, 3000);
+  }
+
+  const observer = new IntersectionObserver(onSectionIntersect, { threshold: 0.3 });
   if (section) observer.observe(section);
 
   const onResize = () => {
@@ -289,9 +292,7 @@ export function initLifestyleSlider() {
     state.marker?.classList.remove('is-active', 'is-pulling');
     window.removeEventListener('resize', onResize);
     state.allSlides.forEach((el) => el.classList.remove('is-active'));
-    while (track.children.length > slideCount) {
-      track.removeChild(track.lastChild!);
-    }
+    while (track.children.length > slideCount) track.removeChild(track.lastChild!);
     gsap.set(track, { x: 0 });
     cleanup = null;
   };

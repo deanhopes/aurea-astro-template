@@ -131,14 +131,15 @@ function initVideo(): void {
 
   if (worker) {
     // Worker path: pump ImageBitmap frames
+    function pumpVideoFrame() {
+      if (!videoEl || videoEl.readyState < videoEl.HAVE_CURRENT_DATA) return;
+      void createImageBitmap(videoEl).then((bitmap) => {
+        postWorker({ type: 'videoFrame', bitmap }, [bitmap]);
+      });
+    }
     const onReady = () => {
       if (!videoEl) return;
-      videoPumpTimer = setInterval(() => {
-        if (!videoEl || videoEl.readyState < videoEl.HAVE_CURRENT_DATA) return;
-        void createImageBitmap(videoEl).then((bitmap) => {
-          postWorker({ type: 'videoFrame', bitmap }, [bitmap]);
-        });
-      }, VIDEO_INTERVAL);
+      videoPumpTimer = setInterval(pumpVideoFrame, VIDEO_INTERVAL);
     };
     videoEl.addEventListener('playing', onReady, { once: true });
     videoEl.addEventListener('canplay', onReady, { once: true });

@@ -104,7 +104,7 @@ function isStrictlyBetween(d: Date, start: Date, end: Date): boolean {
 const GRID_ROWS = 6;
 
 function renderMonth(container: HTMLElement, year: number, month: number): void {
-  container.innerHTML = '';
+  container.replaceChildren();
 
   const grid = document.createElement('div');
   grid.className = 'calendar__day-grid';
@@ -232,7 +232,7 @@ function renderBothMonths(): void {
 function renderFlexibleMonths(): void {
   const grid = document.querySelector<HTMLElement>('[data-months-grid]');
   if (!grid) return;
-  grid.innerHTML = '';
+  grid.replaceChildren();
 
   const today = new Date();
   for (let i = 0; i < 12; i++) {

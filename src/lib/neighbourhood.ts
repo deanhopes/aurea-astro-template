@@ -76,6 +76,20 @@ function fadeInOnLoad(iframe: HTMLIFrameElement, panel: HTMLElement, instant: bo
   iframe.addEventListener('load', onLoad);
 }
 
+function applyActiveMapPanel(
+  panel: HTMLElement,
+  iframe: HTMLIFrameElement | null,
+  instant: boolean,
+) {
+  panel.classList.add('is-active');
+  if (iframe) {
+    fadeInOnLoad(iframe, panel, instant);
+    return;
+  }
+  gsap.set(panel, { opacity: instant ? 1 : 0 });
+  if (!instant) gsap.to(panel, { opacity: 1, duration: 0.5, ease: 'expo.out', overwrite: true });
+}
+
 function crossfadeMaps(state: NeighbourhoodState, id: string, instant: boolean) {
   state.maps.forEach((panel) => {
     const isActive = panel.dataset.neighbourhoodMap === id;
@@ -86,15 +100,7 @@ function crossfadeMaps(state: NeighbourhoodState, id: string, instant: boolean) 
     }
 
     if (isActive) {
-      panel.classList.add('is-active');
-      if (iframe) {
-        fadeInOnLoad(iframe, panel, instant);
-      } else {
-        gsap.set(panel, { opacity: instant ? 1 : 0 });
-        if (!instant) {
-          gsap.to(panel, { opacity: 1, duration: 0.5, ease: 'expo.out', overwrite: true });
-        }
-      }
+      applyActiveMapPanel(panel, iframe, instant);
     } else if (instant) {
       gsap.set(panel, { opacity: 0 });
       panel.classList.remove('is-active');
@@ -109,6 +115,36 @@ function crossfadeMaps(state: NeighbourhoodState, id: string, instant: boolean) 
   });
 }
 
+function applyTextPanel(
+  panel: HTMLElement,
+  children: NodeListOf<Element>,
+  isActive: boolean,
+  instant: boolean,
+  yOffset: number,
+) {
+  if (instant) {
+    gsap.set(panel, { opacity: isActive ? 1 : 0, y: 0 });
+    if (children.length) gsap.set(children, { opacity: isActive ? 1 : 0, y: 0 });
+    panel.classList.toggle('is-active', isActive);
+    return;
+  }
+  if (isActive) {
+    panel.classList.add('is-active');
+    gsap.set(panel, { opacity: 1 });
+    if (children.length) {
+      gsap.fromTo(
+        children,
+        { opacity: 0, y: yOffset },
+        { opacity: 1, y: 0, duration: 0.6, ease: 'expo.out', stagger: 0.08, overwrite: true },
+      );
+    }
+  } else {
+    gsap.set(panel, { opacity: 0, y: 0 });
+    if (children.length) gsap.set(children, { opacity: 0, y: 0 });
+    panel.classList.remove('is-active');
+  }
+}
+
 function crossfadeText(state: NeighbourhoodState, id: string, instant: boolean, newIndex: number) {
   const tabDistance = Math.abs(newIndex - state.activeIndex);
   const yOffset = 8 + tabDistance * 3;
@@ -116,32 +152,7 @@ function crossfadeText(state: NeighbourhoodState, id: string, instant: boolean, 
   state.texts.forEach((panel) => {
     const isActive = panel.dataset.neighbourhoodText === id;
     const children = panel.querySelectorAll('.neighbourhood__body, .neighbourhood__cta');
-    if (instant) {
-      gsap.set(panel, { opacity: isActive ? 1 : 0, y: 0 });
-      if (children.length) gsap.set(children, { opacity: isActive ? 1 : 0, y: 0 });
-      panel.classList.toggle('is-active', isActive);
-    } else if (isActive) {
-      panel.classList.add('is-active');
-      gsap.set(panel, { opacity: 1 });
-      if (children.length) {
-        gsap.fromTo(
-          children,
-          { opacity: 0, y: yOffset },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.6,
-            ease: 'expo.out',
-            stagger: 0.08,
-            overwrite: true,
-          },
-        );
-      }
-    } else {
-      gsap.set(panel, { opacity: 0, y: 0 });
-      if (children.length) gsap.set(children, { opacity: 0, y: 0 });
-      panel.classList.remove('is-active');
-    }
+    applyTextPanel(panel, children, isActive, instant, yOffset);
   });
 }
 
@@ -189,49 +200,66 @@ function getAutoHeight(el: HTMLElement): number {
   return h;
 }
 
+function expandContent(item: HTMLElement, content: HTMLElement, instant: boolean) {
+  item.classList.add('is-active');
+  const targetH = getAutoHeight(content);
+  if (instant) {
+    gsap.set(content, { height: targetH });
+    return;
+  }
+  gsap.fromTo(
+    content,
+    { height: content.offsetHeight },
+    {
+      height: targetH,
+      duration: 0.5,
+      ease: 'expo.out',
+      overwrite: true,
+      onComplete: () => {
+        content.style.height = 'auto';
+      },
+    },
+  );
+}
+
+function collapseContent(item: HTMLElement, content: HTMLElement, instant: boolean) {
+  if (instant) {
+    gsap.set(content, { height: 0 });
+    item.classList.remove('is-active');
+    return;
+  }
+  gsap.fromTo(
+    content,
+    { height: content.offsetHeight },
+    {
+      height: 0,
+      duration: 0.4,
+      ease: 'expo.out',
+      overwrite: true,
+      onComplete: () => item.classList.remove('is-active'),
+    },
+  );
+}
+
+function applyAccordionItem(
+  item: HTMLElement,
+  content: HTMLElement,
+  isActive: boolean,
+  instant: boolean,
+) {
+  if (isActive) {
+    expandContent(item, content, instant);
+  } else {
+    collapseContent(item, content, instant);
+  }
+}
+
 function animateAccordion(state: NeighbourhoodState, id: string, instant: boolean) {
   state.items.forEach((item) => {
-    const itemId = item.dataset.neighbourhoodItem;
-    const isActive = itemId === id;
+    const isActive = item.dataset.neighbourhoodItem === id;
     const content = item.querySelector<HTMLElement>('[data-neighbourhood-inline]');
     if (!content) return;
-
-    if (isActive) {
-      item.classList.add('is-active');
-      const targetH = getAutoHeight(content);
-      if (instant) {
-        gsap.set(content, { height: targetH });
-      } else {
-        gsap.fromTo(
-          content,
-          { height: content.offsetHeight },
-          {
-            height: targetH,
-            duration: 0.5,
-            ease: 'expo.out',
-            overwrite: true,
-            onComplete: () => {
-              content.style.height = 'auto';
-            },
-          },
-        );
-      }
-    } else if (instant) {
-      gsap.set(content, { height: 0 });
-      item.classList.remove('is-active');
-    } else {
-      gsap.fromTo(
-        content,
-        { height: content.offsetHeight },
-        {
-          height: 0,
-          duration: 0.4,
-          ease: 'expo.out',
-          overwrite: true,
-          onComplete: () => item.classList.remove('is-active'),
-        },
-      );
-    }
+    applyAccordionItem(item, content, isActive, instant);
   });
 }
 
@@ -306,7 +334,6 @@ function stashAndObserveMaps(
 
 function bindEvents(
   state: NeighbourhoodState,
-  section: HTMLElement,
   mobileQuery: MediaQueryList,
   measureIfDesktop: () => void,
 ): () => void {
@@ -411,7 +438,7 @@ export function initNeighbourhood() {
 
   function measureIfDesktop() {
     if (state.isMobile) return;
-    const textWrap = section.querySelector<HTMLElement>('.neighbourhood__text');
+    const textWrap = section!.querySelector<HTMLElement>('.neighbourhood__text');
     if (textWrap) measureTextPanels(texts, textWrap);
   }
 
@@ -424,7 +451,7 @@ export function initNeighbourhood() {
   const sectionLoadObserver = stashAndObserveMaps(state, section);
   setActive(state, state.activeId, true);
 
-  const unbindEvents = bindEvents(state, section, mobileQuery, measureIfDesktop);
+  const unbindEvents = bindEvents(state, mobileQuery, measureIfDesktop);
 
   cleanup = () => {
     sectionLoadObserver.disconnect();

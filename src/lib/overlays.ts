@@ -94,23 +94,23 @@ function open(overlay: HTMLElement): void {
   initGallery(overlay);
 }
 
+function afterClose(overlay: HTMLElement): void {
+  overlay.classList.remove('is-open');
+  overlay.setAttribute('inert', '');
+  if (state.activeOverlay === overlay) {
+    state.activeOverlay = null;
+    state.activeResidence = null;
+  }
+  getLenis()?.start();
+}
+
 function close(overlay: HTMLElement): void {
   const backdrop = overlay.querySelector<HTMLElement>('.overlay__backdrop');
   const panel = overlay.querySelector<HTMLElement>('.overlay__panel');
 
   if (backdrop && panel) {
     gsap
-      .timeline({
-        onComplete() {
-          overlay.classList.remove('is-open');
-          overlay.setAttribute('inert', '');
-          if (state.activeOverlay === overlay) {
-            state.activeOverlay = null;
-            state.activeResidence = null;
-          }
-          getLenis()?.start();
-        },
-      })
+      .timeline({ onComplete: () => afterClose(overlay) })
       .to(panel, { opacity: 0, y: 10, duration: 0.25, ease: 'expo.in' })
       .to(backdrop, { opacity: 0, duration: 0.25, ease: 'expo.in' }, 0.05);
   } else {

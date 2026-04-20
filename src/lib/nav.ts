@@ -135,39 +135,13 @@ function setupHoverBehavior(
   };
 }
 
-export function initNav() {
-  cleanup?.();
-
-  const header = document.querySelector<HTMLElement>('[data-nav]');
-  const toggle = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
-  const panel = document.querySelector<HTMLElement>('[data-menu-panel]');
-  // Non-null assertions needed — TS can't narrow querySelector across closure boundaries
-  if (!header || !toggle || !panel) return;
-
-  gsap.set(panel, { autoAlpha: 0, y: -4, force3D: true });
-
-  const iconTl = createIconTimeline(toggle);
-  const panelTl = createPanelTimeline(panel);
-
-  function open() {
-    toggle.setAttribute('aria-expanded', 'true');
-    panel.setAttribute('aria-hidden', 'false');
-    header.classList.remove('header--hidden');
-    iconTl.play();
-    panelTl.restart();
-    getLenis()?.stop();
-  }
-
-  function close() {
-    if (!isMenuOpen(toggle)) return;
-    toggle.setAttribute('aria-expanded', 'false');
-    panel.setAttribute('aria-hidden', 'true');
-    iconTl.reverse();
-    panelTl.progress(0).pause();
-    gsap.set(panel, { autoAlpha: 0, y: -4 });
-    getLenis()?.start();
-  }
-
+function bindNavEvents(
+  header: HTMLElement,
+  toggle: HTMLButtonElement,
+  panel: HTMLElement,
+  open: () => void,
+  close: () => void,
+): () => void {
   let toggleClicked = false;
   // When the menu opens via hover, ignore close-clicks for this long — a user
   // who naturally hovers-then-clicks shouldn't accidentally close what they
@@ -216,16 +190,59 @@ export function initNav() {
   document.addEventListener('click', handleClickOutside);
   panel.addEventListener('click', handlePanelClick);
 
-  cleanup = () => {
-    close();
+  return () => {
     teardownScroll();
     teardownHover();
-    iconTl.kill();
-    panelTl.kill();
     toggle.removeEventListener('click', handleToggle);
     document.removeEventListener('keydown', handleKeydown);
     document.removeEventListener('click', handleClickOutside);
     panel.removeEventListener('click', handlePanelClick);
+  };
+}
+
+export function initNav() {
+  cleanup?.();
+
+  const headerEl = document.querySelector<HTMLElement>('[data-nav]');
+  const toggleEl = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
+  const panelEl = document.querySelector<HTMLElement>('[data-menu-panel]');
+  // Non-null assertions needed — TS can't narrow querySelector across closure boundaries
+  if (!headerEl || !toggleEl || !panelEl) return;
+  const header = headerEl;
+  const toggle = toggleEl;
+  const panel = panelEl;
+
+  gsap.set(panel, { autoAlpha: 0, y: -4, force3D: true });
+
+  const iconTl = createIconTimeline(toggle);
+  const panelTl = createPanelTimeline(panel);
+
+  function open() {
+    toggle.setAttribute('aria-expanded', 'true');
+    panel.setAttribute('aria-hidden', 'false');
+    header.classList.remove('header--hidden');
+    iconTl.play();
+    panelTl.restart();
+    getLenis()?.stop();
+  }
+
+  function close() {
+    if (!isMenuOpen(toggle)) return;
+    toggle.setAttribute('aria-expanded', 'false');
+    panel.setAttribute('aria-hidden', 'true');
+    iconTl.reverse();
+    panelTl.progress(0).pause();
+    gsap.set(panel, { autoAlpha: 0, y: -4 });
+    getLenis()?.start();
+  }
+
+  const unbindEvents = bindNavEvents(header, toggle, panel, open, close);
+
+  cleanup = () => {
+    close();
+    unbindEvents();
+    iconTl.kill();
+    panelTl.kill();
     header.classList.remove('header--hidden');
     cleanup = null;
   };

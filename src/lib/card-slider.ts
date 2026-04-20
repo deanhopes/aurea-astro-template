@@ -2,39 +2,31 @@ import gsap from 'gsap';
 
 let cleanups: (() => void)[] = [];
 
-function initCard(card: HTMLElement): () => void {
-  const track = card.querySelector<HTMLElement>('.card__slider-track');
-  if (!track) return () => {};
-
-  const originalSlides = Array.from(card.querySelectorAll<HTMLElement>('.card__slide'));
-  const total = originalSlides.length;
-  if (total < 2) return () => {};
-
-  // Clone last slide to front, first slide to back for seamless wrap
-  const headClone = originalSlides[0].cloneNode(true) as HTMLElement;
-  const tailClone = originalSlides[total - 1].cloneNode(true) as HTMLElement;
+function setupClones(
+  track: HTMLElement,
+  originals: HTMLElement[],
+): { headClone: HTMLElement; tailClone: HTMLElement } {
+  const headClone = originals[0]!.cloneNode(true) as HTMLElement;
+  const tailClone = originals[originals.length - 1]!.cloneNode(true) as HTMLElement;
   headClone.setAttribute('aria-hidden', 'true');
   tailClone.setAttribute('aria-hidden', 'true');
-
   track.appendChild(headClone);
-  track.insertBefore(tailClone, originalSlides[0]);
+  track.insertBefore(tailClone, originals[0]!);
+  return { headClone, tailClone };
+}
 
+function createSlideController(track: HTMLElement, total: number) {
   // current = index into originals (0-based); real position = current + 1 (offset by tail clone)
   let current = 0;
   let animating = false;
 
-  // Position to slide 0 without transition (tail clone is now at index 0)
-  gsap.set(track, { xPercent: -100 });
-
   function goTo(index: number, instant = false) {
     current = ((index % total) + total) % total;
     const xPercent = -(current + 1) * 100;
-
     if (instant) {
       gsap.set(track, { xPercent });
       return;
     }
-
     animating = true;
     gsap.to(track, {
       xPercent,
@@ -64,23 +56,35 @@ function initCard(card: HTMLElement): () => void {
     e.preventDefault();
     e.stopPropagation();
     if (animating) return;
-    if (current - 1 < 0) {
-      wrapTo(0, -total * 100, total - 1);
-    } else {
-      goTo(current - 1);
-    }
+    if (current - 1 < 0) wrapTo(0, -total * 100, total - 1);
+    else goTo(current - 1);
   }
 
   function next(e: Event) {
     e.preventDefault();
     e.stopPropagation();
     if (animating) return;
-    if (current + 1 >= total) {
-      wrapTo(-(total + 1) * 100, -100, 0);
-    } else {
-      goTo(current + 1);
-    }
+    if (current + 1 >= total) wrapTo(-(total + 1) * 100, -100, 0);
+    else goTo(current + 1);
   }
+
+  return { prev, next };
+}
+
+function initCard(card: HTMLElement): () => void {
+  const track = card.querySelector<HTMLElement>('.card__slider-track');
+  if (!track) return () => {};
+
+  const originalSlides = Array.from(card.querySelectorAll<HTMLElement>('.card__slide'));
+  const total = originalSlides.length;
+  if (total < 2) return () => {};
+
+  const { headClone, tailClone } = setupClones(track, originalSlides);
+
+  // Position to slide 0 without transition (tail clone is now at index 0)
+  gsap.set(track, { xPercent: -100 });
+
+  const { prev, next } = createSlideController(track, total);
 
   const prevBtn = card.querySelector<HTMLButtonElement>('.card__slider-arrow--prev');
   const nextBtn = card.querySelector<HTMLButtonElement>('.card__slider-arrow--next');
@@ -93,7 +97,6 @@ function initCard(card: HTMLElement): () => void {
     nextBtn?.removeEventListener('click', next);
     gsap.killTweensOf(track);
     gsap.set(track, { xPercent: 0, clearProps: 'xPercent' });
-    // Remove clones
     headClone.remove();
     tailClone.remove();
   };
