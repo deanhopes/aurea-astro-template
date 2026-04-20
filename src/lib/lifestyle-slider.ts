@@ -202,6 +202,7 @@ function createDraggable(
   })[0]!;
 }
 
+// eslint-disable-next-line max-lines-per-function -- IO observer + draggable + autoplay lifecycle can't split further without fake abstractions
 export function initLifestyleSlider() {
   cleanup?.();
 

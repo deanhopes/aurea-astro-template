@@ -138,15 +138,11 @@ function setupHoverBehavior(
 export function initNav() {
   cleanup?.();
 
-  const _header = document.querySelector<HTMLElement>('[data-nav]');
-  const _toggle = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
-  const _panel = document.querySelector<HTMLElement>('[data-menu-panel]');
-  if (!_header || !_toggle || !_panel) return;
-
-  // Non-null refs for closures (TS can't narrow querySelector across closure boundaries)
-  const header = _header;
-  const toggle = _toggle;
-  const panel = _panel;
+  const header = document.querySelector<HTMLElement>('[data-nav]');
+  const toggle = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
+  const panel = document.querySelector<HTMLElement>('[data-menu-panel]');
+  // Non-null assertions needed — TS can't narrow querySelector across closure boundaries
+  if (!header || !toggle || !panel) return;
 
   gsap.set(panel, { autoAlpha: 0, y: -4, force3D: true });
 

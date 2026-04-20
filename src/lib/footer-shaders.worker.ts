@@ -70,132 +70,130 @@ function stopLoop(): void {
   dirty = false;
 }
 
-self.onmessage = async (e: MessageEvent<InboundMessage>) => {
+async function handleInit(canvas: OffscreenCanvas, width: number, height: number): Promise<void> {
+  fs = await buildScene(canvas);
+  if (!fs) {
+    self.postMessage({ type: 'error', message: 'WebGPU init failed' });
+    return;
+  }
+  fs.renderer.setPixelRatio(1);
+  fs.renderer.setSize(width, height, false);
+  ensureLoop();
+  self.postMessage({ type: 'ready' });
+}
+
+function handleVideoFrame(bitmap: ImageBitmap): void {
+  if (!fs) {
+    bitmap.close();
+    return;
+  }
+  if (!videoTex) {
+    videoTex = new THREE.Texture(bitmap as unknown as HTMLImageElement);
+    videoTex.minFilter = THREE.LinearFilter;
+    videoTex.magFilter = THREE.LinearFilter;
+    videoTex.format = THREE.RGBAFormat;
+    videoTex.colorSpace = THREE.SRGBColorSpace;
+    fs.videoTexNode.value = videoTex;
+  } else {
+    videoTex.image = bitmap as unknown as HTMLImageElement;
+  }
+  videoTex.needsUpdate = true;
+  if (prevBitmap) prevBitmap.close();
+  prevBitmap = bitmap;
+  ensureLoop();
+}
+
+function handleWordmarkBitmap(bitmap: ImageBitmap): void {
+  if (!fs) {
+    bitmap.close();
+    return;
+  }
+  const wmTex = new THREE.Texture(bitmap as unknown as HTMLImageElement);
+  wmTex.minFilter = THREE.LinearFilter;
+  wmTex.magFilter = THREE.LinearFilter;
+  wmTex.format = THREE.RGBAFormat;
+  wmTex.needsUpdate = true;
+  fs.wordmarkTexNode.value = wmTex;
+  ensureLoop();
+}
+
+function handleUniform(name: string, value: number): void {
+  const uniforms: Record<string, { value: number }> = {
+    uCausticScale,
+    uCausticSpeed,
+    uCausticSharpness,
+    uCausticHeight,
+    uShadowThreshold,
+    uShadowSoftness,
+    uShadowAlpha,
+    uRefraction,
+    uWordmarkOpacity,
+    uWordmarkScale,
+    uWordmarkX,
+    uWordmarkY,
+  };
+  const u = uniforms[name];
+  if (u) {
+    u.value = value;
+    ensureLoop();
+  }
+}
+
+function handleDestroy(): void {
+  stopLoop();
+  if (prevBitmap) {
+    prevBitmap.close();
+    prevBitmap = null;
+  }
+  videoTex?.dispose();
+  videoTex = null;
+  if (fs) {
+    fs.renderer.dispose();
+    fs.material.dispose();
+    fs = null;
+  }
+}
+
+self.onmessage = (e: MessageEvent<InboundMessage>) => {
   const msg = e.data;
-
   switch (msg.type) {
-    case 'init': {
-      fs = await buildScene(msg.canvas);
-      if (!fs) {
-        self.postMessage({ type: 'error', message: 'WebGPU init failed' });
-        return;
+    case 'init':
+      void handleInit(msg.canvas, msg.width, msg.height);
+      break;
+    case 'resize':
+      if (fs) {
+        fs.renderer.setPixelRatio(1);
+        fs.renderer.setSize(msg.width, msg.height, false);
       }
-      fs.renderer.setPixelRatio(1);
-      fs.renderer.setSize(msg.width, msg.height, false);
-      ensureLoop();
-      self.postMessage({ type: 'ready' });
       break;
-    }
-
-    case 'resize': {
-      if (!fs) return;
-      fs.renderer.setPixelRatio(1);
-      fs.renderer.setSize(msg.width, msg.height, false);
-      break;
-    }
-
-    case 'progress': {
+    case 'progress':
       uProgress.value = msg.value;
       ensureLoop();
       break;
-    }
-
-    case 'mouse': {
+    case 'mouse':
       uSunX.value = msg.x;
       uSunY.value = msg.y;
       ensureLoop();
       break;
-    }
-
-    case 'videoFrame': {
-      if (!fs) {
-        msg.bitmap.close();
-        return;
-      }
-
-      if (!videoTex) {
-        videoTex = new THREE.Texture(msg.bitmap as unknown as HTMLImageElement);
-        videoTex.minFilter = THREE.LinearFilter;
-        videoTex.magFilter = THREE.LinearFilter;
-        videoTex.format = THREE.RGBAFormat;
-        videoTex.colorSpace = THREE.SRGBColorSpace;
-        fs.videoTexNode.value = videoTex;
-      } else {
-        videoTex.image = msg.bitmap as unknown as HTMLImageElement;
-      }
-      videoTex.needsUpdate = true;
-
-      if (prevBitmap) prevBitmap.close();
-      prevBitmap = msg.bitmap;
-
-      ensureLoop();
+    case 'videoFrame':
+      handleVideoFrame(msg.bitmap);
       break;
-    }
-
-    case 'wordmarkBitmap': {
-      if (!fs) {
-        msg.bitmap.close();
-        return;
-      }
-      const wmTex = new THREE.Texture(msg.bitmap as unknown as HTMLImageElement);
-      wmTex.minFilter = THREE.LinearFilter;
-      wmTex.magFilter = THREE.LinearFilter;
-      wmTex.format = THREE.RGBAFormat;
-      wmTex.needsUpdate = true;
-      fs.wordmarkTexNode.value = wmTex;
-      ensureLoop();
+    case 'wordmarkBitmap':
+      handleWordmarkBitmap(msg.bitmap);
       break;
-    }
-
-    case 'uniform': {
-      const uniforms: Record<string, { value: number }> = {
-        uCausticScale,
-        uCausticSpeed,
-        uCausticSharpness,
-        uCausticHeight,
-        uShadowThreshold,
-        uShadowSoftness,
-        uShadowAlpha,
-        uRefraction,
-        uWordmarkOpacity,
-        uWordmarkScale,
-        uWordmarkX,
-        uWordmarkY,
-      };
-      const u = uniforms[msg.name];
-      if (u) {
-        u.value = msg.value;
-        ensureLoop();
-      }
+    case 'uniform':
+      handleUniform(msg.name, msg.value);
       break;
-    }
-
-    case 'visibility': {
+    case 'visibility':
       visible = msg.visible;
       if (visible) ensureLoop();
       break;
-    }
-
-    case 'quality': {
+    case 'quality':
       uQuality.value = msg.value;
       ensureLoop();
       break;
-    }
-
-    case 'destroy': {
-      stopLoop();
-      if (prevBitmap) {
-        prevBitmap.close();
-        prevBitmap = null;
-      }
-      videoTex?.dispose();
-      videoTex = null;
-      if (fs) {
-        fs.renderer.dispose();
-        fs.material.dispose();
-        fs = null;
-      }
+    case 'destroy':
+      handleDestroy();
       break;
-    }
   }
 };

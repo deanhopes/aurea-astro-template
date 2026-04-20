@@ -41,14 +41,20 @@ function initCard(card: HTMLElement): () => void {
       duration: 0.5,
       ease: 'expo.out',
       onComplete() {
-        // If we landed on a clone, silently teleport to the real slide
-        if (current === 0 && xPercent === -(total + 1) * 100) {
-          // landed on headClone (past last real) — snap to real first
-          gsap.set(track, { xPercent: -100 });
-        } else if (current === total - 1 && xPercent === 0) {
-          // landed on tailClone (before first real) — snap to real last
-          gsap.set(track, { xPercent: -total * 100 });
-        }
+        animating = false;
+      },
+    });
+  }
+
+  function wrapTo(toX: number, snapX: number, landIndex: number) {
+    animating = true;
+    gsap.to(track, {
+      xPercent: toX,
+      duration: 0.5,
+      ease: 'expo.out',
+      onComplete() {
+        current = landIndex;
+        gsap.set(track, { xPercent: snapX });
         animating = false;
       },
     });
@@ -58,22 +64,10 @@ function initCard(card: HTMLElement): () => void {
     e.preventDefault();
     e.stopPropagation();
     if (animating) return;
-    const next = current - 1;
-    if (next < 0) {
-      // animate to tailClone (position 0), then snap to real last
-      animating = true;
-      gsap.to(track, {
-        xPercent: 0,
-        duration: 0.5,
-        ease: 'expo.out',
-        onComplete() {
-          current = total - 1;
-          gsap.set(track, { xPercent: -total * 100 });
-          animating = false;
-        },
-      });
+    if (current - 1 < 0) {
+      wrapTo(0, -total * 100, total - 1);
     } else {
-      goTo(next);
+      goTo(current - 1);
     }
   }
 
@@ -81,22 +75,10 @@ function initCard(card: HTMLElement): () => void {
     e.preventDefault();
     e.stopPropagation();
     if (animating) return;
-    const nextIdx = current + 1;
-    if (nextIdx >= total) {
-      // animate to headClone (position total+1), then snap to real first
-      animating = true;
-      gsap.to(track, {
-        xPercent: -(total + 1) * 100,
-        duration: 0.5,
-        ease: 'expo.out',
-        onComplete() {
-          current = 0;
-          gsap.set(track, { xPercent: -100 });
-          animating = false;
-        },
-      });
+    if (current + 1 >= total) {
+      wrapTo(-(total + 1) * 100, -100, 0);
     } else {
-      goTo(nextIdx);
+      goTo(current + 1);
     }
   }
 

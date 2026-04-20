@@ -272,6 +272,101 @@ function setActive(state: NeighbourhoodState, id: string, instant = false) {
   state.activeId = id;
 }
 
+function stashAndObserveMaps(
+  state: NeighbourhoodState,
+  section: HTMLElement,
+): IntersectionObserver {
+  const stashedMapSrcs = new Map<HTMLIFrameElement, string>();
+  state.maps.forEach((panel) => {
+    const iframe = panel.querySelector<HTMLIFrameElement>('iframe');
+    if (iframe?.dataset.src) {
+      stashedMapSrcs.set(iframe, iframe.dataset.src);
+      delete iframe.dataset.src;
+    }
+  });
+
+  const obs = new IntersectionObserver(
+    (entries) => {
+      if (!entries[0]?.isIntersecting) return;
+      obs.disconnect();
+      stashedMapSrcs.forEach((src, iframe) => {
+        iframe.dataset.src = src;
+      });
+      const currentPanel = Array.from(state.maps).find(
+        (m) => m.dataset.neighbourhoodMap === state.activeId,
+      );
+      const iframe = currentPanel?.querySelector<HTMLIFrameElement>('iframe');
+      if (iframe && !iframe.src && iframe.dataset.src) iframe.src = iframe.dataset.src;
+    },
+    { rootMargin: '600px 0px' },
+  );
+  obs.observe(section);
+  return obs;
+}
+
+function bindEvents(
+  state: NeighbourhoodState,
+  section: HTMLElement,
+  mobileQuery: MediaQueryList,
+  measureIfDesktop: () => void,
+): () => void {
+  const { tabs, lines } = state;
+
+  function onTabHover(e: Event) {
+    if (state.isMobile) return;
+    const id = (e.currentTarget as HTMLElement).dataset.neighbourhoodTab;
+    if (!id) return;
+    const panel = Array.from(state.maps).find((m) => m.dataset.neighbourhoodMap === id);
+    const iframe = panel?.querySelector<HTMLIFrameElement>('iframe');
+    if (iframe && !iframe.src && iframe.dataset.src) iframe.src = iframe.dataset.src;
+  }
+
+  function onTabClick(e: Event) {
+    const id = (e.currentTarget as HTMLElement).dataset.neighbourhoodTab;
+    if (id) setActive(state, id);
+  }
+
+  tabs.forEach((tab) => {
+    tab.addEventListener('mouseenter', onTabHover);
+    tab.addEventListener('click', onTabClick);
+  });
+
+  function onLineClick(e: Event) {
+    const item = (e.currentTarget as HTMLElement).closest<HTMLElement>('[data-neighbourhood-item]');
+    const id = item?.dataset.neighbourhoodItem;
+    if (id) setActive(state, id);
+  }
+  lines.forEach((line) => line.addEventListener('click', onLineClick));
+
+  function onBreakpoint(e: MediaQueryListEvent) {
+    state.isMobile = e.matches;
+    if (!e.matches) measureIfDesktop();
+    setActive(state, state.activeId, true);
+  }
+  mobileQuery.addEventListener('change', onBreakpoint);
+
+  function onResize() {
+    if (!state.isMobile) moveIndicator(state, state.activeId, true);
+  }
+  window.addEventListener('resize', onResize);
+
+  function onVisibility() {
+    if (!document.hidden) setActive(state, state.activeId, true);
+  }
+  document.addEventListener('visibilitychange', onVisibility);
+
+  return () => {
+    tabs.forEach((tab) => {
+      tab.removeEventListener('mouseenter', onTabHover);
+      tab.removeEventListener('click', onTabClick);
+    });
+    lines.forEach((line) => line.removeEventListener('click', onLineClick));
+    mobileQuery.removeEventListener('change', onBreakpoint);
+    window.removeEventListener('resize', onResize);
+    document.removeEventListener('visibilitychange', onVisibility);
+  };
+}
+
 export function initNeighbourhood() {
   cleanup?.();
 
@@ -285,19 +380,14 @@ export function initNeighbourhood() {
   const items = section.querySelectorAll<HTMLElement>('[data-neighbourhood-item]');
   const lines = section.querySelectorAll<HTMLElement>('.neighbourhood__line');
 
-  const content = section.querySelector<HTMLElement>('.neighbourhood__content');
-  const indicator = section.querySelector<HTMLElement>('[data-neighbourhood-indicator]');
-
   const tabIds = Array.from(tabs).map((el) => el.dataset.neighbourhoodTab!);
   if (!tabIds.length) {
-    const accIds = Array.from(items).map((el) => el.dataset.neighbourhoodItem!);
-    if (!accIds.length) return;
+    if (!Array.from(items).length) return;
   }
 
   const layoutMap: Record<string, string> = {};
   tabs.forEach((tab) => {
-    const id = tab.dataset.neighbourhoodTab!;
-    layoutMap[id] = tab.dataset.layout ?? 'a';
+    layoutMap[tab.dataset.neighbourhoodTab!] = tab.dataset.layout ?? 'a';
   });
 
   const mobileQuery = window.matchMedia('(max-width: 767px)');
@@ -310,8 +400,8 @@ export function initNeighbourhood() {
     texts,
     items,
     lines,
-    content,
-    indicator,
+    content: section.querySelector<HTMLElement>('.neighbourhood__content'),
+    indicator: section.querySelector<HTMLElement>('[data-neighbourhood-indicator]'),
     tabIds,
     layoutMap,
     activeId: tabIds[0] ?? Array.from(items)[0]?.dataset.neighbourhoodItem ?? '',
@@ -331,97 +421,14 @@ export function initNeighbourhood() {
     measureIfDesktop();
   }
 
-  // Stash data-src so initial setActive() can't eagerly load Google Maps (~500KB) and stall Lenis. Restored on first IO hit.
-  const stashedMapSrcs = new Map<HTMLIFrameElement, string>();
-  state.maps.forEach((panel) => {
-    const iframe = panel.querySelector<HTMLIFrameElement>('iframe');
-    if (iframe?.dataset.src) {
-      stashedMapSrcs.set(iframe, iframe.dataset.src);
-      delete iframe.dataset.src;
-    }
-  });
-
-  // Initial visual state — runs against stashed iframes so crossfadeMaps lazy-load is a no-op here
+  const sectionLoadObserver = stashAndObserveMaps(state, section);
   setActive(state, state.activeId, true);
 
-  // Restore data-src + activate current map when section approaches viewport
-  const sectionLoadObserver = new IntersectionObserver(
-    (entries) => {
-      if (!entries[0]?.isIntersecting) return;
-      sectionLoadObserver.disconnect();
-      stashedMapSrcs.forEach((src, iframe) => {
-        iframe.dataset.src = src;
-      });
-      const currentPanel = Array.from(state.maps).find(
-        (m) => m.dataset.neighbourhoodMap === state.activeId,
-      );
-      const iframe = currentPanel?.querySelector<HTMLIFrameElement>('iframe');
-      if (iframe && !iframe.src && iframe.dataset.src) {
-        iframe.src = iframe.dataset.src;
-      }
-    },
-    { rootMargin: '600px 0px' },
-  );
-  sectionLoadObserver.observe(section);
-
-  function onTabHover(e: Event) {
-    if (state.isMobile) return;
-    const id = (e.currentTarget as HTMLElement).dataset.neighbourhoodTab;
-    if (!id) return;
-    const panel = Array.from(state.maps).find((m) => m.dataset.neighbourhoodMap === id);
-    const iframe = panel?.querySelector<HTMLIFrameElement>('iframe');
-    if (iframe && !iframe.src && iframe.dataset.src) {
-      iframe.src = iframe.dataset.src;
-    }
-  }
-
-  function onTabClick(e: Event) {
-    const id = (e.currentTarget as HTMLElement).dataset.neighbourhoodTab;
-    if (id) setActive(state, id);
-  }
-
-  tabs.forEach((tab) => {
-    tab.addEventListener('mouseenter', onTabHover);
-    tab.addEventListener('click', onTabClick);
-  });
-
-  function onLineClick(e: Event) {
-    const item = (e.currentTarget as HTMLElement).closest<HTMLElement>('[data-neighbourhood-item]');
-    const id = item?.dataset.neighbourhoodItem;
-    if (id) setActive(state, id);
-  }
-
-  lines.forEach((line) => line.addEventListener('click', onLineClick));
-
-  function onBreakpoint(e: MediaQueryListEvent) {
-    state.isMobile = e.matches;
-    if (!e.matches) measureIfDesktop();
-    setActive(state, state.activeId, true);
-  }
-  mobileQuery.addEventListener('change', onBreakpoint);
-
-  function onResize() {
-    if (!state.isMobile) {
-      moveIndicator(state, state.activeId, true);
-    }
-  }
-  window.addEventListener('resize', onResize);
-
-  function onVisibility() {
-    if (!document.hidden) setActive(state, state.activeId, true);
-  }
-  document.addEventListener('visibilitychange', onVisibility);
+  const unbindEvents = bindEvents(state, section, mobileQuery, measureIfDesktop);
 
   cleanup = () => {
     sectionLoadObserver.disconnect();
-    tabs.forEach((tab) => {
-      tab.removeEventListener('mouseenter', onTabHover);
-      tab.removeEventListener('click', onTabClick);
-    });
-    lines.forEach((line) => line.removeEventListener('click', onLineClick));
-    mobileQuery.removeEventListener('change', onBreakpoint);
-    window.removeEventListener('resize', onResize);
-    document.removeEventListener('visibilitychange', onVisibility);
+    unbindEvents();
     cleanup = null;
   };
 }

@@ -156,6 +156,15 @@ function renderMonth(container: HTMLElement, year: number, month: number): void 
   container.appendChild(grid);
 }
 
+function applyHoverPreview(btn: HTMLElement, date: Date, selStart: Date, hovered: Date): void {
+  if (sameDay(hovered, selStart)) return;
+  const a = dayStart(selStart) < dayStart(hovered) ? selStart : hovered;
+  const b = dayStart(selStart) < dayStart(hovered) ? hovered : selStart;
+  if (isInRange(date, a, b) && !sameDay(date, selStart)) {
+    btn.classList.add('is-in-range-preview');
+  }
+}
+
 function applyDayClasses(btn: HTMLElement, date: Date): void {
   btn.classList.remove(
     'is-selected-start',
@@ -166,24 +175,12 @@ function applyDayClasses(btn: HTMLElement, date: Date): void {
 
   const { selStart, selEnd, hovered } = state;
 
-  if (selStart && sameDay(date, selStart)) {
-    btn.classList.add('is-selected-start');
-  }
-  if (selEnd && sameDay(date, selEnd)) {
-    btn.classList.add('is-selected-end');
-  }
+  if (selStart && sameDay(date, selStart)) btn.classList.add('is-selected-start');
+  if (selEnd && sameDay(date, selEnd)) btn.classList.add('is-selected-end');
   if (selStart && selEnd && isStrictlyBetween(date, selStart, selEnd)) {
     btn.classList.add('is-in-range');
   }
-
-  // Hover preview in HALF state only
-  if (selStart && !selEnd && hovered && !sameDay(hovered, selStart)) {
-    const a = dayStart(selStart) < dayStart(hovered) ? selStart : hovered;
-    const b = dayStart(selStart) < dayStart(hovered) ? hovered : selStart;
-    if (isInRange(date, a, b) && !sameDay(date, selStart)) {
-      btn.classList.add('is-in-range-preview');
-    }
-  }
+  if (selStart && !selEnd && hovered) applyHoverPreview(btn, date, selStart, hovered);
 }
 
 /**
