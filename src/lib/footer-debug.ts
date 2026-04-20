@@ -13,7 +13,7 @@ const params = {
   // Wordmark
   wmOpacity: 1.0,
   wmScale: 1.13,
-  wmX: -0.01,
+  wmX: 0.01,
   wmY: 0.05,
   // Caustics
   causticScale: 2.3,

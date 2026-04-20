@@ -47,10 +47,11 @@ function loadFooterShaders(): Promise<void> {
   footerReadyPromise = (async () => {
     footerModule = await import('./footer-shaders');
     await footerModule.initFooterShaders();
-    if (import.meta.env.DEV) {
-      const { initFooterDebug } = await import('./footer-debug');
-      initFooterDebug();
-    }
+    // Uncomment to enable Tweakpane shader debug panel in dev:
+    // if (import.meta.env.DEV) {
+    //   const { initFooterDebug } = await import('./footer-debug');
+    //   initFooterDebug();
+    // }
   })();
   return footerReadyPromise;
 }

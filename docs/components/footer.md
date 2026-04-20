@@ -154,6 +154,18 @@ videoPumpTimer = setInterval(() => {
 
 **Adjust scroll trigger timing:** In `footer-shaders.ts` → `setupScrollTrigger()`, the `start` and `end` values control when `uProgress` animates from 0 to 1. `start: 'top 85%'` means caustics start animating when the footer trigger is 85% from the top of the viewport.
 
+**Adjust wordmark position:** `uWordmarkX` and `uWordmarkY` in `footer-shaders-scene.ts` control the wordmark offset (UV space, 0–1). Current values: `x: 0.010`, `y: 0.05`. Positive X shifts right, negative shifts left. To dial these in visually, uncomment the Tweakpane block in `bootstrap.ts`:
+
+```ts
+// src/lib/bootstrap.ts — inside loadFooterShaders(), after initFooterShaders()
+if (import.meta.env.DEV) {
+  const { initFooterDebug } = await import('./footer-debug');
+  initFooterDebug();
+}
+```
+
+The panel appears top-right in dev. Re-comment when done and copy the final values back to `footer-shaders-scene.ts`.
+
 ---
 
 ## Gotchas
