@@ -241,15 +241,6 @@ Checklist — don't ship with placeholders.
 
 ---
 
-## Roadmap
-
-- [ ] Alternative colour palettes (night, coastal, desert)
-- [ ] Sanity / DatoCMS adapter for Residences + Lifestyle grids
-- [ ] Multilingual variant (Astro i18n + fluid type for mixed scripts)
-- [ ] Showcase gallery of shipped sites built on this template
-
----
-
 ## Questions, feedback, hire me
 
 - Template issues / ideas — [open an issue](https://github.com/deanhopes/aurea-astro-template/issues)

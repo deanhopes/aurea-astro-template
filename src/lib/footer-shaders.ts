@@ -100,7 +100,8 @@ function fallbackTick(): void {
 }
 
 function ensureFallbackLoop(): void {
-  if (!fallbackRafId && fallbackScene && footerVisible) fallbackRafId = requestAnimationFrame(fallbackTick);
+  if (!fallbackRafId && fallbackScene && footerVisible)
+    fallbackRafId = requestAnimationFrame(fallbackTick);
 }
 
 // ── Shared: video lazy-load + frame pump ──────────────────────────────
@@ -257,7 +258,7 @@ async function rasterizeWordmark(
 ): Promise<ImageBitmap | null> {
   // Wait for Test Söhne to load
   try {
-    await document.fonts.load('300 100px "Test Sohne"');
+    await document.fonts.load('300 100px "Cormorant Garamond"');
   } catch {
     // font may already be loaded
   }
@@ -282,9 +283,9 @@ async function rasterizeWordmark(
   ctx.fillStyle = '#ffffff';
 
   const applyFont = (size: number) => {
-    ctx.font = `300 ${size}px "Test Sohne", sans-serif`;
+    ctx.font = `300 ${size}px "Cormorant Garamond", serif`;
     if ('letterSpacing' in ctx) {
-      ctx.letterSpacing = `${size * 0.15}px`;
+      ctx.letterSpacing = `${size * 0.08}px`;
     }
   };
 

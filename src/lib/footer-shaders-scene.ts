@@ -53,7 +53,7 @@ export const uQuality = uniform(0);
 // Wordmark
 export const uWordmarkOpacity = uniform(1.0);
 export const uWordmarkScale = uniform(1.13);
-export const uWordmarkX = uniform(0.02);
+export const uWordmarkX = uniform(-0.01);
 export const uWordmarkY = uniform(0.05);
 
 // ── TSL node graph ────────────────────────────────────────────────────

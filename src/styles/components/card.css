@@ -108,7 +108,7 @@
 
 .card__name {
   font-family: var(--font-display);
-  font-weight: 300;
+  font-weight: 400;
   font-size: var(--text-2xl);
   letter-spacing: -0.03em;
   line-height: 1.05;

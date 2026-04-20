@@ -36,7 +36,7 @@
 
 .enquiry__heading {
   font-family: var(--font-display);
-  font-weight: 300;
+  font-weight: 400;
   font-size: var(--text-section);
   letter-spacing: -0.03em;
   line-height: var(--leading-section);
@@ -451,7 +451,7 @@
 
 .enquiry__success-heading {
   font-family: var(--font-display);
-  font-weight: 300;
+  font-weight: 400;
   font-size: clamp(1.5rem, 2vw + 0.5rem, 2.25rem);
   letter-spacing: -0.02em;
   color: var(--color-black);

@@ -13,8 +13,8 @@
      cut it back. */
   --color-accent: #ef5d2a;
 
-  --font-display: 'Test Sohne', system-ui, sans-serif;
-  --font-body: 'Aktiv Grotesk', system-ui, sans-serif;
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-body: 'DM Sans', system-ui, sans-serif;
 
   /* Size scale — primitive. Fluid clamp across mobile → desktop.
      Use these directly for ad-hoc sizing; semantic aliases below map
@@ -31,8 +31,8 @@
 
   /* Semantic aliases — role → size. */
   --text-hero: var(--text-5xl);
-  --leading-hero: 0.95;
-  --tracking-hero: -0.025em;
+  --leading-hero: 0.92;
+  --tracking-hero: -0.01em;
 
   --text-section: var(--text-4xl);
   --leading-section: 1.1;

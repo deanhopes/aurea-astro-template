@@ -48,7 +48,7 @@
   background: var(--color-background);
   color: var(--color-black);
   font-family: var(--font-display);
-  font-weight: 300;
+  font-weight: 400;
   font-size: clamp(1.5rem, 1.5vw + 0.75rem, 2.125rem);
   letter-spacing: 0.2em;
   transition: letter-spacing 600ms var(--ease-premium);

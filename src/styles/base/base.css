@@ -19,8 +19,8 @@ h1,
 h2,
 h3 {
   font-family: var(--font-display);
-  font-weight: 300;
-  text-wrap: balance;
+  font-weight: 400;
+  text-wrap: pretty;
 }
 
 p {

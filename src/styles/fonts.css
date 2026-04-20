@@ -1,47 +1,48 @@
 /*
- * Font declarations for Test Söhne (headings) + Aktiv Grotesk (body).
+ * Font declarations for Cormorant Garamond (headings) + DM Sans (body).
  * Files live in /public/fonts so URLs are stable (preload-friendly).
+ * Both families are OFL licensed — free for commercial use.
  */
 
-/* ─── Test Söhne ─── */
+/* ─── Cormorant Garamond ─── */
 
 @font-face {
-  font-family: 'Test Sohne';
-  src: url('/fonts/TestSohne-Leicht.woff2') format('woff2');
+  font-family: 'Cormorant Garamond';
+  src: url('/fonts/CormorantGaramond-Light.woff2') format('woff2');
   font-weight: 300;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Test Sohne';
-  src: url('/fonts/TestSohne-Buch.woff2') format('woff2');
+  font-family: 'Cormorant Garamond';
+  src: url('/fonts/CormorantGaramond-Regular.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 
-/* ─── Aktiv Grotesk ─── */
+/* ─── DM Sans ─── */
 
 @font-face {
-  font-family: 'Aktiv Grotesk';
-  src: url('/fonts/AktivGrotesk-Light.woff2') format('woff2');
+  font-family: 'DM Sans';
+  src: url('/fonts/DMSans-Light.woff2') format('woff2');
   font-weight: 300;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Aktiv Grotesk';
-  src: url('/fonts/AktivGrotesk-Regular.woff2') format('woff2');
+  font-family: 'DM Sans';
+  src: url('/fonts/DMSans-Regular.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Aktiv Grotesk';
-  src: url('/fonts/AktivGrotesk-Medium.woff2') format('woff2');
+  font-family: 'DM Sans';
+  src: url('/fonts/DMSans-Medium.woff2') format('woff2');
   font-weight: 500;
   font-style: normal;
   font-display: swap;
