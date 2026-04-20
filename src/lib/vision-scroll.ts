@@ -12,7 +12,11 @@ function animateCardColumns(section: HTMLElement, containerAnimation: gsap.core.
   if (!columns.length) return;
 
   gsap.from(columns, {
-    y: 30, opacity: 0, duration: 1.4, ease: 'expo.out', stagger: 0.12,
+    y: 30,
+    opacity: 0,
+    duration: 1.4,
+    ease: 'expo.out',
+    stagger: 0.12,
     scrollTrigger: {
       trigger: '.vision__card',
       containerAnimation,
@@ -27,7 +31,9 @@ function animateCardImages(section: HTMLElement, containerAnimation: gsap.core.T
 
   images.forEach((img, i) => {
     gsap.from(img, {
-      scale: 1.05, duration: 1.25, ease: 'expo.out',
+      scale: 1.05,
+      duration: 1.25,
+      ease: 'expo.out',
       scrollTrigger: {
         trigger: img.parentElement,
         containerAnimation,
@@ -37,10 +43,12 @@ function animateCardImages(section: HTMLElement, containerAnimation: gsap.core.T
     });
 
     const direction = i % 2 === 0 ? -1 : 1;
-    gsap.fromTo(img,
+    gsap.fromTo(
+      img,
       { xPercent: direction * 4 },
       {
-        xPercent: direction * -4, ease: 'none',
+        xPercent: direction * -4,
+        ease: 'none',
         scrollTrigger: {
           trigger: img.parentElement,
           containerAnimation,
@@ -58,7 +66,9 @@ function animatePairImages(section: HTMLElement, containerAnimation: gsap.core.T
 
   images.forEach((img) => {
     gsap.from(img, {
-      scale: 1.05, duration: 1.25, ease: 'expo.out',
+      scale: 1.05,
+      duration: 1.25,
+      ease: 'expo.out',
       scrollTrigger: {
         trigger: img.parentElement,
         containerAnimation,
@@ -67,10 +77,12 @@ function animatePairImages(section: HTMLElement, containerAnimation: gsap.core.T
       },
     });
 
-    gsap.fromTo(img,
+    gsap.fromTo(
+      img,
       { xPercent: -3 },
       {
-        xPercent: 3, ease: 'none',
+        xPercent: 3,
+        ease: 'none',
         scrollTrigger: {
           trigger: img.parentElement,
           containerAnimation,

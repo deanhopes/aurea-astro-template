@@ -12,6 +12,7 @@
 
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
 import type { FooterScene } from './footer-shaders-scene';
 import { uQuality } from './footer-shaders-scene';
 
@@ -134,7 +135,7 @@ function initVideo(): void {
       if (!videoEl) return;
       videoPumpTimer = setInterval(() => {
         if (!videoEl || videoEl.readyState < videoEl.HAVE_CURRENT_DATA) return;
-        createImageBitmap(videoEl).then((bitmap) => {
+        void createImageBitmap(videoEl).then((bitmap) => {
           postWorker({ type: 'videoFrame', bitmap }, [bitmap]);
         });
       }, VIDEO_INTERVAL);
@@ -155,8 +156,9 @@ function initVideo(): void {
       fallbackScene.videoTexNode.value = vidTex;
       ensureFallbackLoop();
     };
-    videoEl.addEventListener('playing', onReady, { once: true });
-    videoEl.addEventListener('canplay', onReady, { once: true });
+    const onReadyVoid = () => void onReady();
+    videoEl.addEventListener('playing', onReadyVoid, { once: true });
+    videoEl.addEventListener('canplay', onReadyVoid, { once: true });
   }
 }
 
@@ -280,6 +282,7 @@ async function rasterizeWordmark(
   let fontSize = texH * 0.38;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'alphabetic';
+  // eslint-disable-next-line no-restricted-syntax -- canvas 2D API requires a color string, not a CSS token
   ctx.fillStyle = '#ffffff';
 
   const applyFont = (size: number) => {
@@ -403,7 +406,7 @@ export async function initFooterShaders(): Promise<void> {
   setupScrollTrigger();
   setupMouse();
   initVideo();
-  sendWordmark(canvas.clientWidth, canvas.clientHeight);
+  void sendWordmark(canvas.clientWidth, canvas.clientHeight);
   adaptiveQuality();
 
   // Gate rendering to when footer is actually visible
@@ -411,7 +414,7 @@ export async function initFooterShaders(): Promise<void> {
   if (footer) {
     visibilityObserver = new IntersectionObserver(
       (entries) => {
-        footerVisible = !!entries[0]?.isIntersecting;
+        footerVisible = Boolean(entries[0]?.isIntersecting);
         if (worker) {
           postWorker({ type: 'visibility', visible: footerVisible });
         } else if (footerVisible) {

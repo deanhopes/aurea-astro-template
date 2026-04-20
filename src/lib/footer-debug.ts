@@ -4,6 +4,7 @@
  */
 
 import { Pane } from 'tweakpane';
+
 import { setUniform } from './footer-shaders';
 
 let pane: Pane | null = null;

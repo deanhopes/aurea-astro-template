@@ -3,7 +3,7 @@ name: Penthouse
 heading: Above the Horizon
 slug: penthouse
 detail: Top floor, private lift. Sunrise over Miami Beach. Sunset over downtown. The bay holds the whole day in between.
-description: "Penthouse Suite, Full Floor. 2 King, 1 Queen, 2 Twin/King, Full kitchen, Wine storage, 4,200+sqft/390sqm, Private lift, Wraparound terrace, Separate living and dining, Study, Wireless internet, Coffee/tea maker."
+description: 'Penthouse Suite, Full Floor. 2 King, 1 Queen, 2 Twin/King, Full kitchen, Wine storage, 4,200+sqft/390sqm, Private lift, Wraparound terrace, Separate living and dining, Study, Wireless internet, Coffee/tea maker.'
 image: ../../assets/images/residences-penthouse.png
 alt: Penthouse terrace at sunset overlooking the bay
 gallery:
@@ -19,15 +19,15 @@ gallery:
     alt: Rooftop infinity pool
 roomOverview:
   - label: Bedrooms
-    value: "5"
+    value: '5'
   - label: Bathrooms
-    value: "6.5"
+    value: '6.5'
   - label: Area
-    value: "4,200+ sq ft"
+    value: '4,200+ sq ft'
   - label: Aspect
     value: Full floor
   - label: Floor
-    value: "48–52"
+    value: '48–52'
 bedsAndBedding:
   - label: Master
     value: 1 King

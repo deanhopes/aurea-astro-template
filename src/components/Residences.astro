@@ -1,6 +1,6 @@
 ---
-import { getCollection } from 'astro:content';
 import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
 
 const residences = (await getCollection('residences')).sort((a, b) => a.data.order - b.data.order);
 ---
@@ -15,7 +15,7 @@ const residences = (await getCollection('residences')).sort((a, b) => a.data.ord
         <div class="card card--residence">
           <div class="card__image" data-card-slider>
             <div class="card__slider-track">
-              {r.gallery.map((img, i) => (
+              {r.gallery.map((img) => (
                 <div class="card__slide">
                   <Image src={img.src} alt={img.alt} loading="lazy" decoding="async" />
                 </div>

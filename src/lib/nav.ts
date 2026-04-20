@@ -1,4 +1,5 @@
 import gsap from 'gsap';
+
 import { getLenis } from './lenis';
 
 let cleanup: (() => void) | null = null;

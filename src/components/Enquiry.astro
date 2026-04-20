@@ -148,15 +148,30 @@
               </button>
               <input type="hidden" name="residence" value="" />
               <ul class="enquiry__select-menu" data-select-menu role="listbox">
-                <li class="enquiry__select-option" data-value="3" role="option">
+                <li
+                  class="enquiry__select-option"
+                  data-value="3"
+                  role="option"
+                  aria-selected="false"
+                >
                   <span class="enquiry__select-option-name">Three Bedroom</span>
                   <span class="enquiry__select-option-meta">From 12th floor</span>
                 </li>
-                <li class="enquiry__select-option" data-value="4" role="option">
+                <li
+                  class="enquiry__select-option"
+                  data-value="4"
+                  role="option"
+                  aria-selected="false"
+                >
                   <span class="enquiry__select-option-name">Four Bedroom</span>
                   <span class="enquiry__select-option-meta">Upper floors</span>
                 </li>
-                <li class="enquiry__select-option" data-value="penthouse" role="option">
+                <li
+                  class="enquiry__select-option"
+                  data-value="penthouse"
+                  role="option"
+                  aria-selected="false"
+                >
                   <span class="enquiry__select-option-name">Penthouse</span>
                   <span class="enquiry__select-option-meta">Full floor residences</span>
                 </li>
@@ -186,7 +201,6 @@
     const phoneCountry = enquiry.querySelector<HTMLElement>('[data-phone-country]');
     if (phoneCountry) {
       const trigger = phoneCountry.querySelector<HTMLButtonElement>('[data-phone-trigger]')!;
-      const popover = phoneCountry.querySelector<HTMLElement>('[data-phone-popover]')!;
       const searchInput = phoneCountry.querySelector<HTMLInputElement>('[data-phone-search]')!;
       const list = phoneCountry.querySelector<HTMLUListElement>('[data-phone-list]')!;
       const flagEl = phoneCountry.querySelector<HTMLElement>('[data-phone-flag]')!;

@@ -95,18 +95,16 @@ function crossfadeMaps(state: NeighbourhoodState, id: string, instant: boolean) 
           gsap.to(panel, { opacity: 1, duration: 0.5, ease: 'expo.out', overwrite: true });
         }
       }
+    } else if (instant) {
+      gsap.set(panel, { opacity: 0 });
+      panel.classList.remove('is-active');
     } else {
-      if (instant) {
-        gsap.set(panel, { opacity: 0 });
-        panel.classList.remove('is-active');
-      } else {
-        gsap.to(panel, {
-          opacity: 0,
-          duration: 0.3,
-          overwrite: true,
-          onComplete: () => panel.classList.remove('is-active'),
-        });
-      }
+      gsap.to(panel, {
+        opacity: 0,
+        duration: 0.3,
+        overwrite: true,
+        onComplete: () => panel.classList.remove('is-active'),
+      });
     }
   });
 }
@@ -218,23 +216,21 @@ function animateAccordion(state: NeighbourhoodState, id: string, instant: boolea
           },
         );
       }
+    } else if (instant) {
+      gsap.set(content, { height: 0 });
+      item.classList.remove('is-active');
     } else {
-      if (instant) {
-        gsap.set(content, { height: 0 });
-        item.classList.remove('is-active');
-      } else {
-        gsap.fromTo(
-          content,
-          { height: content.offsetHeight },
-          {
-            height: 0,
-            duration: 0.4,
-            ease: 'expo.out',
-            overwrite: true,
-            onComplete: () => item.classList.remove('is-active'),
-          },
-        );
-      }
+      gsap.fromTo(
+        content,
+        { height: content.offsetHeight },
+        {
+          height: 0,
+          duration: 0.4,
+          ease: 'expo.out',
+          overwrite: true,
+          onComplete: () => item.classList.remove('is-active'),
+        },
+      );
     }
   });
 }
@@ -329,8 +325,8 @@ export function initNeighbourhood() {
     if (textWrap) measureTextPanels(texts, textWrap);
   }
 
-  if (document.fonts?.ready) {
-    document.fonts.ready.then(measureIfDesktop).catch(measureIfDesktop);
+  if (document.fonts) {
+    void document.fonts.ready.then(measureIfDesktop).catch(measureIfDesktop);
   } else {
     measureIfDesktop();
   }

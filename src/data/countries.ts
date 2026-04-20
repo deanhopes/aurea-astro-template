@@ -1,9 +1,9 @@
-export type Country = {
+export interface Country {
   code: string;
   flag: string;
   name: string;
   dial: string;
-};
+}
 
 export const COUNTRIES: readonly Country[] = [
   { code: 'US', flag: '🇺🇸', name: 'United States', dial: '+1' },

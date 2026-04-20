@@ -1,6 +1,6 @@
 ---
-import { getCollection } from 'astro:content';
 import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
 
 const slides = (await getCollection('lifestyle')).sort((a, b) => a.data.order - b.data.order);
 ---

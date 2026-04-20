@@ -87,8 +87,7 @@
   gap: clamp(4rem, 8vw, 10rem);
   width: 100%;
   max-width: 1600px;
-  margin-top: auto;
-  padding-bottom: clamp(16rem, 22vw, 24rem);
+  margin: auto;
 }
 
 .site-footer__links {

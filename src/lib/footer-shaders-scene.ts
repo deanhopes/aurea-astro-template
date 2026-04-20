@@ -6,7 +6,6 @@
  * canvas-like surfaces and Three.js primitives.
  */
 
-import * as THREE from 'three/webgpu';
 import {
   uniform,
   vec2,
@@ -28,6 +27,7 @@ import {
   texture,
   time,
 } from 'three/tsl';
+import * as THREE from 'three/webgpu';
 
 type Vec2Node = ReturnType<typeof vec2>;
 

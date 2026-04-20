@@ -3,7 +3,7 @@ name: Three Bedroom
 heading: Light on the Water
 slug: three-bedroom
 detail: East over the bay. The water changes colour six times before the kettle boils.
-description: "Three Bedroom Residential Suite, Mountain View. 1 King, Sofa bed, Mini fridge, Microwave, 900sqft/81sqm, Living/dining area, Dining area, Separate living room, Wireless internet, for a fee, Wired internet, for a fee, Coffee/tea maker."
+description: 'Three Bedroom Residential Suite, Mountain View. 1 King, Sofa bed, Mini fridge, Microwave, 900sqft/81sqm, Living/dining area, Dining area, Separate living room, Wireless internet, for a fee, Wired internet, for a fee, Coffee/tea maker.'
 image: ../../assets/images/vision-interior.png
 alt: Three bedroom residence interior with bay view
 gallery:
@@ -19,15 +19,15 @@ gallery:
     alt: Sunset view from residence
 roomOverview:
   - label: Bedrooms
-    value: "3"
+    value: '3'
   - label: Bathrooms
-    value: "3.5"
+    value: '3.5'
   - label: Area
-    value: "1,800–2,100 sq ft"
+    value: '1,800–2,100 sq ft'
   - label: Aspect
     value: East
   - label: Floor
-    value: "12–28"
+    value: '12–28'
 bedsAndBedding:
   - label: Master
     value: 1 King
@@ -36,4 +36,4 @@ bedsAndBedding:
   - label: Bedroom 3
     value: Twin/King
   - label: Sofa bed
-    value: "1"
+    value: '1'

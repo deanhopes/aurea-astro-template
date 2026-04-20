@@ -5,6 +5,7 @@
  */
 
 import * as THREE from 'three/webgpu';
+
 import {
   buildScene,
   uProgress,

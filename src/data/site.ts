@@ -1,4 +1,7 @@
-export type NavLink = { label: string; href: string };
+export interface NavLink {
+  label: string;
+  href: string;
+}
 
 export const site = {
   name: 'Aurea Residences',

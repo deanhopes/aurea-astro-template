@@ -1,14 +1,14 @@
 // Single entry for all client modules. Heavy modules lazy + idle-gated.
 
-import { initLenis } from './lenis';
-import { initNav } from './nav';
 import { initAnimations } from './animations';
-import { initLifestyleSlider } from './lifestyle-slider';
-import { initNeighbourhood } from './neighbourhood';
-import { initVisionScroll } from './vision-scroll';
-import { initOverlays } from './overlays';
 import { initCalendar } from './calendar';
 import { initCardSliders } from './card-slider';
+import { initLenis } from './lenis';
+import { initLifestyleSlider } from './lifestyle-slider';
+import { initNav } from './nav';
+import { initNeighbourhood } from './neighbourhood';
+import { initOverlays } from './overlays';
+import { initVisionScroll } from './vision-scroll';
 
 let revealObserver: IntersectionObserver | null = null;
 

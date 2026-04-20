@@ -3,7 +3,7 @@ name: Four Bedroom
 heading: Corner of the Bay
 slug: four-bedroom
 detail: A corner residence. The sun moves through the flat from one terrace to the other.
-description: "Four Bedroom Corner Suite, Dual Aspect. 1 King, 1 Queen, 2 Twin/King, Mini fridge, Microwave, 2,400sqft/223sqm, Living/dining area, Wraparound terrace, Separate living room, Wireless internet, Coffee/tea maker."
+description: 'Four Bedroom Corner Suite, Dual Aspect. 1 King, 1 Queen, 2 Twin/King, Mini fridge, Microwave, 2,400sqft/223sqm, Living/dining area, Wraparound terrace, Separate living room, Wireless internet, Coffee/tea maker.'
 image: ../../assets/images/residences-four-bedroom.png
 alt: Four bedroom residence with wraparound terrace
 gallery:
@@ -19,15 +19,15 @@ gallery:
     alt: Terrace overlooking the bay
 roomOverview:
   - label: Bedrooms
-    value: "4"
+    value: '4'
   - label: Bathrooms
-    value: "4.5"
+    value: '4.5'
   - label: Area
-    value: "2,400–3,100 sq ft"
+    value: '2,400–3,100 sq ft'
   - label: Aspect
     value: Corner
   - label: Floor
-    value: "18–38"
+    value: '18–38'
 bedsAndBedding:
   - label: Master
     value: 1 King
