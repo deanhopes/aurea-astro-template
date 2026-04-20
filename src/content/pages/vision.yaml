@@ -27,10 +27,10 @@ images:
     src: ../../assets/images/vision-interior.png
     alt: Warm interior with bay view
   entrance:
-    src: ../../assets/images/neighbourhood-palms.png
+    src: ../../assets/images/res-3b-pool-terrace.jpg
     alt: Palm trees framed by the building overhangs
   video:
-    src: /video/vision-drone.mp4
+    src: ../../assets/images/res-3b-bay-towers.jpg
     alt: Drone video of Aurea tower at golden hour, curved balconies glowing
 captions:
   towerNumber: (1)
