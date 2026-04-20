@@ -1,3 +1,5 @@
+import process from 'node:process';
+
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 
