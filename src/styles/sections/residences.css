@@ -19,7 +19,7 @@
 .residences__grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
-  gap: clamp(1rem, 2vw, 1.5rem);
+  gap: 4px;
 }
 
 @media (max-width: 599px) {

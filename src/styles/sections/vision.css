@@ -120,15 +120,6 @@
 }
 
 .vision__cta {
-  font-family: var(--font-body);
-  font-weight: 500;
-  font-size: 0.875rem;
-  line-height: 1.11;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--color-black);
-  text-decoration: none;
-  position: relative;
   align-self: flex-start;
 }
 
