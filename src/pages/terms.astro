@@ -3,30 +3,212 @@ import BaseLayout from '@layouts/BaseLayout.astro';
 ---
 
 <BaseLayout title="Terms & Conditions">
-  <section class="section section--center">
-    <div class="content-text">
-      <p class="eyebrow">Legal</p>
-      <h1 class="text-section-heading mt-sm">Terms &amp; Conditions</h1>
-      <p class="text-body-muted mt-md">
-        Placeholder. Replace with your terms before going live. A template scaffolded by Aurea —
-        swap this file's contents with your own legal copy.
-      </p>
-      <a href="/" class="link-underline mt-md">Return home</a>
+  <section class="section">
+    <div class="legal-wrap">
+      <header class="legal-header">
+        <p class="eyebrow">Legal</p>
+        <h1 class="text-section-heading">Terms &amp; Conditions</h1>
+        <p class="legal-meta">Last updated: April 2026</p>
+      </header>
+
+      <div class="legal-body">
+        <div class="legal-section">
+          <h2>1. Acceptance of Terms</h2>
+          <p>
+            By accessing or using this website (<strong>aurearresidences.com</strong>, the "Site"),
+            you agree to be bound by these Terms and Conditions. If you do not agree, please
+            discontinue use of the Site immediately.
+          </p>
+          <p>
+            These terms apply to all visitors, enquirers, and any person who submits information
+            through the Site.
+          </p>
+        </div>
+
+        <div class="legal-section">
+          <h2>2. About Aurea Residences</h2>
+          <p>
+            Aurea Residences is a residential development marketed by Aurea Development Group ("we",
+            "us", "our"). The Site is a marketing and information resource. It does not constitute a
+            legal offer, contract, or reservation of any unit.
+          </p>
+        </div>
+
+        <div class="legal-section">
+          <h2>3. Accuracy of Information</h2>
+          <p>
+            All imagery, floor plans, specifications, pricing, and availability information on this
+            Site are indicative and subject to change without notice. Computer-generated images
+            (CGIs) and renders are for illustrative purposes only and may not precisely represent
+            the finished development.
+          </p>
+          <p>
+            We make no warranty, express or implied, as to the accuracy, completeness, or
+            suitability of any information on the Site for any particular purpose.
+          </p>
+        </div>
+
+        <div class="legal-section">
+          <h2>4. No Offer or Advice</h2>
+          <p>
+            Nothing on this Site constitutes financial, investment, legal, or tax advice. You should
+            seek independent professional advice before making any property acquisition decision.
+            Aurea Residences does not hold or offer financial advice in any jurisdiction.
+          </p>
+        </div>
+
+        <div class="legal-section">
+          <h2>5. Enquiries and Communications</h2>
+          <p>
+            When you submit an enquiry, schedule a viewing, or otherwise contact us through the
+            Site, you consent to being contacted by our sales team via email, telephone, or other
+            means you have provided. You may withdraw this consent at any time by contacting us at
+            the details below.
+          </p>
+          <p>
+            Submitting an enquiry creates no obligation on either party and does not constitute a
+            reservation or agreement to purchase.
+          </p>
+        </div>
+
+        <div class="legal-section">
+          <h2>6. Intellectual Property</h2>
+          <p>
+            All content on this Site — including text, photography, renders, branding, logos, and
+            code — is owned by or licensed to Aurea Development Group. You may not reproduce,
+            distribute, or create derivative works from any material on this Site without prior
+            written consent.
+          </p>
+        </div>
+
+        <div class="legal-section">
+          <h2>7. Cookies and Tracking</h2>
+          <p>
+            This Site uses cookies and similar technologies to improve your browsing experience,
+            analyse traffic, and support our marketing. By continuing to use the Site, you consent
+            to our use of cookies as described in our <a href="/privacy">Privacy Policy</a>.
+          </p>
+          <p>
+            You may manage or disable cookies through your browser settings at any time. Disabling
+            certain cookies may affect the functionality of the Site.
+          </p>
+        </div>
+
+        <div class="legal-section">
+          <h2>8. Third-Party Links</h2>
+          <p>
+            The Site may contain links to third-party websites for your convenience. We have no
+            control over the content or practices of those sites and accept no responsibility for
+            them. Their inclusion does not imply endorsement.
+          </p>
+        </div>
+
+        <div class="legal-section">
+          <h2>9. Limitation of Liability</h2>
+          <p>
+            To the fullest extent permitted by applicable law, Aurea Development Group shall not be
+            liable for any direct, indirect, incidental, or consequential loss arising from your use
+            of or reliance on this Site or its content.
+          </p>
+        </div>
+
+        <div class="legal-section">
+          <h2>10. Governing Law</h2>
+          <p>
+            These Terms are governed by and construed in accordance with applicable law. Any dispute
+            arising from your use of this Site shall be subject to the exclusive jurisdiction of the
+            courts of the relevant territory.
+          </p>
+        </div>
+
+        <div class="legal-section">
+          <h2>11. Changes to These Terms</h2>
+          <p>
+            We may update these Terms at any time. Continued use of the Site after any changes
+            constitutes your acceptance of the revised Terms. We recommend reviewing this page
+            periodically.
+          </p>
+        </div>
+
+        <div class="legal-section">
+          <h2>12. Contact</h2>
+          <p>
+            For any questions regarding these Terms, please contact us at <a
+              href="mailto:legal@aurearresidences.com">legal@aurearresidences.com</a
+            >.
+          </p>
+        </div>
+      </div>
+
+      <a href="/" class="link-underline legal-back">Return home</a>
     </div>
   </section>
 </BaseLayout>
 
 <style>
+  .legal-wrap {
+    max-width: 48rem;
+    padding: 0 var(--space-edge);
+    margin: 0 auto;
+    padding-top: clamp(4rem, 8vw, 7rem);
+    padding-bottom: clamp(4rem, 8vw, 7rem);
+  }
+
+  .legal-header {
+    margin-bottom: clamp(2.5rem, 4vw, 4rem);
+  }
+
   .eyebrow {
     font-family: var(--font-body);
     font-weight: 500;
     font-size: 0.75rem;
-    line-height: 1.11;
     letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: color-mix(in srgb, var(--color-black) 50%, transparent);
+    color: var(--color-accent);
+    margin-bottom: 1rem;
   }
-  .section--center .content-text {
-    text-align: left;
+
+  .legal-meta {
+    margin-top: 1rem;
+    font-size: var(--text-sm);
+    color: color-mix(in srgb, var(--color-black) 40%, transparent);
+  }
+
+  .legal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+    margin-bottom: 3rem;
+  }
+
+  .legal-section h2 {
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: var(--text-sm);
+    letter-spacing: 0.04em;
+    color: var(--color-black);
+    margin-bottom: 0.75rem;
+  }
+
+  .legal-section p {
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
+    color: color-mix(in srgb, var(--color-black) 65%, transparent);
+    margin-bottom: 0.75rem;
+  }
+
+  .legal-section p:last-child {
+    margin-bottom: 0;
+  }
+
+  .legal-section a {
+    color: var(--color-black);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .legal-back {
+    display: inline-block;
   }
 </style>
