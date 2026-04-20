@@ -4,17 +4,17 @@ heading: Light on the Water
 slug: three-bedroom
 detail: East over the bay. The water changes colour six times before the kettle boils.
 description: 'Three Bedroom Residential Suite, Mountain View. 1 King, Sofa bed, Mini fridge, Microwave, 900sqft/81sqm, Living/dining area, Dining area, Separate living room, Wireless internet, for a fee, Wired internet, for a fee, Coffee/tea maker.'
-image: ../../assets/images/res-3b-bay-towers.jpg
-alt: Bay view between towers from residence
+image: ../../assets/images/menu-residences.jpg
+alt: Three bedroom residence with bay view
 gallery:
+  - src: ../../assets/images/res-3b-dining-kitchen.jpg
+    alt: Open plan dining and kitchen with pendant lighting
+  - src: ../../assets/images/vision-interior.png
+    alt: Living room with warm light and bay view through full-height glass
   - src: ../../assets/images/res-3b-bay-towers.jpg
     alt: Bay framed between two residential towers
   - src: ../../assets/images/res-3b-aerial-beach.jpg
     alt: Aerial view of Miami Beach and the bay
-  - src: ../../assets/images/res-3b-bay-dock.jpg
-    alt: Bay from the dock with downtown skyline
-  - src: ../../assets/images/res-3b-pool-terrace.jpg
-    alt: Pool terrace with tropical gardens
   - src: ../../assets/images/res-3b-infinity-pool.jpg
     alt: Infinity pool overlooking the open ocean
 roomOverview:

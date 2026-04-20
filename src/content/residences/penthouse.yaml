@@ -4,19 +4,19 @@ heading: Above the Horizon
 slug: penthouse
 detail: Top floor, private lift. Sunrise over Miami Beach. Sunset over downtown. The bay holds the whole day in between.
 description: 'Penthouse Suite, Full Floor. 2 King, 1 Queen, 2 Twin/King, Full kitchen, Wine storage, 4,200+sqft/390sqm, Private lift, Wraparound terrace, Separate living and dining, Study, Wireless internet, Coffee/tea maker.'
-image: ../../assets/images/res-ph-spa-interior.jpg
-alt: Penthouse spa interior with warm ambient light
+image: ../../assets/images/residences-penthouse.png
+alt: Penthouse terrace with bay view at golden hour
 gallery:
-  - src: ../../assets/images/res-ph-spa-interior.jpg
-    alt: Private spa with warm amber light and reflection pool
-  - src: ../../assets/images/res-ph-sauna.jpg
-    alt: Cedar sauna with Huum stone heaters
-  - src: ../../assets/images/res-ph-stone-massage.jpg
-    alt: Hot stone massage treatment
-  - src: ../../assets/images/res-ph-yoga-sunset.jpg
-    alt: Yoga practice at sunset over the water
+  - src: ../../assets/images/res-ph-curved-balcony.jpg
+    alt: Curved wraparound balcony with city and sky views
+  - src: ../../assets/images/res-ph-marina-view.jpg
+    alt: Bay marina and Miami skyline from penthouse height
   - src: ../../assets/images/res-ph-bay-park.jpg
     alt: Bay front park lined with royal palms
+  - src: ../../assets/images/res-ph-pool-sunset.png
+    alt: Infinity pool with bay and bridge at golden hour
+  - src: ../../assets/images/res-3b-aerial-beach.jpg
+    alt: Aerial view of Miami Beach and the bay
 roomOverview:
   - label: Bedrooms
     value: '5'

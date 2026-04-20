@@ -21,17 +21,17 @@ cta:
   href: '#enquire'
 images:
   tower:
-    src: ../../assets/images/vision-sunset.png
-    alt: Sunset through palm trees from the Aurea terrace
+    src: ../../assets/images/vision-tower-street.jpg
+    alt: Glass tower rising above palm-lined Edgewater street
   interior:
-    src: ../../assets/images/vision-interior.png
-    alt: Warm interior with bay view
+    src: ../../assets/images/lifestyle-beach-tower.jpg
+    alt: Beach path with Miami tower and lifeguard stand at South Beach
   entrance:
     src: ../../assets/images/res-3b-pool-terrace.jpg
     alt: Palm trees framed by the building overhangs
-  video:
+  bay:
     src: ../../assets/images/res-3b-bay-towers.jpg
-    alt: Drone video of Aurea tower at golden hour, curved balconies glowing
+    alt: Bay view framed between two residential towers
 captions:
   towerNumber: (1)
   interiorMuted: A residence kept like a private hotel.

@@ -75,7 +75,7 @@ const pages = defineCollection({
         tower: z.object({ src: image(), alt: z.string() }),
         interior: z.object({ src: image(), alt: z.string() }),
         entrance: z.object({ src: image(), alt: z.string() }),
-        video: z.object({ src: z.string(), alt: z.string() }),
+        bay: z.object({ src: image(), alt: z.string() }),
       }),
       captions: z.object({
         towerNumber: z.string(),

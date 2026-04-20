@@ -83,15 +83,17 @@ const { label, towerBody, cardCopy, cta, images, captions } = vision.data;
               decoding="async"
             />
           </div>
-          <div class="vision__card-image vision__card-image--video">
-            <video
-              src={images.video.src}
-              aria-label={images.video.alt}
-              autoplay
-              muted
-              loop
-              playsinline
-              preload="metadata"></video>
+          <div class="vision__card-image vision__card-image--bay">
+            <Image
+              src={images.bay.src}
+              alt={images.bay.alt}
+              widths={[400, 600, 800, 1200]}
+              sizes="(max-width: 1024px) 90vw, 55vw"
+              format="webp"
+              quality={80}
+              loading="lazy"
+              decoding="async"
+            />
           </div>
         </div>
       </div>

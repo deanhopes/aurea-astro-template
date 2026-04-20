@@ -4,19 +4,19 @@ heading: Corner of the Bay
 slug: four-bedroom
 detail: A corner residence. The sun moves through the flat from one terrace to the other.
 description: 'Four Bedroom Corner Suite, Dual Aspect. 1 King, 1 Queen, 2 Twin/King, Mini fridge, Microwave, 2,400sqft/223sqm, Living/dining area, Wraparound terrace, Separate living room, Wireless internet, Coffee/tea maker.'
-image: ../../assets/images/res-4b-tower-close.jpg
-alt: Tower exterior rising above the palm-lined street
+image: ../../assets/images/residences-four-bedroom.png
+alt: Four bedroom corner residence interior
 gallery:
+  - src: ../../assets/images/res-4b-living-room.jpg
+    alt: Bright living room with warm tones and natural light
+  - src: ../../assets/images/res-4b-kitchen-island.jpg
+    alt: Open kitchen with island bench and floor-to-ceiling windows
   - src: ../../assets/images/res-4b-tower-close.jpg
     alt: Tower exterior rising above the palm-lined street
-  - src: ../../assets/images/res-4b-towers-street.jpg
-    alt: Twin towers viewed from the boulevard
   - src: ../../assets/images/res-4b-aerial-waterfront.jpg
     alt: Aerial view of waterfront residences and the bay
   - src: ../../assets/images/res-4b-aerial-beach.jpg
-    alt: Aerial view of South Beach and the city skyline
-  - src: ../../assets/images/res-4b-towers-palms.jpg
-    alt: Towers and palm trees against a bright Miami sky
+    alt: Aerial view of South Beach coastline and the city skyline
 roomOverview:
   - label: Bedrooms
     value: '4'
