@@ -1,0 +1,107 @@
+---
+const faqs = [
+  {
+    question: 'Where is Aurea Residences located?',
+    answer:
+      'Aurea Residences is located at 3900 Biscayne Blvd, Edgewater, Miami FL 33137 — on the western shore of Biscayne Bay, five minutes on foot from Wynwood and ten minutes by bike from the Design District.',
+  },
+  {
+    question: 'What residence types are available at Aurea?',
+    answer:
+      'Aurea offers three residence types: three-bedroom residences from the 12th to 28th floor (1,800–2,100 sq ft), four-bedroom corner residences from the 18th to 38th floor (2,400–3,100 sq ft), and full-floor penthouses on floors 48–52 (4,200+ sq ft) with private lift access and wraparound terraces.',
+  },
+  {
+    question: 'What are the views from Aurea Residences?',
+    answer:
+      'Three-bedroom residences face east over Biscayne Bay. Four-bedroom corner residences capture dual-aspect views across the bay and the city. Penthouse floors hold sunrise over Miami Beach to the east and sunset over downtown Miami to the west — the bay occupies the full day in between.',
+  },
+  {
+    question: 'What amenities does Aurea Residences include?',
+    answer:
+      'Aurea includes a rooftop infinity pool, wellness floor with cold plunge and infrared sauna, breathwork terrace, lap pool, private spa, and a residents-only lounge. All amenities are exclusive to residents with no shared access or booking windows.',
+  },
+  {
+    question: 'How do I schedule a viewing of Aurea Residences?',
+    answer:
+      'Every residence is shown by private appointment, in person. Submit an enquiry via the form on this page and the team will reply within one business day to arrange a time. All viewings are conducted by the people who built the building.',
+  },
+];
+---
+
+<section class="faq" id="faq">
+  <div class="faq__container">
+    <div class="faq__head">
+      <p class="faq__label">Questions</p>
+      <h2 class="faq__heading text-section-heading">What you need to know.</h2>
+    </div>
+    <dl class="faq__list">
+      {
+        faqs.map((item) => (
+          <div class="faq__item">
+            <dt class="faq__question">
+              <button class="faq__trigger" type="button" aria-expanded="false">
+                {item.question}
+                <svg
+                  class="faq__chevron"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M5 7.5L10 12.5L15 7.5"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </button>
+            </dt>
+            <dd class="faq__answer">
+              <p>{item.answer}</p>
+            </dd>
+          </div>
+        ))
+      }
+    </dl>
+  </div>
+</section>
+
+<script
+  is:inline
+  type="application/ld+json"
+  set:html={JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((item) => ({
+      '@type': 'Question',
+      name: item.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: item.answer,
+      },
+    })),
+  })}
+/>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('.faq__trigger').forEach((trigger) => {
+    trigger.addEventListener('click', () => {
+      const item = trigger.closest<HTMLElement>('.faq__item')!;
+      const isOpen = item.classList.contains('is-open');
+      document.querySelectorAll('.faq__item.is-open').forEach((el) => {
+        el.classList.remove('is-open');
+        el.querySelector<HTMLButtonElement>('.faq__trigger')?.setAttribute(
+          'aria-expanded',
+          'false',
+        );
+      });
+      if (!isOpen) {
+        item.classList.add('is-open');
+        trigger.setAttribute('aria-expanded', 'true');
+      }
+    });
+  });
+</script>

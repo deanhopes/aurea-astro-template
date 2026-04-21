@@ -34,6 +34,7 @@
 @import './sections/lifestyle.css' layer(sections);
 @import './sections/residences.css' layer(sections);
 @import './sections/neighbourhood.css' layer(sections);
+@import './sections/faq.css' layer(sections);
 
 /* Utilities */
 @import './utilities/text.css' layer(utilities);

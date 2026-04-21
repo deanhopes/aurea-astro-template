@@ -51,6 +51,74 @@ const { title, description = 'Aurea Residences — Waterfront living in Edgewate
     <SEO title={title} description={description} />
     <slot name="head" />
 
+    <!-- Structured data -->
+    <script
+      is:inline
+      type="application/ld+json"
+      set:html={JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'ApartmentComplex',
+        name: 'Aurea Residences',
+        description:
+          'Private waterfront residences on Biscayne Bay in Edgewater, Miami. Three-bedroom, four-bedroom, and full-floor penthouse homes from the 12th to 52nd floor.',
+        url: 'https://aurearesidences.com',
+        image: 'https://aurearesidences.com/og.jpg',
+        address: {
+          '@type': 'PostalAddress',
+          streetAddress: '3900 Biscayne Blvd',
+          addressLocality: 'Miami',
+          addressRegion: 'FL',
+          postalCode: '33137',
+          addressCountry: 'US',
+        },
+        geo: {
+          '@type': 'GeoCoordinates',
+          latitude: 25.8,
+          longitude: -80.186,
+        },
+        telephone: '+13055550180',
+        numberOfRooms: 52,
+        amenityFeature: [
+          { '@type': 'LocationFeatureSpecification', name: 'Infinity pool', value: true },
+          { '@type': 'LocationFeatureSpecification', name: 'Wellness floor', value: true },
+          { '@type': 'LocationFeatureSpecification', name: 'Cold plunge', value: true },
+          { '@type': 'LocationFeatureSpecification', name: 'Infrared sauna', value: true },
+          { '@type': 'LocationFeatureSpecification', name: 'Breathwork terrace', value: true },
+          { '@type': 'LocationFeatureSpecification', name: 'Residents lounge', value: true },
+          { '@type': 'LocationFeatureSpecification', name: 'Spa', value: true },
+          { '@type': 'LocationFeatureSpecification', name: 'Private lift', value: true },
+          { '@type': 'LocationFeatureSpecification', name: 'Wraparound terrace', value: true },
+          { '@type': 'LocationFeatureSpecification', name: 'Bay views', value: true },
+        ],
+        containsPlace: [
+          {
+            '@type': 'Apartment',
+            name: 'Three Bedroom Residence',
+            numberOfRooms: 3,
+            floorSize: { '@type': 'QuantitativeValue', value: 1950, unitCode: 'FTK' },
+            numberOfBathroomsTotal: 3.5,
+            floorLevel: '12–28',
+          },
+          {
+            '@type': 'Apartment',
+            name: 'Four Bedroom Corner Residence',
+            numberOfRooms: 4,
+            floorSize: { '@type': 'QuantitativeValue', value: 2750, unitCode: 'FTK' },
+            numberOfBathroomsTotal: 4.5,
+            floorLevel: '18–38',
+          },
+          {
+            '@type': 'Apartment',
+            name: 'Penthouse',
+            numberOfRooms: 5,
+            floorSize: { '@type': 'QuantitativeValue', value: 4200, unitCode: 'FTK' },
+            numberOfBathroomsTotal: 6.5,
+            floorLevel: '48–52',
+          },
+        ],
+      })}
+    />
+
     <!-- Early Lenis — init before bootstrap so scroll works immediately -->
     <script>
       import { initLenis } from '@lib/lenis';

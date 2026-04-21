@@ -5,8 +5,9 @@ export interface NavLink {
 
 export const site = {
   name: 'Aurea Residences',
-  url: 'https://aurearesidences.com',
-  description: 'Waterfront living on Biscayne Bay, Edgewater, Miami.',
+  url: 'https://aurea-astro-template.netlify.app',
+  description:
+    'Aurea Residences offers private waterfront residences on Biscayne Bay in Edgewater, Miami. Three-bedroom, four-bedroom, and full-floor penthouse homes from the 12th to 52nd floor, with bay views, wraparound terraces, and private lift access.',
   ogImage: '/og.jpg',
   locale: 'en',
 } as const;

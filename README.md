@@ -7,7 +7,7 @@ cloned, rebranded, and shipped as a single development's website.
 Ships with full design documentation and a `CLAUDE.md` tuned for Claude Code —
 so you (and your AI pair) can customise it without drifting off-spec.
 
-**Live demo:** [aurearesidences.com](https://aurearesidences.com) _(fictional)_
+**Live demo:** [aurea-astro-template.netlify.app](https://aurea-astro-template.netlify.app)
 
 ---
 
@@ -19,6 +19,7 @@ so you (and your AI pair) can customise it without drifting off-spec.
 - A design system encoded in `global.css` (tokens, type scale, spacing, motion)
 - A set of documented sections (Hero, Vision, Residences, Lifestyle, Neighbourhood, Enquiry)
 - A working Three.js WebGPU footer with atmospheric shaders
+- SEO and AEO ready — JSON-LD structured data, sitemap, semantic HTML, Open Graph meta
 - A `CLAUDE.md` + `docs/` kit so agents stay on-brand when you edit it
 
 **Isn't:**
@@ -54,8 +55,9 @@ npm run fix        # ESLint + Prettier autofix
 
 ### Deploy
 
-Static output. Drop `dist/` on anything — Netlify, Vercel, Cloudflare Pages,
-S3, your own box. No serverless required.
+Static output. `netlify.toml` is included — connect the repo on Netlify and
+it deploys automatically. For other hosts, set build command `npm run build`
+and publish directory `dist`. No serverless required.
 
 ---
 
@@ -68,7 +70,8 @@ S3, your own box. No serverless required.
 | Styles    | Vanilla CSS + Lightning CSS (nesting, `color-mix`, bundled) |
 | Motion    | GSAP 3 + Lenis smooth scroll                                |
 | 3D        | Three.js WebGPU + TSL (footer shaders)                      |
-| Sitemap   | `@astrojs/sitemap`                                          |
+| Sitemap   | `@astrojs/sitemap` (auto-generated)                         |
+| SEO / AEO | JSON-LD, Open Graph, semantic HTML, `robots.txt`            |
 | Linting   | ESLint 9 + Prettier 3 + `astro-eslint-parser`               |
 
 No Tailwind. No runtime framework. No CMS coupling. Content is hard-coded in
@@ -167,10 +170,12 @@ needed for most rebrands. See `docs/codebase.md` for the full token table.
 
 ### 3. Fonts
 
-Default pairing is Test Söhne (display) + Aktiv Grotesk (body). These are
-paid licenses — **you must provide your own font files**. Replace files in
-`public/fonts/` and update `src/styles/fonts.css` `@font-face` declarations,
-plus the preload links in `src/layouts/BaseLayout.astro`.
+Default pairing is **Cormorant Garamond** (display) + **DM Sans** (body).
+Both are OFL licensed — free for commercial use, no action required.
+
+To swap: replace files in `public/fonts/`, update `src/styles/fonts.css`
+`@font-face` declarations, and update the preload links in
+`src/layouts/BaseLayout.astro`.
 
 ### 4. Sections
 
@@ -223,21 +228,37 @@ If you're not using Claude Code, delete `CLAUDE.md`, `tasks/`, and keep
 
 ## Before you launch
 
-Checklist — don't ship with placeholders.
+Checklist — don't ship with demo content.
 
-- [ ] Replace `/terms` and `/privacy` page content
+**Content**
+
+- [ ] Replace copy in all section `.astro` components (Hero, Vision, Residences, Lifestyle, Neighbourhood, Enquiry, Footer)
+- [ ] Replace images in `src/assets/images/` and video in `public/video/`
+- [ ] Edit `src/pages/terms.astro` and `src/pages/privacy.astro` to match your entity and jurisdiction
+
+**Brand**
+
+- [ ] Update tokens in `src/styles/tokens.css` (colours, fonts)
 - [ ] Replace `public/favicon.svg`, `public/favicon-dark.svg`, `public/apple-touch-icon.svg`
-- [ ] Replace `public/og.jpg` (1200×630 social share)
-- [ ] Update `astro.config.ts` `site:` to your production URL
-- [ ] Update `src/components/seo/Head.astro` defaults (title, description, og)
-- [ ] Wire up `Enquiry.astro` form to your backend (Formspree, Netlify Forms, Resend, etc.)
-- [ ] Replace demo copy in all section components
-- [ ] Replace demo media in `public/` and `src/assets/`
+- [ ] Replace `public/og.jpg` (1200×630, used for social sharing previews)
+
+**Config**
+
+- [ ] Update `site:` in `astro.config.ts` and `url` in `src/data/site.ts` to your production URL
+- [ ] Update `src/data/site.ts` — name, description, contact details
+- [ ] Update JSON-LD in `BaseLayout.astro` — real unit specs, amenities, address
+
+**Forms**
+
+- [ ] Netlify Forms is pre-wired — just deploy and check the Forms tab in your Netlify dashboard
+- [ ] To use a different provider, update `action` and remove the `netlify` attribute in `Enquiry.astro`
+
+**Post-launch**
+
 - [ ] Cookie consent banner (GDPR / ePrivacy — if you're EU/UK)
 - [ ] Analytics (Plausible, Fathom, GA4 — your call)
 - [ ] Test on real devices (iOS Safari, Android Chrome)
 - [ ] Lighthouse pass — aim for 95+ across the board
-- [ ] Swap fonts if you don't have the default license
 
 ---
 

@@ -6,7 +6,7 @@ import sitemap from '@astrojs/sitemap';
 const isDev = process.env.NODE_ENV !== 'production' && !process.argv.includes('build');
 
 export default defineConfig({
-  site: 'https://aurearesidences.com',
+  site: 'https://aurea-astro-template.netlify.app',
   output: 'static',
   trailingSlash: 'never',
   integrations: [sitemap()],

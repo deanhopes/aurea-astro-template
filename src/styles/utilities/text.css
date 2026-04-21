@@ -57,7 +57,8 @@
 .vision__label,
 .lifestyle__label,
 .residences__label,
-.neighbourhood__label {
+.neighbourhood__label,
+.faq__label {
   font-family: var(--font-body);
   font-weight: 500;
   font-size: 0.75rem;
